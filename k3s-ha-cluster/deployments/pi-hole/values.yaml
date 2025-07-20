@@ -1,0 +1,54 @@
+# Remove hostNetwork, not needed and causes port conflicts
+# hostNetwork: true
+
+# DHCP is not needed, so disable it
+serviceDhcp:
+  enabled: false
+
+# DNS Service (UDP)
+serviceDns:
+  type: ClusterIP
+  port: 53
+  mixedService: true
+  externalTrafficPolicy: Cluster
+
+# Web service (HTTP + HTTPS)
+serviceWeb:
+  type: ClusterIP
+  loadBalancerIP: 192.168.0.202
+  http:
+    enabled: true
+    port: 80
+  https:
+    enabled: true
+    port: 443
+  externalTrafficPolicy: Cluster
+
+# Remove or comment out ingress if you want direct IP access only
+#ingress:
+#  enabled: false
+
+# Set timezone and any extra env vars
+extraEnvVars:
+  TZ: "Europe/Helsinki"
+
+tz: "Europe/Helsinki"
+
+admin:
+  existingSecret: ""
+  password: "" # Optional: set your password here or use a secret
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 250m
+    memory: 256Mi
+
+# Stick it to your infra node
+nodeSelector:
+  role: pi-hole
+
+tolerations: []
+affinity: {}

@@ -1,0 +1,50 @@
+# kube-vip-cloud-provider Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kube-vip-cloud-provider
+  namespace: kube-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kube-vip-cloud-provider
+  template:
+    metadata:
+      labels:
+        app: kube-vip-cloud-provider
+    spec:
+      serviceAccountName: kube-vip-cloud-provider
+      containers:
+        - name: kube-vip-cloud-provider
+          image: ghcr.io/kube-vip/kube-vip-cloud-provider:v0.0.7
+          resources:
+            limits:
+              cpu: "10m"
+              memory: "32Mi"
+            requests:
+              cpu: "100m"
+              memory: "64Mi"
+          args:
+            - manager
+          env:
+            - name: vip_arp
+              value: "false"
+            - name: port
+              value: "6443"
+            - name: address
+              value: "192.168.0.100"
+            - name: vip_leaderelection
+              value: "true"
+            - name: vip_interface
+              value: "eth0"
+            - name: cp_enable
+              value: "true"
+            - name: cp_namespace
+              value: "kube-system"
+            - name: svc_enable
+              value: "true"
+            - name: svc_leasename
+              value: "kube-vip"
+            - name: vip_cidr
+              value: "32"
