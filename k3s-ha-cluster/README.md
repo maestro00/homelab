@@ -220,3 +220,55 @@ This enables:
 - `:53` TCP/UDP → DNS
 - `:80` → Web UI
 - `:443` → SSL (optional)
+
+## Tailscale VPN
+
+🛠️ **Step 1: Create a Tailscale Account & Auth Key**
+
+> Go to <https://tailscale.com>
+> Sign in with Google, GitHub, or email
+> Visit: <https://login.tailscale.com/admin/settings/keys>
+> Click "Generate Key":
+> Type: Reusable key ✅
+> Scopes:
+> ✅ ephemeral (optional: good for non-persistent nodes)
+> ✅ preauthorized (optional: skip web login)
+> ✅ Allow exit node and subnet routing (if desired)
+> Copy the tskey-... auth key and keep it handy (we’ll use it in a Kubernetes Secret)
+
+📦 **Step 2: Create Kubernetes Secret with the Auth Key**
+
+```bash
+kubectl create secret generic tailscale-auth \
+  -n kube-system \
+  --from-literal=TS_AUTHKEY='tskey-auth-mykey' # Replace with your key
+```
+
+Create service account and rbac to allow accessing this secret by our
+deployment and apply it.
+
+```bash
+kubectl apply -f rbac.yaml
+```
+
+Navigate to tailscale folder and apply deployment by configuring your allowed ip
+range for `--exit-node`.
+
+```bash
+kubectl apply -f deployment.yaml
+```
+
+After the deployment is successful, you'll see the added new machine
+`k3s-exit-router` in *machines* in tailscale dashboard.
+
+Click on the machine and *Edit* Route Settings, then approve all the routes we
+defined in our deployment and check the `Use as exit node` checkbox.
+
+Now you can go to any client, for example your phone (Android & iOS) and
+
+1. Download `tailscale` application from the store
+2. Login with the same account you setup tailscale
+3. Configure VPN and now you should be seeing your machines
+4. Select `k3s-exit-node` as your **EXIT NODE** mark also
+**Allow Local Network Access** to be able to get LAN access working.
+5. Test an IP address serving a service from your cluster (192.168.0.202 - pihole)
