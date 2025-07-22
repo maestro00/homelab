@@ -7,7 +7,6 @@ metadata:
   namespace: pihole
   annotations:
     metallb.universe.tf/allow-shared-ip: shared
-    # service.k3s.io/disable-load-balancer: "true"
 spec:
   ports:
     - name: pihole-dns-tcp
