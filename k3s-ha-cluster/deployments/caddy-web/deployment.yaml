@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: caddy-web
+  namespace: caddy-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: caddy-web
+  template:
+    metadata:
+      labels:
+        app: caddy-web
+    spec:
+      containers:
+        - name: caddy
+          image: caddy:2
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 80
+            - containerPort: 443
+          volumeMounts:
+            - name: config
+              mountPath: /etc/caddy/Caddyfile
+              subPath: Caddyfile
+            - name: site
+              mountPath: /srv
+      nodeSelector:
+        role: master-ingress
+      hostNetwork: true
+      volumes:
+        - name: config
+          configMap:
+            name: caddy-web-config
+        - name: site
+          persistentVolumeClaim:
+            claimName: caddy-web-pvc

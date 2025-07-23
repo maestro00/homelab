@@ -162,6 +162,36 @@ helm upgrade --install caddy caddyserver/caddy-ingress-controller \
 `role=master-ingress` nodeSelector is used to avoid scheduling on the Pi-hole
 node.
 
+## Caddy Web Server
+
+Navigate to host node that caddy is deployed at and create pvc path and paste
+content of your site into it.
+
+```sh
+sudo mkdir -p /data/caddy-web # inside the node
+sudo cp demo.html /data/caddy-web/index.html # from your machine
+```
+
+Apply deployment and configuration files to put caddy web-server up and running
+
+```sh
+kubectl apply -f deployment.yaml
+kubectl apply -f pvc.yaml
+kubectl apply -f configmap.yaml
+kubectl apply -f service.yaml
+```
+
+Go to LoadBalancer IP given by the MetalLB and display your page. To get the IP
+address run
+
+```sh
+kubectl get svc -n caddy-web -o wide
+NAME        TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)
+caddy-web   LoadBalancer   10.43.136.232   192.168.0.201   80:30145/TCP,443:30695/TCP
+```
+
+Hit the `EXTERNAL-IP` and now you'll be seeing the content of your page!
+
 ## 🚫 Pi-hole: Local DNS + Ad Blocker
 
 ### pi-hole DNS Nameserver
@@ -225,15 +255,17 @@ This enables:
 
 🛠️ **Step 1: Create a Tailscale Account & Auth Key**
 
-> Go to <https://tailscale.com>
-> Sign in with Google, GitHub, or email
-> Visit: <https://login.tailscale.com/admin/settings/keys>
-> Click "Generate Key":
-> Type: Reusable key ✅
-> Scopes:
-> ✅ ephemeral (optional: good for non-persistent nodes)
-> ✅ preauthorized (optional: skip web login)
-> ✅ Allow exit node and subnet routing (if desired)
+> - Go to <https://tailscale.com>
+> - Sign in with Google, GitHub, or email
+> - Visit: <https://login.tailscale.com/admin/settings/keys>
+> - Click "Generate Key":
+> - Type: Reusable key ✅
+> - Scopes:
+>
+> - ✅ ephemeral (optional: good for non-persistent nodes)
+> - ✅ preauthorized (optional: skip web login)
+> - ✅ Allow exit node and subnet routing (if desired)
+>
 > Copy the tskey-... auth key and keep it handy (we’ll use it in a Kubernetes Secret)
 
 📦 **Step 2: Create Kubernetes Secret with the Auth Key**
@@ -241,7 +273,7 @@ This enables:
 ```bash
 kubectl create secret generic tailscale-auth \
   -n kube-system \
-  --from-literal=TS_AUTHKEY='tskey-auth-mykey' # Replace with your key
+  --from-literal=TS_AUTHKEY='tskey-...' # Replace with your key
 ```
 
 Create service account and rbac to allow accessing this secret by our
