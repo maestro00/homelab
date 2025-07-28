@@ -6,7 +6,7 @@ metadata:
   name: pihole-udp
   namespace: pihole
   annotations:
-    metallb.universe.tf/allow-shared-ip: shared
+    metallb.universe.tf/allow-shared-ip: pihole
 spec:
   ports:
     - name: pihole-dns-udp
@@ -20,5 +20,5 @@ spec:
   selector:
     app: pihole
   loadBalancerIP: 192.168.0.202
-  externalTrafficPolicy: Local
+  externalTrafficPolicy: Cluster
   type: LoadBalancer
