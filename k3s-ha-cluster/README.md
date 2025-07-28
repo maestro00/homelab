@@ -164,21 +164,25 @@ node.
 
 ## Caddy Web Server
 
-Navigate to host node that caddy is deployed at and create pvc path and paste
-content of your site into it.
-
-```sh
-sudo mkdir -p /data/caddy-web # inside the node
-sudo cp demo.html /data/caddy-web/index.html # from your machine
-```
-
 Apply deployment and configuration files to put caddy web-server up and running
+
+> **NOTE**: I used an init container to copy my html files to volumes mount path
+in my deployment, comment out if you don't need to.
 
 ```sh
 kubectl apply -f deployment.yaml
 kubectl apply -f pvc.yaml
 kubectl apply -f configmap.yaml
 kubectl apply -f service.yaml
+```
+
+If you have static files for your website you can create a config-map from the
+file
+
+```sh
+kubectl create configmap caddy-html-files \
+  --from-file=caddy-web/html/index.html \
+  -n caddy-web
 ```
 
 Go to LoadBalancer IP given by the MetalLB and display your page. To get the IP
@@ -278,12 +282,39 @@ helm upgrade --install longhorn longhorn/longhorn \
   --set defaultSettings.taintToleration="node-role.kubernetes.io/no-longhorn=true:NoSchedule"
 ```
 
+Label each node to point to default disk labels to be scheduled once the
+`longhorn-manager` pods are up and running.
+
+```sh
+# repeat this for each node to be used as longhorn storage
+kubectl label nodes <my_node> node.longhorn.io/create-default-disk=true
+```
+
 I assign LoadBalancer IP `192.168.0.203 for` `longhorn-ui` and applied my
 loadbalancer config file with
 
 ```bash
 kubectl apply -f longhorn/loadbalancer-ui.yaml
 ```
+
+To get rid of conflict between `multipath` and `longhorn` disable `multipath`
+service
+
+```bash
+sudo systemctl stop multipathd
+sudo systemctl disable multipathd
+```
+
+**NOTE**
+If you face with the warning `longhorn Kernel modules [dm_crypt] are not loaded`
+if not using encryption, it's OK, otherwise you can load the module with
+
+```bash
+echo "dm_crypt" | sudo tee -a /etc/modules
+```
+
+either restart the node or the manager pod of that node to get updated status in
+longhorn UI.
 
 ## Tailscale VPN
 
