@@ -6,7 +6,7 @@ users:
     shell: /bin/bash
     groups: users, admin
     lock_passwd: false
-    passwd: "$6$Oz268Rma99VT0/Rp$RMWzlifqToLFhE5adJk5REUREM1YDxTiwjTeu5izin0k6J4lmB67.cmUqfdjW7nuGZX2JiVSxpk4T7NO.XNzc0"
+    passwd: "password"
 
 ssh_pwauth: true
 

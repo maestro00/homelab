@@ -7,7 +7,7 @@ if [[ ! -f ~/.ssh/id_rsa ]]; then
 fi
 
 # master node IPs
-masters=("192.168.0.171" "192.168.0.181" "192.168.0.10")
+masters=("192.168.0.10" "192.168.0.171" "192.168.0.172" "192.168.0.181" "192.168.0.182")
 
 for ip in "${masters[@]}"; do
     echo ">>> Setting up SSH access for $ip"
