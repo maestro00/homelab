@@ -251,6 +251,40 @@ This enables:
 - `:80` → Web UI
 - `:443` → SSL (optional)
 
+## 🐮 Longhorn Block Storage
+
+Longhorn gives us persistent storage accross all nodes for our deployments which
+brings highly availability to our services.
+
+I wanted to exclude to using pi4 as storage class since it has only sd card
+inserted which could slow down my apps using that in write/read operations. For
+that reason, I tainted my `infra-pi` hostnamed node from longhorn deployments.
+
+```bash
+kubectl taint nodes infra-pi node-role.kubernetes.io/no-longhorn=:NoSchedule
+```
+
+To deploy Longhorn via helm to our selected nodes:
+
+```bash
+helm repo add longhorn https://charts.longhorn.io
+helm repo update
+
+helm upgrade --install longhorn longhorn/longhorn \
+  --namespace longhorn-system \
+  --create-namespace \
+  --set persistence.defaultClass=true \
+  --set defaultSettings.createDefaultDiskLabeledNodes=true \
+  --set defaultSettings.taintToleration="node-role.kubernetes.io/no-longhorn=true:NoSchedule"
+```
+
+I assign LoadBalancer IP `192.168.0.203 for` `longhorn-ui` and applied my
+loadbalancer config file with
+
+```bash
+kubectl apply -f longhorn/loadbalancer-ui.yaml
+```
+
 ## Tailscale VPN
 
 🛠️ **Step 1: Create a Tailscale Account & Auth Key**
