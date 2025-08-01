@@ -144,57 +144,113 @@ metadata:
   namespace: metallb-system
 ```
 
-## 🌐 Caddy Ingress Controller
+## 🌐 Caddy
 
-Caddy handles TLS, routing, and hostname-based services (like pihole.lab.local).
+Caddy is used as the Ingress Controller to handle TLS, routing, and hostname-based
+services (like demo.yukselcloud.com and pihole.yukselcloud.com).
 
-🚀 **Install with Helm**
+### 🚀 Deploying Caddy Ingress
+
+This repo provides manifests for deploying Caddy as an ingress controller. The
+deployment is configured to run only on nodes labeled with `role=master-ingress`
+and exposes HTTP/HTTPS via a LoadBalancer service.
+
+**Deployment steps:**
 
 ```bash
-helm repo add caddyserver https://caddyserver.github.io/ingress/
-helm repo update
-
-helm upgrade --install caddy caddyserver/caddy-ingress-controller \
-  --namespace caddy-system \
-  -f values.yaml
+kubectl create namespace caddy
+kubectl apply -f caddy/configmap.yaml
+kubectl apply -f caddy/pvc.yaml
+kubectl apply -f caddy/deployment.yaml
+kubectl apply -f caddy/service.yaml
 ```
 
-`role=master-ingress` nodeSelector is used to avoid scheduling on the Pi-hole
-node.
+- The `configmap.yaml` contains the Caddyfile with routing rules for your domains.
+- The `pvc.yaml` creates a PersistentVolumeClaim using Longhorn for Caddy's
+`/data` directory.
+- The `deployment.yaml` sets up the Caddy pods with a nodeSelector for
+`role: master-ingress` and mounts the PVC at `/data`.
+- The `service.yaml` exposes Caddy on ports 80 and 443 using a LoadBalancer, so
+MetalLB will assign an external IP.
 
-## Caddy Web Server
+You can check the assigned external IP with:
 
-Apply deployment and configuration files to put caddy web-server up and running
+```bash
+kubectl get svc -n caddy -o wide
+```
 
-> **NOTE**: I used an init container to copy my html files to volumes mount path
-in my deployment, comment out if you don't need to.
+Example output:
 
-```sh
+```text
+NAME    TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)
+caddy   LoadBalancer   10.43.136.232   192.168.0.201   80:30145/TCP,443:30695/TCP
+```
+
+Visit the `EXTERNAL-IP` in your browser to access your routed services.
+
+To make my websites publicly, I added this EXTERNAL-IP to my Router's NAT Port
+forwarding for the ports `80` and `443`, so once the Public IP is promoted to cloudflare,
+the requests are forwarded to my caddy ingress.
+
+### 📝 Customizing Caddyfile
+
+Edit `deployments/caddy/configmap.yaml` to add or change domain routing rules.
+For example:
+
+```yaml
+data:
+  Caddyfile: |
+    demo.yukselcloud.com {
+        reverse_proxy demo-service.caddy-web-demo.svc.cluster.local:80
+    }
+    caddy-web.yukselcloud.com {
+        reverse_proxy caddy-web.caddy-web.svc.cluster.local:80
+    }
+```
+
+Apply changes with:
+
+```bash
+kubectl apply -f deployments/caddy/configmap.yaml
+kubectl rollout restart deployment caddy -n caddy
+```
+
+> **Note:** The Caddy deployment uses a persistent volume claim (PVC) backed by
+Longhorn for `/data` and mounts the config from the ConfigMap.
+Adjust the `nodeSelector` or `replica` count as needed in `deployment.yaml`.
+
+## Cloudfare Setup for Using our Domain
+
+Create an API token from Cloudfare profile page and select your `Zone Resources`
+points to your domain. Using the api token create a secret in our new namespace
+to keep our `A Record`s of domains' updated automatically with our Public IP.
+
+I deployed a Cloudflare Dynamic DNS Updater from community which works like a
+charm. Install following the section for
+[Deployment on Kubernetes](https://github.com/timothymiller/cloudflare-ddns/?tab=readme-ov-file#-kubernetes)
+
+Create your `config.json` according to readme and apply it.
+
+```bash
+kubectl create namespace ddns
+kubectl create secret generic config-cloudflare-ddns \
+  --from-file=ddns/config.json \
+  --dry-run=client -oyaml -n ddns > config-cloudflare-ddns-Secret.yaml
+kubectl apply -f config-cloudflare-ddns-Secret.yaml
 kubectl apply -f deployment.yaml
-kubectl apply -f pvc.yaml
-kubectl apply -f configmap.yaml
-kubectl apply -f service.yaml
 ```
 
-If you have static files for your website you can create a config-map from the
-file
+Now I can see in my logs that it creates a `A Record` in my cloudflare domain.
 
-```sh
-kubectl create configmap caddy-html-files \
-  --from-file=caddy-web/html/index.html \
-  -n caddy-web
+```txt
+➕ Adding new record {
+  'type': 'A',
+  'name': 'caddy.yukselcloud.com',
+  'content': '12.123.123.123',
+  'proxied': False,
+  'ttl': 3600
+}
 ```
-
-Go to LoadBalancer IP given by the MetalLB and display your page. To get the IP
-address run
-
-```sh
-kubectl get svc -n caddy-web -o wide
-NAME        TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)
-caddy-web   LoadBalancer   10.43.136.232   192.168.0.201   80:30145/TCP,443:30695/TCP
-```
-
-Hit the `EXTERNAL-IP` and now you'll be seeing the content of your page!
 
 ## 🚫 Pi-hole: Local DNS + Ad Blocker
 
@@ -279,6 +335,8 @@ helm upgrade --install longhorn longhorn/longhorn \
   --create-namespace \
   --set persistence.defaultClass=true \
   --set defaultSettings.createDefaultDiskLabeledNodes=true \
+  --set defaultSettings.defaultDataLocality=best-effort \
+  --set defaultSettings.createDefaultFilesystemVolumeRWX=true \
   --set defaultSettings.taintToleration="node-role.kubernetes.io/no-longhorn=true:NoSchedule"
 ```
 
