@@ -1,0 +1,12 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: demo-html
+  namespace: caddy-web-demo
+data:
+  index.html: |
+    <html>
+      <head><title>Hello World</title></head>
+      <body><h1>Tay sokucu tayfa (fener keremi aliyomus la mert xd) yukselcloud.com!</h1></body>
+    </html>
