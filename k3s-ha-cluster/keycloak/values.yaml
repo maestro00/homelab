@@ -1,0 +1,11 @@
+---
+replicaCount: 3
+
+auth:
+  existingSecret: keycloak-secret
+
+service:
+  type: LoadBalancer
+
+ingress:
+  enabled: false

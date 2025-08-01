@@ -9,6 +9,6 @@ data:
     demo.yukselcloud.com {
         reverse_proxy demo-service.caddy-web-demo.svc.cluster.local:80
     }
-    pihole.yukselcloud.com {
-        reverse_proxy pihole-tcp.pihole.svc.cluster.local:80
+    keycloak.yukselcloud.com {
+        reverse_proxy keycloak-http.keycloak.svc.cluster.local:8080
     }

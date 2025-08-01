@@ -25,7 +25,7 @@ With this setup, we can host;
 
 ```text
   3x control-plane nodes: infra-pi, k8s-node-171, k8s-node-181
-  (TODO: Worker nodes to be added)
+  2x worker nodes: k8s-node-172, k8s-node-182
 
   Architecture mix: ARM (infra-pi) and AMD64 (k8s-node-*)
 
@@ -41,6 +41,8 @@ With this setup, we can host;
 | `infra-pi` | `192.168.0.10`  | ARM64 | `control-plane`, `pi-hole`        |
 | `node-171` | `192.168.0.171` | AMD64 | `control-plane`, `master-ingress` |
 | `node-181` | `192.168.0.181` | AMD64 | `control-plane`, `master-ingress` |
+| `node-172` | `192.168.0.172` | AMD64 |                                   |
+| `node-182` | `192.168.0.182` | AMD64 |                                   |
 
 🗄️ **MariaDB as External K3s Datastore**
 
@@ -373,6 +375,47 @@ echo "dm_crypt" | sudo tee -a /etc/modules
 
 either restart the node or the manager pod of that node to get updated status in
 longhorn UI.
+
+## 🔑 Keycloak - Central Authentication
+
+Keycloak provides central authentication for our services via OAuth2 / OIDC / SAML.
+
+Install it via helm
+
+```bash
+kubectl create namespace keycloak
+kubectl create secret generic keycloak-secret \
+  --from-literal=admin-password=password \ # By default admin username is 'user'
+  -n keycloak
+
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo update
+
+helm install keycloak bitnami/keycloak \
+  --namespace keycloak \
+  -f keycloak/values.yaml
+```
+
+### Keycloak Setup
+
+To create our Realm and clients via Rest API, get `svc` LoadBalancer IP and
+obtain an API token for your user.
+
+```bash
+kubectl get svc -n keycloak
+NAME                     TYPE           CLUSTER-IP     EXTERNAL-IP     PORT(S)
+keycloak                 LoadBalancer   10.43.215.69   192.168.0.204   80:31215/TCP
+keycloak-headless        ClusterIP      None           <none>          8080/TCP
+keycloak-postgresql      ClusterIP      10.43.52.242   <none>          5432/TCP
+keycloak-postgresql-hl   ClusterIP      None           <none>          5432/TCP
+```
+
+Use [keycloak/setup_realm.sh](/k3s-ha-cluster/keycloak/setup_realm.sh) to bootstrap
+a new realm named `homelab`.
+
+Create a client by updating `CLIENT_NAME` and `CLIENT_DOMAIN` environment variables
+in [keycloak/create_client.sh](/k3s-ha-cluster/keycloak/create_client.sh) to be
+used in our authentication services.
 
 ## Tailscale VPN
 
