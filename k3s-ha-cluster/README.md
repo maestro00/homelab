@@ -417,6 +417,10 @@ Create a client by updating `CLIENT_NAME` and `CLIENT_DOMAIN` environment variab
 in [keycloak/create_client.sh](/k3s-ha-cluster/keycloak/create_client.sh) to be
 used in our authentication services.
 
+> **Note**: To add DNS record in cloudflare, update your `config.json` and generate
+a new secret. After that, restart your ddns pod to add your record immediately before
+the actual `ttl`.
+
 ## Tailscale VPN
 
 🛠️ **Step 1: Create a Tailscale Account & Auth Key**
