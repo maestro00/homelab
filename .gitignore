@@ -1,2 +1,3 @@
 k3s-ha-cluster/scripts/.env
 .env
+temp/
