@@ -7,7 +7,7 @@ KEYCLOAK_HOST="" # Set this to your Keycloak host, e.g., keycloak.yukselcloud.co
 MASTER_USERNAME="" # Set this to your Keycloak master username, e.g., admin
 MASTER_PASSWORD="" # Set this to your Keycloak master password, e.g., password
 HOMELAB_ADMIN_USERNAME="" # Set this to your desired homelab admin username, e.g., homelab-admin
-HOMELAB_ADMIN_PASSWORD="" # Set this to your desired homelab admin password, e.g., Lab123
+HOMELAB_ADMIN_PASSWORD="" # Set this to your desired homelab admin password, e.g., password
 CLIENT_NAME="nextcloud" # This is an initial demo client name
 CLIENT_DOMAIN="nextcloud.yukselcloud.com"
 

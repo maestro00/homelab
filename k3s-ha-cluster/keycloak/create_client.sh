@@ -5,7 +5,7 @@ set -euo pipefail
 # Configuration
 KEYCLOAK_HOST="" # Set this to your Keycloak host, e.g., keycloak.yukselcloud.com
 HOMELAB_ADMIN_USERNAME="" # Set this to your desired homelab admin username, e.g., homelab-admin
-HOMELAB_ADMIN_PASSWORD="" # Set this to your desired homelab admin password, e.g., Lab123
+HOMELAB_ADMIN_PASSWORD="" # Set this to your desired homelab admin password, e.g., password
 CLIENT_NAME="nextcloud" # This is an initial demo client name
 CLIENT_DOMAIN="nextcloud.yukselcloud.com"
 
@@ -14,7 +14,7 @@ source "$SCRIPT_DIR/utils.sh"
 
 print_status "Getting access token for homelab admin user..."
 HOMELAB_ACCESS_TOKEN=$(curl -s -X POST \
- "http://$KEYCLOAK_HOST/realms/homelab/protocol/openid-connect/token" \
+ "https://$KEYCLOAK_HOST/realms/homelab/protocol/openid-connect/token" \
  -H "Content-Type: application/x-www-form-urlencoded" \
  -d "username=$HOMELAB_ADMIN_USERNAME" \
  -d "password=$HOMELAB_ADMIN_PASSWORD" \
@@ -28,7 +28,7 @@ fi
 print_status "Homelab admin access token obtained"
 
 print_status "Creating client '$CLIENT_NAME' in homelab realm..."
-CLIENT_RESPONSE=$(curl -s -X POST "http://$KEYCLOAK_HOST/admin/realms/homelab/clients" \
+CLIENT_RESPONSE=$(curl -s -X POST "https://$KEYCLOAK_HOST/admin/realms/homelab/clients" \
  -H "Authorization: Bearer $HOMELAB_ACCESS_TOKEN" \
  -H "Content-Type: application/json" \
  -d "{
@@ -54,10 +54,10 @@ else
 fi
 
 print_status "Getting client secret for '$CLIENT_NAME'..."
-CLIENT_UUID=$(curl -s -X GET "http://$KEYCLOAK_HOST/admin/realms/homelab/clients?clientId=$CLIENT_NAME" \
+CLIENT_UUID=$(curl -s -X GET "https://$KEYCLOAK_HOST/admin/realms/homelab/clients?clientId=$CLIENT_NAME" \
  -H "Authorization: Bearer $HOMELAB_ACCESS_TOKEN" | jq -r '.[0].id')
 
-CLIENT_SECRET=$(curl -s -X GET "http://$KEYCLOAK_HOST/admin/realms/homelab/clients/$CLIENT_UUID/client-secret" \
+CLIENT_SECRET=$(curl -s -X GET "https://$KEYCLOAK_HOST/admin/realms/homelab/clients/$CLIENT_UUID/client-secret" \
  -H "Authorization: Bearer $HOMELAB_ACCESS_TOKEN" | jq -r '.value')
 
 echo ""
