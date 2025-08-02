@@ -9,3 +9,20 @@ service:
 
 ingress:
   enabled: false
+
+# These extra vars are needed for Keycloak to work with Caddy as a reverse proxy
+# If you don't want to expose Keycloak via ingress, you can remove these and use
+# only the LoadBalancer service for other services access
+extraEnvVars:
+  - name: KC_HOSTNAME
+    value: keycloak.yukselcloud.com
+  - name: KC_HOSTNAME_STRICT
+    value: "true"
+  - name: KC_HOSTNAME_STRICT_HTTPS
+    value: "true"
+  - name: KC_PROXY
+    value: edge
+  - name: KC_HTTP_ENABLED
+    value: "true"
+
+proxy: edge
