@@ -1,0 +1,121 @@
+---
+replicaCount: 3
+
+nextcloud:
+  host: nextcloud.yukselcloud.com
+  username: user
+  password: password
+  updateStrategy: rollingUpdate
+  extraApps:
+    - user_oidc
+  extraEnv:
+    - name: OIDC_CLIENT_ID
+      valueFrom:
+        secretKeyRef:
+          name: nextcloud-oidc-secret
+          key: OIDC_CLIENT_ID
+    - name: OIDC_CLIENT_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: nextcloud-oidc-secret
+          key: OIDC_CLIENT_SECRET
+    - name: OIDC_ISSUER_URL
+      valueFrom:
+        secretKeyRef:
+          name: nextcloud-oidc-secret
+          key: OIDC_ISSUER_URL
+    - name: OIDC_SCOPES
+      value: "openid profile email"
+    - name: OIDC_AUTO_PROVISION
+      value: "true"
+  externalDatabase:
+    host: nextcloud-mariadb
+    user: nextcloud
+    password: password
+    database: nextcloud
+
+extraVolumes:
+  - name: custom-config
+    configMap:
+      name: nextcloud-custom-config
+  - name: oidc-secret
+    secret:
+      secretName: nextcloud-oidc-secret
+
+extraVolumeMounts:
+  - name: custom-config
+    mountPath: /var/www/html/config/config.php
+    subPath: custom.config.php
+    readOnly: true
+  - name: oidc-secret
+    mountPath: /etc/oidc
+    readOnly: true
+
+extraEnvVars:
+  - name: OIDC_CLIENT_ID
+    valueFrom:
+      secretKeyRef:
+        name: nextcloud-secret
+        key: OIDC_CLIENT_ID
+  - name: OIDC_CLIENT_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: nextcloud-secret
+        key: OIDC_CLIENT_SECRET
+  - name: OIDC_ISSUER_URL
+    valueFrom:
+      secretKeyRef:
+        name: nextcloud-secret
+        key: OIDC_ISSUER_URL
+  # Add Redis configuration for multi-replica support
+  - name: REDIS_HOST
+    value: "nextcloud-redis-master"
+  - name: REDIS_HOST_PORT
+    value: "6379"
+
+service:
+  type: LoadBalancer
+  port: 80
+  loadBalancerIP: "192.168.0.205"
+
+ingress:
+  enabled: false
+
+persistence:
+  enabled: true
+  existingClaim: nextcloud-data
+
+mariadb:
+  enabled: true
+  auth:
+    rootPassword: password
+    database: nextcloud
+    username: user
+    password: password
+
+internalDatabase:
+  enabled: false
+
+redis:
+  enabled: true
+  auth:
+    enabled: false
+  master:
+    persistence:
+      enabled: true
+      size: 2Gi
+    accessModes:
+      - ReadWriteMany
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+livenessProbe:
+  enabled: false
+readinessProbe:
+  enabled: false

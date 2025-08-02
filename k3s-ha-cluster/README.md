@@ -421,6 +421,90 @@ used in our authentication services.
 a new secret. After that, restart your ddns pod to add your record immediately before
 the actual `ttl`.
 
+## ☁️ Nextcloud on Kubernetes
+
+This deployment uses the official
+[Nextcloud Helm chart](https://github.com/nextcloud/helm) with full OpenID
+Connect (OIDC) integration via Keycloak, optional external MariaDB and Redis
+support, and production-readiness features like PVC persistence and support for
+scaling (with some caveats).
+
+---
+
+### 🔐 OIDC Configuration
+
+Before deploying, create a Kubernetes secret containing your OIDC credentials
+from Keycloak:
+
+```bash
+kubectl create namespace nextcloud
+kubectl apply -f nextcloud/secret.yaml
+```
+
+Create kubernetes secret for OICD credentials, find `CLIENT_ID` and
+`CLIENT_SECRET` either from UI or using API.
+
+```bash
+kubectl create namespace nextcloud
+kubectl apply -f nextcloud/secret.yaml
+```
+
+Then, apply a custom ConfigMap that modifies the login redirection to point to
+your OIDC provider:
+
+```bash
+kubectl apply -f nextcloud/configmap.yaml
+```
+
+Your nextcloud/secret.yaml should look like:
+
+```bash
+apiVersion: v1
+kind: Secret
+metadata:
+  name: nextcloud-oidc-secret
+  namespace: nextcloud
+type: Opaque
+stringData:
+  OIDC_CLIENT_ID: myclientid
+  OIDC_CLIENT_SECRET: myclientsecret
+  OIDC_ISSUER_URL: https://keycloak.example.com/realms/myrealm
+```
+
+The Helm chart is configured to read these values and enable the oidc_login
+Nextcloud app automatically.
+
+### ☸️ Install via Helm
+
+```bash
+helm repo add nextcloud https://nextcloud.github.io/helm/
+helm repo update
+
+helm upgrade --install nextcloud nextcloud/nextcloud \
+  -f nextcloud/values.yaml \
+  -n nextcloud
+```
+
+### 🧠 Redis and Database
+
+You can use the built-in MariaDB (`mariadb.enabled=true`) for testing, or configure
+externalDatabase to connect to an external MariaDB instance for production.
+
+Redis is optional but strongly recommended for performance and locking. Enable
+it via `redis.enabled=true` in your [values.yaml](/k3s-ha-cluster/nextcloud/values.yaml).
+
+### 📱 Mobile Client Support (iOS/Android)
+
+Since the OIDC login flow disables the native login endpoints (`/login/v2/poll`),
+the mobile apps will not log in using the default browser OIDC flow.
+
+Instead:
+
+1. Log into the web UI
+2. Go to Settings → Security
+3. Generate a new App Password
+4. Use the generated credentials in your iOS/Android Nextcloud app
+
 ## Tailscale VPN
 
 🛠️ **Step 1: Create a Tailscale Account & Auth Key**

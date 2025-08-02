@@ -1,0 +1,51 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nextcloud-custom-config
+  namespace: nextcloud
+data:
+  custom.config.php: |
+    <?php
+    $CONFIG = array (
+      'overwrite.cli.url' => 'https://nextcloud.yukselcloud.com',
+      'overwriteprotocol' => 'https',
+      'trusted_domains' =>
+      array (
+        0 => 'nextcloud.yukselcloud.com',
+      ),
+      'auth.bruteforce.protection.enabled' => true,
+
+      // OIDC Configuration
+      'oidc_login_provider_url' => getenv("OIDC_ISSUER_URL"),
+      'oidc_login_client_id' => getenv("OIDC_CLIENT_ID"),
+      'oidc_login_client_secret' => getenv("OIDC_CLIENT_SECRET"),
+      'oidc_login_auto_redirect' => false, // Changed to false for mobile app support
+      'oidc_login_end_session_redirect' => true,
+      'oidc_login_logout_url' => getenv("OIDC_ISSUER_URL") . '/protocol/openid-connect/logout?redirect_uri=https://nextcloud.yukselcloud.com',
+      'oidc_login_attributes' => [
+        'id' => 'preferred_username',
+        'name' => 'name',
+        'mail' => 'email',
+        'groups' => 'groups',
+      ],
+      'oidc_login_default_group' => 'oidc',
+      'oidc_login_use_id_token' => false,
+      'oidc_login_attributes_to_update' => ['name', 'mail'],
+      'oidc_login_webdav_enabled' => true, // Enable WebDAV for mobile apps
+      'oidc_login_password_authentication' => true, // Allow app passwords
+
+      // Redis configuration for multi-replica support
+      'memcache.local' => '\OC\Memcache\APCu',
+      'memcache.distributed' => '\OC\Memcache\Redis',
+      'memcache.locking' => '\OC\Memcache\Redis',
+      'redis' => [
+        'host' => getenv('REDIS_HOST') ?: 'nextcloud-redis-master',
+        'port' => (int)(getenv('REDIS_HOST_PORT') ?: 6379),
+        'timeout' => 0.0,
+      ],
+
+      // Additional multi-replica settings
+      'filelocking.enabled' => true,
+      'trusted_proxies' => ['10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16'],
+    );

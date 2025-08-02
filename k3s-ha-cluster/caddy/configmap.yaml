@@ -12,3 +12,6 @@ data:
     keycloak.yukselcloud.com {
         reverse_proxy keycloak.keycloak.svc.cluster.local:80
     }
+    nextcloud.yukselcloud.com {
+        reverse_proxy 192.168.0.205:80
+    }
