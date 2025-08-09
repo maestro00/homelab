@@ -505,7 +505,69 @@ Instead:
 3. Generate a new App Password
 4. Use the generated credentials in your iOS/Android Nextcloud app
 
-## Tailscale VPN
+## 🛡️ Vaultwarden
+
+Vaultwarden is deployed for self-hosted password management, with secure admin
+access and OIDC authentication via Keycloak.
+
+- Generated a strong `ADMIN_TOKEN` using:
+
+  ```bash
+  openssl rand -hex 32
+  ```
+
+  and stored it as a Kubernetes secret referenced in [values.yaml](/k3s-ha-cluster/vaultwarden/values.yaml).
+
+- Installed using a community Helm chart:
+
+  ```bash
+  helm repo add vaultwarden https://guerzon.github.io/vaultwarden
+  helm repo update
+  helm install vaultwarden vaultwarden/vaultwarden \
+    -n vaultwarden --create-namespace \
+    -f vaultwarden/values.yaml
+  ```
+
+**Ingress with Caddy:**
+Added the following entry to `deployments/caddy/configmap.yaml` to route traffic
+for Vaultwarden:
+
+```caddyfile
+vaultwarden.yukselcloud.com {
+    reverse_proxy 192.168.0.206:80 # you can use svc address as well
+}
+```
+
+Apply changes and restart Caddy deployment:
+
+```bash
+kubectl apply -f deployments/caddy/configmap.yaml
+kubectl rollout restart deployment caddy -n caddy
+```
+
+**DNS Record with DDNS:**
+Update your config.json file by adding new entry
+
+  ```bash
+  {
+      "name": "vaultwarden",
+      "proxied": false
+  }
+  ```
+
+and generate a new kubernetes secret and apply it.
+
+```bash
+kubectl create secret generic config-cloudflare-ddns \
+  --from-file=../temp/config.json \
+  --dry-run=client -oyaml -n ddns > config-cloudflare-ddns-Secret.yaml
+
+kubectl apply -f config-cloudflare-ddns-Secret.yaml
+```
+
+Restart deployment or recreate pods to apply the change immediately.
+
+## 🔒 Tailscale VPN
 
 🛠️ **Step 1: Create a Tailscale Account & Auth Key**
 
