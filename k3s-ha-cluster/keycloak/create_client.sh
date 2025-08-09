@@ -6,8 +6,10 @@ set -euo pipefail
 KEYCLOAK_HOST="" # Set this to your Keycloak host, e.g., keycloak.yukselcloud.com
 HOMELAB_ADMIN_USERNAME="" # Set this to your desired homelab admin username, e.g., homelab-admin
 HOMELAB_ADMIN_PASSWORD="" # Set this to your desired homelab admin password, e.g., password
-CLIENT_NAME="nextcloud" # This is an initial demo client name
-CLIENT_DOMAIN="nextcloud.yukselcloud.com"
+CLIENT_NAME="" # This is an initial demo client name e.g., nextcloud
+CLIENT_DOMAIN="" # Set this to your client domain, e.g., nextcloud.yukselcloud.com
+# For nextcloud set custom oidc domainname/index.php/apps/sociallogin/custom_oidc/keycloak
+CLIENT_REDICT_URI="https://$CLIENT_DOMAIN/oauth/callback"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/utils.sh"
@@ -37,13 +39,13 @@ CLIENT_RESPONSE=$(curl -s -X POST "https://$KEYCLOAK_HOST/admin/realms/homelab/c
    \"enabled\": true,
    \"publicClient\": false,
    \"protocol\": \"openid-connect\",
-   \"redirectUris\": [\"https://$CLIENT_DOMAIN/index.php/apps/sociallogin/custom_oidc/keycloak\"],
+   \"redirectUris\": [\"$CLIENT_REDICT_URI\"],
    \"baseUrl\": \"https://$CLIENT_DOMAIN\",
    \"adminUrl\": \"https://$CLIENT_DOMAIN\",
    \"standardFlowEnabled\": true,
    \"implicitFlowEnabled\": false,
    \"directAccessGrantsEnabled\": true,
-   \"serviceAccountsEnabled\": true,
+   \"serviceAccountsEnabled\": false,
    \"authorizationServicesEnabled\": false
  }")
 
@@ -69,5 +71,5 @@ print_status "Client $CLIENT_NAME setup completed successfully!"
 echo "Client Details:"
 echo "  - Client ID: $CLIENT_NAME"
 echo "  - Client Secret: $CLIENT_SECRET"
-echo "  - Redirect URI: https://$CLIENT_DOMAIN/index.php/apps/sociallogin/custom_oidc/keycloak"
+echo "  - Redirect URI: $CLIENT_REDICT_URI"
 echo ""
