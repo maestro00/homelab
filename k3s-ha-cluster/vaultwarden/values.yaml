@@ -19,12 +19,14 @@ service:
     http:
       port: 80
 
-persistence:
-  enabled: true
-  storageClass: "longhorn"
-  accessMode: ReadWriteOnce
-  size: 1Gi
-  mountPath: /data
+storage:
+  data:
+    name: "vaultwarden-data"
+    size: "1Gi"
+    class: "longhorn"
+    path: "/data"
+    keepPvc: true
+    accessMode: "ReadWriteOnce"
 
 resources:
   requests:
