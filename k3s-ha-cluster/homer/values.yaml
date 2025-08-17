@@ -1,0 +1,59 @@
+#
+# This chart inherits from a common library chart. You can check the default values/options here:
+# https://github.com/bjw-s/helm-charts/blob/4d09009bf809b2ce3c06225f61cf229e40d2c08a/charts/library/common/values.yaml
+#
+
+image:
+  # -- image repository
+  repository: b4bz/homer
+  # -- image tag
+  # @default -- chart.appVersion
+  tag: ""
+  # -- image pull policy
+  pullPolicy: IfNotPresent
+
+# -- environment variables.
+# @default -- See below
+env:
+  # -- Set the container timezone
+  TZ: UTC
+
+# -- Configures service settings for the chart.
+# @default -- See values.yaml
+service:
+  main:
+    type: LoadBalancer
+    loadBalancerIP: "192.168.0.208"
+    ports:
+      http:
+        port: 8080
+
+ingress:
+  # -- Enable and configure ingress settings for the chart under this key.
+  # @default -- See values.yaml
+  main:
+    enabled: false
+
+securityContext:
+  # -- Specify the user ID the application will run as
+  runAsUser: 1000
+  # -- Enable validation that the container must run as non-root user
+  runAsNonRoot: true
+  # -- Specify the group ID the application will run as
+  runAsGroup: 1000
+
+# -- Configure persistence settings for the chart under this key.
+# @default -- See values.yaml
+persistence:
+  config:
+    enabled: true
+    mountPath: /www/assets
+    size: 1Gi
+    accessMode: ReadWriteOnce
+    storageClass: longhorn
+
+configmap:
+  config:
+    enabled: true
+    existingClaim: ""
+    name: homer-config

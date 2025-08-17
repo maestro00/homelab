@@ -1,0 +1,79 @@
+title: "☁️ YukselCloud Homelab"
+subtitle: "K3s HA Cluster Dashboard"
+logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/homer.png"
+theme: default
+footer: "Powered by K3s • Longhorn • Caddy • MetalLB • kube-vip"
+columns: 3
+
+services:
+  - name: "Infrastructure"
+    icon: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/kubernetes.png"
+    items:
+      - name: "Longhorn UI 🔒"
+        logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/longhorn.png"
+        url: "http://192.168.0.203"
+        subtitle: "Persistent Storage"
+        tag: "private"
+
+      - name: "Kubernetes Dashboard 🔒"
+        logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/kubernetes.png"
+        url: "https://dashboard.yukselcloud.com"
+        subtitle: "Cluster Management"
+        tag: "private"
+
+      # - name: "ArgoCD 🔒"
+      #   logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/argo-cd.png"
+      #   url: "https://argocd.yukselcloud.com"
+      #   subtitle: "GitOps CD"
+      #   tag: "private"
+
+  - name: "Identity & Security"
+    icon: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/keycloak.png"
+    items:
+      - name: "Keycloak"
+        logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/keycloak.png"
+        url: "https://keycloak.yukselcloud.com"
+        subtitle: "Central Authentication"
+        tag: "public"
+
+      - name: "Vaultwarden"
+        logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/vaultwarden.png"
+        url: "https://vaultwarden.yukselcloud.com"
+        subtitle: "Password Manager"
+        tag: "public"
+
+  - name: "Apps & Docs"
+    icon: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/nextcloud.png"
+    items:
+      - name: "Nextcloud"
+        logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/nextcloud.png"
+        url: "https://nextcloud.yukselcloud.com"
+        subtitle: "Files & Collaboration"
+        tag: "public"
+
+      - name: "Paperless-ngx"
+        logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/paperless-ngx.png"
+        url: "https://paperless.yukselcloud.com"
+        subtitle: "Document Management"
+        tag: "public"
+
+  - name: "Networking & DNS"
+    icon: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/pihole.png"
+    items:
+      - name: "Pi-hole"
+        logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/raspberry-pi.png"
+        url: "https://pihole.yukselcloud.com"
+        subtitle: "DNS & Ad-block"
+        tag: "public"
+
+      - name: "Caddy"
+        logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/caddy.png"
+        # url: "https://caddy.yukselcloud.com"
+        subtitle: "Ingress Controller"
+        tag: "public"
+
+      - name: "Tailscale Admin 🔒"
+        logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/tailscale.png"
+        url: "https://login.tailscale.com/admin"
+        subtitle: "VPN Overlay"
+        tag: "private"
