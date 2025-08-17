@@ -1,0 +1,11 @@
+# create a dedicated namespace
+namespaceOverride: "kubernetes-dashboard"
+
+# enable metrics if you want resource usage graphs in dashboard
+metricsScraper:
+  enabled: true
+metricsServer:
+  enabled: true
+# # recommended for login (token mode)
+# rbac:
+#   clusterReadOnlyRole: true
