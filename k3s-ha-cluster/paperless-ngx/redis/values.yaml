@@ -1,0 +1,22 @@
+architecture: standalone
+
+persistence:
+  enabled: true
+  size: 3Gi
+  storageClass: longhorn
+
+master:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: storage-with-longhorn
+                operator: In
+                values:
+                  - "true"
+
+auth:
+  enabled: true
+  existingSecret: redis-secret
+  existingSecretPasswordKey: redis-password

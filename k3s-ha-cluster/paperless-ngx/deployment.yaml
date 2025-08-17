@@ -1,0 +1,65 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: paperless-ngx
+  namespace: paperless
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: paperless-ngx
+  template:
+    metadata:
+      labels:
+        app: paperless-ngx
+    spec:
+      containers:
+        - name: paperless-ngx
+          image: ghcr.io/paperless-ngx/paperless-ngx:latest
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+          ports:
+            - containerPort: 8000
+          env:
+            - name: PAPERLESS_REDIS
+              value: "redis://:<your-redis-password-here>@paperless-redis-master.paperless.svc.cluster.local:6379"
+            - name: PAPERLESS_APPS
+              value: "allauth.socialaccount.providers.openid_connect"
+            - name: PAPERLESS_ALLOWED_HOSTS
+              value: "paperless.yukselcloud.com"
+            - name: PAPERLESS_CSRF_TRUSTED_ORIGINS
+              value: "https://paperless.yukselcloud.com"
+            - name: PAPERLESS_SOCIALACCOUNT_ALLOW_SIGNUPS
+              value: "true"
+            - name: PAPERLESS_SOCIAL_AUTO_SIGNUP
+              value: "true"
+            - name: PAPERLESS_SOCIALACCOUNT_PROVIDERS
+              value: |
+                {
+                  "openid_connect": {
+                    "APPS": [
+                      {
+                        "provider_id": "keycloak",
+                        "name": "Keycloak",
+                        "client_id": "<your-client-id-here>",
+                        "secret": "<your-secret-here>",
+                        "settings": {
+                          "server_url": "https://keycloak.yukselcloud.com/realms/homelab/.well-known/openid-configuration"
+                        }
+                      }
+                    ]
+                  }
+                }
+          volumeMounts:
+            - name: data
+              mountPath: /usr/src/paperless/media
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: paperless-ngx-pvc
