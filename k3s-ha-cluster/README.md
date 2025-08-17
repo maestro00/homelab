@@ -326,6 +326,16 @@ that reason, I tainted my `infra-pi` hostnamed node from longhorn deployments.
 kubectl taint nodes infra-pi node-role.kubernetes.io/no-longhorn=:NoSchedule
 ```
 
+I tainted my other nodes with `storage-with-longhorn=true` since some
+deployments doesn't accept `taintToleration`, rather expects a label to match.
+
+```bash
+kubectl label node k8s-node-171 storage-with-longhorn=true
+kubectl label node k8s-node-172 storage-with-longhorn=true
+kubectl label node k8s-node-181 storage-with-longhorn=true
+kubectl label node k8s-node-182 storage-with-longhorn=true
+```
+
 To deploy Longhorn via helm to our selected nodes:
 
 ```bash
@@ -433,16 +443,8 @@ scaling (with some caveats).
 
 ### 🔐 OIDC Configuration
 
-Before deploying, create a Kubernetes secret containing your OIDC credentials
-from Keycloak:
-
-```bash
-kubectl create namespace nextcloud
-kubectl apply -f nextcloud/secret.yaml
-```
-
-Create kubernetes secret for OICD credentials, find `CLIENT_ID` and
-`CLIENT_SECRET` either from UI or using API.
+Before deploying, create a Kubernetes secret for OICD credentials, find
+`CLIENT_ID` and `CLIENT_SECRET` either from UI or using API.
 
 ```bash
 kubectl create namespace nextcloud
@@ -469,6 +471,13 @@ stringData:
   OIDC_CLIENT_ID: myclientid
   OIDC_CLIENT_SECRET: myclientsecret
   OIDC_ISSUER_URL: https://keycloak.example.com/realms/myrealm
+```
+
+Create a longhorn backed PVC for a space you need, to support replicas, apply
+storage `accessModes` as `ReadWriteMany`.
+
+```bash
+kubectl apply -f nextcloud/pvc.yaml
 ```
 
 The Helm chart is configured to read these values and enable the oidc_login
@@ -620,3 +629,164 @@ Now you can go to any client, for example your phone (Android & iOS) and
 4. Select `k3s-exit-node` as your **EXIT NODE** mark also
 **Allow Local Network Access** to be able to get LAN access working.
 5. Test an IP address serving a service from your cluster (192.168.0.202 - pihole)
+
+## 📄 Paperless-ngx: Document Management
+
+Paperless-ngx is a powerful self-hosted document management solution.
+This section guides you through deploying Paperless-ngx on Kubernetes with Redis
+and persistent storage.
+
+### 1️⃣ Deploy Redis
+
+Create a Redis password secret:
+
+```bash
+kubectl create secret generic redis-secret \
+  --from-literal=redis-password="maestroredispaperless" \
+  --namespace=paperless
+```
+
+Install Redis using the Bitnami Helm chart:
+
+```bash
+helm install paperless-redis bitnami/redis \
+  -n paperless \
+  --create-namespace \
+  -f paperless-ngx/redis/values.yaml
+```
+
+Get the Redis service name and connection details:
+
+```bash
+kubectl get svc -n paperless
+
+NAME                       TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)    AGE
+paperless-redis-headless   ClusterIP   None         <none>        6379/TCP   21h
+paperless-redis-master     ClusterIP   10.43.4.92   <none>        6379/TCP   21h
+```
+
+Compose your `PAPERLESS_REDIS` environment variable using the service name:
+
+```text
+redis://:<password>@paperless-redis-master.paperless.svc.cluster.local:6379
+```
+
+### 2️⃣ Deploy Persistent Storage
+
+Apply the PVC manifest to provide persistent storage for Paperless-ngx:
+
+```bash
+kubectl apply -f paperless-ngx/pvc.yaml
+```
+
+### 3️⃣ Deploy Paperless-ngx
+
+Apply the deployment manifest:
+
+```bash
+kubectl apply -f paperless-ngx/deployment.yaml
+```
+
+### 4️⃣ Expose Paperless-ngx Service
+
+Expose Paperless-ngx via a LoadBalancer service:
+
+```bash
+kubectl apply -f paperless-ngx/service.yaml
+```
+
+Check the assigned external IP:
+
+```bash
+kubectl get svc -n paperless -o wide
+```
+
+Access Paperless-ngx at `http://<EXTERNAL-IP>`.
+
+---
+
+**Notes:**
+
+- The deployment uses Longhorn for persistent storage.
+- Redis is required for optimal performance and locking.
+- OIDC authentication can be configured via Keycloak for SSO.
+- Update environment variables in the deployment manifest as needed for your setup.
+
+## 📊 Kubernetes Dashboard
+
+Kubernetes Dashboard provides a web-based UI for managing and monitoring your cluster.
+
+### 1️⃣ Install via Helm
+
+Add the Helm repo and install the dashboard:
+
+```bash
+helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
+helm repo update
+helm upgrade --install kubernetes-dashboard \
+  kubernetes-dashboard/kubernetes-dashboard \
+  --create-namespace \
+  --namespace kubernetes-dashboard \
+  -f kubernetes-dashboard/values.yaml
+```
+
+### 2️⃣ Configure Access
+
+Apply the pre-created ServiceAccount and RBAC configuration for admin access:
+
+```bash
+kubectl apply -f kubernetes-dashboard/service-account.yaml
+kubectl apply -f kubernetes-dashboard/rbac.yaml
+```
+
+### 3️⃣ Get Login Token
+
+Retrieve the login token for the dashboard:
+
+```bash
+kubectl -n kubernetes-dashboard create token admin-user
+```
+
+Access the dashboard at `https://<EXTERNAL-IP>` (see the service details).
+
+---
+
+**Notes:**
+
+- The dashboard is exposed via a LoadBalancer service.
+- Use the generated token for admin login.
+
+## 🏠 Homer Dashboard
+
+Homer is a simple, static dashboard for your homelab services.
+
+### Install via Helm
+
+Add the Homer Helm repo and install:
+
+```bash
+helm repo add djjudas21 https://djjudas21.github.io/charts/
+helm repo update djjudas21
+
+helm install homer djjudas21/homer \
+  --create-namespace \
+  -n homer \
+  -f homer/values.yaml
+```
+
+### Configure Homer
+
+Create a ConfigMap referencing your dashboard configuration:
+
+```bash
+kubectl -n homer create configmap homer-config \
+  --from-file=config.yml=homer/config.yaml \
+  -o yaml --dry-run=client | kubectl apply -f -
+```
+
+---
+
+**Notes:**
+
+- Homer is exposed via a LoadBalancer service (see `homer/values.yaml`).
+- Update `homer/config.yaml` to customize your dashboard links and appearance.
