@@ -27,6 +27,15 @@ services:
       #   subtitle: "GitOps CD"
       #   tag: "private"
 
+  - name: "DevOps & Git"
+    icon: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/git.png"
+    items:
+      - name: "Forgejo"
+        logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/git.png"
+        url: "https://git.yukselcloud.com"
+        subtitle: "Self-hosted Git Service"
+        tag: "public"
+
   - name: "Identity & Security"
     icon: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/keycloak.png"
     items:
