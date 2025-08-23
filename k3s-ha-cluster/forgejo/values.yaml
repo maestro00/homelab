@@ -1,0 +1,90 @@
+# Storage
+persistence:
+  enabled: true
+  size: 10Gi
+  storageClass: longhorn
+  accessModes: ["ReadWriteOnce"]
+
+# We use Caddy as the edge; no k8s Ingress for Forgejo
+ingress:
+  enabled: false
+
+# Service stays internal; Caddy will proxy to it
+service:
+  http:
+    type: ClusterIP
+    port: 3000
+  ssh:
+    type: ClusterIP
+    port: 22
+
+postgresql:
+  enabled: false
+postgresql-ha:
+  enabled: false
+redis:
+  enabled: false
+
+# Bootstrap admin via Secret
+gitea:
+  admin:
+    existingSecret: forgejo-admin
+    usernameKey: username
+    passwordKey: password
+    emailKey: email
+
+  # App config written to app.ini (safe, no secrets)
+  config:
+    server:
+      DOMAIN: git.yukselcloud.com
+      ROOT_URL: https://git.yukselcloud.com/
+      PROTOCOL: http # behind reverse proxy
+      HTTP_PORT: 3000
+      SSH_DOMAIN: git.yukselcloud.com
+    security:
+      INSTALL_LOCK: true
+    packages:
+      ENABLED: true
+    database:
+      DB_TYPE: postgres
+      HOST: forgejo-pg-rw.forgejo.svc.cluster.local:5432
+      NAME: forgejo
+      USER: forgejo
+      PASSWD: "__FROM_ENV__"
+    log:
+      MODE: console
+      LEVEL: info
+    oauth2_client:
+      ENABLE_AUTO_REGISTRATION: true # optional; handy with Keycloak
+      ACCOUNT_LINKING: auto
+  service:
+    DISABLE_REGISTRATION: true
+    ALLOW_ONLY_EXTERNAL_REGISTRATION: false
+
+  # Feed secrets via env (DB password + crypto keys)
+  additionalConfigFromEnvs:
+    - name: FORGEJO__database__PASSWD
+      valueFrom:
+        secretKeyRef:
+          name: forgejo-db-app
+          key: password
+    - name: FORGEJO__security__INTERNAL_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: forgejo-internal
+          key: INTERNAL_TOKEN
+    - name: FORGEJO__security__SECRET_KEY
+      valueFrom:
+        secretKeyRef:
+          name: forgejo-internal
+          key: SECRET_KEY
+    - name: FORGEJO__security__JWT_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: forgejo-internal
+          key: JWT_SECRET
+    - name: FORGEJO__lfs__JWT_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: forgejo-internal
+          key: LFS_JWT_SECRET

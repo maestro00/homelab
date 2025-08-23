@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: forgejo-internal
+  namespace: forgejo
+type: Opaque
+stringData:
+  INTERNAL_TOKEN: REPLACE_BASE64_OR_HEX
+  SECRET_KEY: REPLACE_BASE64_OR_HEX
+  JWT_SECRET: REPLACE_BASE64_OR_HEX
+  LFS_JWT_SECRET: REPLACE_BASE64_OR_HEX

@@ -24,3 +24,28 @@ data:
         paperless.yukselcloud.com {
             reverse_proxy 192.168.0.207:80
         }
+        git.yukselcloud.com {
+            encode zstd gzip
+
+            # Increase limits for big image layers (adjust to taste)
+            request_body {
+                max_size 10GB
+            }
+
+            # Recommended headers to preserve scheme/host for Forgejo
+            header {
+                X-Forwarded-Proto {scheme}
+                X-Forwarded-Host  {host}
+                X-Real-IP         {remote_host}
+            }
+
+            reverse_proxy http://forgejo-http.forgejo.svc.cluster.local:3000 {
+                flush_interval -1
+                transport http {
+                read_buffer  0
+                write_buffer 0
+                response_header_timeout 5m
+                dial_timeout            30s
+                }
+            }
+        }

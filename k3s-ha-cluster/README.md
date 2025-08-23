@@ -790,3 +790,53 @@ kubectl -n homer create configmap homer-config \
 
 - Homer is exposed via a LoadBalancer service (see `homer/values.yaml`).
 - Update `homer/config.yaml` to customize your dashboard links and appearance.
+
+## 🛠️ Forgejo: Self-hosted Git Service
+
+Forgejo provides a lightweight, self-hosted Git platform with Keycloak SSO.
+
+### 🚀 Deploy Forgejo
+
+```bash
+kubectl create namespace forgejo
+
+# Install CNPG operator
+kubectl apply --server-side -f https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/release-1.27/releases/cnpg-1.27.0.yaml
+
+# Deploy PostgreSQL resources
+kubectl apply -f forgejo/postgres/forgejo-db-app.yaml
+kubectl apply -f forgejo/postgres/cnpg-superuser.yaml
+kubectl apply -f forgejo/postgres/postgres-forgejo.yaml
+
+# Deploy Forgejo secrets
+kubectl apply -f forgejo/admin-secret.yaml
+
+# Generate randoms one by one, e.g. head -c32 /dev/urandom | base64
+kubectl apply -f forgejo/internal.yaml
+
+# Install Forgejo via Helm
+helm upgrade --install forgejo \
+  oci://code.forgejo.org/forgejo-helm/forgejo \
+  --namespace forgejo \
+  --version 13.0.1 \
+  -f forgejo/values.yaml
+```
+
+### 🔐 Keycloak SSO Integration
+
+- Create a Keycloak client named `forgejo` in your `homelab` realm.
+- In Forgejo UI:
+  Site Administration → Authentication Sources → Add OAuth2
+  - Name: Keycloak
+  - Provider: OpenID Connect
+  - Client ID/Secret: from Keycloak
+  - Discovery URL: `https://keycloak.yukselcloud.com/realms/homelab/.well-known/openid-configuration`
+  - Enable Auto Registration
+In Forgejo UI (as admin → Site Administration → Authentication Sources → Add OAuth2):
+
+> Name: Keycloak
+> OAuth2 provider: OpenID Connect
+> Client ID/Secret: # copy from Keycloak
+> OpenID Connect Auto Discovery URL: <https://keycloak.yukselcloud.com/realms/homelab/.well-known/openid-configuration>
+
+Enable Auto Registration: ✅
