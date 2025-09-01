@@ -16,11 +16,16 @@ provider "proxmox" {
 
 variable "nodes" {
   type = list(object({
-    vm_name           = string
-    vm_id             = number
-    vm_ipv4_address   = string
-    vm_target_node    = string
-    vm_template_vm_id = number
+    vm_name              = string
+    vm_id                = number
+    vm_ipv4_address      = string
+    vm_target_node       = string
+    vm_template_vm_id    = number
+    cpu_cores            = number
+    cpu_sockets          = number
+    memory_dedicated     = number
+    disk_size            = number
+    storage_datastore_id = string
   }))
 }
 
@@ -36,18 +41,18 @@ resource "proxmox_virtual_environment_vm" "k8s_node" {
   }
 
   cpu {
-    cores   = 2
-    sockets = 1
+    cores   = each.value.cpu_cores   # 2
+    sockets = each.value.cpu_sockets # 1
   }
 
   memory {
-    dedicated = 7680 # 7.5 GB
+    dedicated = each.value.memory_dedicated # 7680 # 7.5 GB
   }
 
   disk {
-    datastore_id = "local-lvm"
+    datastore_id = each.value.storage_datastore_id # "local-lvm" or "shared-nfs"
     interface    = "scsi0"
-    size         = 50
+    size         = each.value.disk_size
   }
 
   network_device {

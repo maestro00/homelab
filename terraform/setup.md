@@ -38,10 +38,10 @@ by running:
    # Terraform has been successfully initialized!
 
    # Review your plan and check for any missing variables
-   terraform plan -var-file="node1.tfvars"
+   terraform plan -var-file="node.tfvars"
 
    # If everything looks correct, apply the configuration:
-   terraform apply -var-file="node1.tfvars"
+   terraform apply -var-file="node.tfvars"
    # ...
    # Enter a value: -> Yes
    # ...
