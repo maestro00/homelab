@@ -74,3 +74,9 @@ community:
 
 - [Kubernetes Homelab Overview by Jonathan Gazeley](https://jonathangazeley.com/2023/01/15/kubernetes-homelab-part-1-overview/)
 - [TheTaqiTahmid/homeserver GitHub Repository](https://github.com/TheTaqiTahmid/homeserver)
+
+## TODOS
+
+- Develop a way to uncordon/cordon a node in the clsuter, drain it, delete the VM,
+create vm via terraform without manually commenting uncommenting stuff, setup ssh
+access, install k3s back.

@@ -24,7 +24,7 @@ pvecm add 192.168.0.52
 
 ## Create NFS Shared Storage
 
-We want shared storage available to both nodes (e.g., for ISO/images or VM
+We want have shared storage available to both nodes (e.g., for ISO/images or VM
 backups). Thus, we host the NFS share on one of the Proxmox nodes.
 
 Create shared nfs folder in one of the node (I select the node which has bigger
