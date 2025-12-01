@@ -2,3 +2,6 @@ k3s-ha-cluster/scripts/.env
 .env
 temp/
 terraform/.terraform/
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/.terraform.lock.hcl
