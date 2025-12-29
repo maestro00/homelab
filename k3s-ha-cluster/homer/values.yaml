@@ -54,6 +54,4 @@ persistence:
 
 configmap:
   config:
-    enabled: true
-    existingClaim: ""
-    name: homer-config
+    enabled: false
