@@ -1,0 +1,6 @@
+apiVersion: v2
+name: media
+description: A Helm chart for Kubernetes media arr stack applications
+type: application
+version: 0.1.0
+appVersion: "1.0"

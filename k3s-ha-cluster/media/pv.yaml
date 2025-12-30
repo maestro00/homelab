@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-media-downloads
+spec:
+  capacity:
+    storage: 200Gi
+  accessModes:
+    - ReadWriteMany
+  storageClassName: media-nfs
+  nfs:
+    path: /srv/media/downloads
+    server: 192.168.0.52
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-media-completed
+spec:
+  capacity:
+    storage: 200Gi
+  accessModes:
+    - ReadWriteMany
+  storageClassName: media-nfs
+  nfs:
+    path: /srv/media/completed
+    server: 192.168.0.52
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-media-jellyfin-config
+spec:
+  capacity:
+    storage: 500Mi
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: media-nfs
+  nfs:
+    path: /srv/media/config/jellyfin
+    server: 192.168.0.52
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-media-qbittorrent-config
+spec:
+  capacity:
+    storage: 500Mi
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: media-nfs
+  nfs:
+    path: /srv/media/config/qbittorrent
+    server: 192.168.0.52
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-media-subtitles
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: media-nfs
+  nfs:
+    path: /srv/media/subtitles
+    server: 192.168.0.52
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-media-movies
+spec:
+  capacity:
+    storage: 200Gi
+  accessModes:
+    - ReadWriteMany
+  storageClassName: media-nfs
+  nfs:
+    path: /srv/media/movies
+    server: 192.168.0.52
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-media-tv
+spec:
+  capacity:
+    storage: 200Gi
+  accessModes:
+    - ReadWriteMany
+  storageClassName: media-nfs
+  nfs:
+    path: /srv/media/tv
+    server: 192.168.0.52

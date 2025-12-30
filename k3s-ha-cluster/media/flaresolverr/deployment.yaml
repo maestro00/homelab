@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flaresolverr
+  namespace: media
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flaresolverr
+  template:
+    metadata:
+      labels:
+        app: flaresolverr
+    spec:
+      containers:
+        - name: flaresolverr
+          image: ghcr.io/flaresolverr/flaresolverr:latest
+          ports:
+            - containerPort: 8191
+          resources:
+            requests:
+              cpu: 50m
+              memory: 192Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+          env:
+            - name: LOG_LEVEL
+              value: info
+            - name: TZ
+              value: Europe/Helsinki
+      volumes:
+        - name: config
+          hostPath:
+            path: /var/lib/media/flaresolverr
+            type: DirectoryOrCreate

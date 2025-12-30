@@ -1,0 +1,34 @@
+namespace: media
+replicaCount: 1
+
+image:
+  name: flaresolverr
+  repository: ghcr.io/flaresolverr/flaresolverr
+  tag: latest
+
+service:
+  port: 8191
+  loadBalancerIP: 192.168.0.217
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 192Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+
+config:
+  PUID: "1000"
+  PGID: "1000"
+  TZ: Europe/Helsinki
+
+volumeMounts:
+  - name: config
+    mountPath: /config
+
+volumes:
+  - name: config
+    hostPath:
+      path: /var/lib/media/flaresolverr
+      type: DirectoryOrCreate

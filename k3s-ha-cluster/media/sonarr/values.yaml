@@ -1,0 +1,44 @@
+namespace: media
+replicaCount: 1
+
+image:
+  name: sonarr
+  repository: linuxserver/sonarr
+  tag: latest
+
+service:
+  port: 8989
+  loadBalancerIP: 192.168.0.212
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 160Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+config:
+  PUID: "1000"
+  PGID: "1000"
+  TZ: Europe/Helsinki
+
+volumeMounts:
+  - name: config
+    mountPath: /config
+  - name: tv
+    mountPath: /tv
+  - name: downloads
+    mountPath: /downloads
+
+volumes:
+  - name: config
+    hostPath:
+      path: /var/lib/media/sonarr
+      type: DirectoryOrCreate
+  - name: tv
+    persistentVolumeClaim:
+      claimName: media-tv
+  - name: downloads
+    persistentVolumeClaim:
+      claimName: media-downloads

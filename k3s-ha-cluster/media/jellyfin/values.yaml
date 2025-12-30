@@ -1,0 +1,48 @@
+namespace: media
+replicaCount: 1
+
+image:
+  name: jellyfin
+  repository: linuxserver/jellyfin
+  tag: latest
+
+service:
+  port: 8096
+  loadBalancerIP: 192.168.0.215
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 1Gi
+  limits:
+    cpu: 2000m
+    memory: 2Gi
+
+config:
+  PUID: "1000"
+  PGID: "1000"
+  TZ: Europe/Helsinki
+
+volumeMounts:
+  - name: config
+    mountPath: /config
+  - name: movies
+    mountPath: /movies
+  - name: tv
+    mountPath: /tv
+  - name: subtitles
+    mountPath: /subtitles
+
+volumes:
+  - name: config
+    persistentVolumeClaim:
+      claimName: media-jellyfin-config
+  - name: movies
+    persistentVolumeClaim:
+      claimName: media-movies
+  - name: tv
+    persistentVolumeClaim:
+      claimName: media-tv
+  - name: subtitles
+    persistentVolumeClaim:
+      claimName: media-subtitles

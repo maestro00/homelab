@@ -1,0 +1,116 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qbittorrent
+  namespace: media
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qbittorrent
+  template:
+    metadata:
+      labels:
+        app: qbittorrent
+    spec:
+      securityContext:
+        fsGroup: 1000
+
+      containers:
+        # ==========================
+        # Gluetun VPN + Proxy
+        # ==========================
+        - name: gluetun
+          image: qmcgaw/gluetun:latest
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+          resources:
+            requests:
+              cpu: 50m
+              memory: 96Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          env:
+            - name: TZ
+              value: Europe/Helsinki
+            - name: VPN_SERVICE_PROVIDER
+              value: custom
+            - name: VPN_TYPE
+              value: wireguard
+            - name: WIREGUARD_CONF_FILE
+              value: wg0.conf
+            - name: FIREWALL
+              value: "on"
+            - name: BLOCK_MALICIOUS
+              value: "off"
+            - name: HTTPPROXY
+              value: "on"
+            - name: HTTPPROXY_PORT
+              value: "8888"
+            - name: SOCKSPROXY
+              value: "on"
+            - name: SOCKSPROXY_PORT
+              value: "1080"
+          ports:
+            - containerPort: 8888 # HTTP proxy
+            - containerPort: 1080 # SOCKS5 proxy
+            - containerPort: 8000 # healthcheck
+          volumeMounts:
+            - name: config
+              mountPath: /gluetun
+
+        # ==========================
+        # qBittorrent
+        # ==========================
+        - name: qbittorrent
+          image: linuxserver/qbittorrent:latest
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: 50m
+              memory: 96Mi
+            limits:
+              cpu: 1500m
+              memory: 1Gi
+          env:
+            - name: TZ
+              value: Europe/Helsinki
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: WEBUI_PORT
+              value: "8080"
+
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: downloads
+              mountPath: /downloads
+            - name: completed
+              mountPath: /completed
+            - name: movies
+              mountPath: /movies
+            - name: tv
+              mountPath: /tv
+
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: media-qbittorrent-config
+        - name: downloads
+          persistentVolumeClaim:
+            claimName: media-downloads
+        - name: completed
+          persistentVolumeClaim:
+            claimName: media-completed
+        - name: movies
+          persistentVolumeClaim:
+            claimName: media-movies
+        - name: tv
+          persistentVolumeClaim:
+            claimName: media-tv

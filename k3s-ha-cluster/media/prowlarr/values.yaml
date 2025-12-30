@@ -1,0 +1,34 @@
+namespace: media
+replicaCount: 1
+
+image:
+  name: prowlarr
+  repository: linuxserver/prowlarr
+  tag: latest
+
+service:
+  port: 9117
+  loadBalancerIP: 192.168.0.211
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 192Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+config:
+  PUID: "1000"
+  PGID: "1000"
+  TZ: Europe/Helsinki
+
+volumeMounts:
+  - name: config
+    mountPath: /config
+
+volumes:
+  - name: config
+    hostPath:
+      path: /var/lib/media/prowlarr
+      type: DirectoryOrCreate

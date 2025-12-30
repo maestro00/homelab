@@ -768,7 +768,7 @@ Add the Homer Helm repo and install:
 helm repo add djjudas21 https://djjudas21.github.io/charts/
 helm repo update djjudas21
 
-helm install homer djjudas21/homer \
+helm upgrade --install homer djjudas21/homer \
   --create-namespace \
   -n homer \
   -f homer/values.yaml
@@ -840,3 +840,148 @@ In Forgejo UI (as admin → Site Administration → Authentication Sources → A
 > OpenID Connect Auto Discovery URL: <https://keycloak.yukselcloud.com/realms/homelab/.well-known/openid-configuration>
 
 Enable Auto Registration: ✅
+
+## 📺 Media Server Stack (Sonarr, Radarr, Prowlarr, Bazarr, Jellyfin, Flaresolverr)
+
+A unified Helm-based deployment for media applications(a.k.a *arr stack) sharing
+common storage and networking.
+
+### 🛠️ Prerequisites Setup
+
+#### 1️⃣ Create StorageClass (media-nfs)
+
+Define an NFS-backed StorageClass for persistent storage:
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: media-nfs
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+EOF
+```
+
+This StorageClass enables `PersistentVolumeClaims` to bind to NFS paths on your
+storage server.
+
+#### 2️⃣ Create Namespace
+
+```bash
+kubectl create namespace media
+```
+
+#### 3️⃣ Prepare NFS Storage Paths
+
+On your NFS server (for me PVE. 192.168.0.52), create the directory structure:
+
+```bash
+mkdir -p /srv/media/{downloads,completed,movies,tv,config,config/jellyfin,config/qbittorrent,config/vpn}
+```
+
+**Directory breakdown:**
+
+- `downloads/` - Active downloads (qBittorrent)
+- `completed/` - Completed downloads (qBittorrent)
+- `movies/` - Movie library (Radarr, Jellyfin)
+- `tv/` - TV shows library (Sonarr, Jellyfin)
+- `config/*` - Application configs (mounted as hostPath or PVC)
+
+If using WireGuard VPN, place your config at:
+
+```bash
+/srv/media/config/wg_confs/wg0.conf
+```
+
+#### 4️⃣ Create PersistentVolumes and PersistentVolumeClaims
+
+```bash
+kubectl apply -f media/pv.yaml
+kubectl apply -f media/pvc.yaml
+```
+
+### 📦 Helm Deployment
+
+The media Helm chart is organized as:
+
+```txt
+media/
+├── Chart.yaml
+├── templates/
+│   ├── deployment.yaml
+│   └── service.yaml
+├── pv.yaml              # PersistentVolume definitions
+├── pvc.yaml             # PersistentVolumeClaim definitions
+├── sonarr/values.yaml   # TV Shows (DVR)
+├── radarr/values.yaml   # Movies (DVR)
+├── bazarr/values.yaml   # Subtitles
+├── prowlarr/values.yaml # Indexer Aggregator
+├── flaresolverr/values.yaml # CAPTCHA Solver
+└── jellyfin/values.yaml # Media Server
+```
+
+Each app has its own `values.yaml` with:
+
+- Image and version
+- Service LoadBalancer IP
+- Resource requests/limits
+- Environment config
+- Volume mounts (references existing PVCs)
+
+#### Deploy Individual Apps
+
+**Deploy all apps:**
+
+```bash
+cd k3s-ha-cluster
+
+helm upgrade \
+  --install <app_name> \
+  ./media -f \
+  ./media/<app_name>/values.yaml \
+  -n media
+
+# Example: Sonarr
+helm upgrade \
+  --install sonarr \
+  ./media -f \
+  ./media/sonarr/values.yaml \
+  -n media
+```
+
+### 🔧 Configuration & Access
+
+**Sonarr** → `http://192.168.0.212:8989` - TV show management
+**Radarr** → `http://192.168.0.213:7878` - Movie management
+**Bazarr** → `http://192.168.0.214:6767` - Subtitle management
+**Prowlarr** → `http://192.168.0.211:9117` - Indexer management
+**Flaresolverr** → `http://192.168.0.217:8191` - CAPTCHA solving
+**Jellyfin** → `http://192.168.0.215:8096` - Media playback
+
+### 🔄 qBittorrent with Gluetun VPN
+
+qBittorrent is deployed separately with **Gluetun** sidecar container to route traffic
+through a VPN. This provides:
+
+- **Privacy:** All torrent traffic encrypted through VPN tunnel
+- **IP Masking:** External IP differs from home network
+- **Firewall:** Gluetun's built-in firewall blocks non-VPN traffic
+- **Killswitch:** Container stops if VPN connection drops
+
+#### Deploy qBittorrent + Gluetun
+
+```bash
+kubectl apply -f media/qbittorrent/deployment.yaml
+kubectl apply -f media/qbittorrent/service.yaml
+```
+
+---
+
+**Notes:**
+
+- Each app references existing PVCs by name (no PV/PVC templates in Helm)
+- PV/PVC are managed separately via `kubectl apply` to preserve existing data
+- All apps use `media-nfs` StorageClass for shared library access
+- LoadBalancer IPs are configured per app in its `values.yaml`
+- qBittorrent is deployed separately (requires multi-container setup)

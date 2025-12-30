@@ -1,0 +1,44 @@
+namespace: media
+replicaCount: 1
+
+image:
+  name: radarr
+  repository: linuxserver/radarr
+  tag: latest
+
+service:
+  port: 7878
+  loadBalancerIP: 192.168.0.213
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 224Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+config:
+  PUID: "1000"
+  PGID: "1000"
+  TZ: Europe/Helsinki
+
+volumeMounts:
+  - name: config
+    mountPath: /config
+  - name: downloads
+    mountPath: /downloads
+  - name: movies
+    mountPath: /movies
+
+volumes:
+  - name: config
+    hostPath:
+      path: /var/lib/media/radarr
+      type: DirectoryOrCreate
+  - name: downloads
+    persistentVolumeClaim:
+      claimName: media-downloads
+  - name: movies
+    persistentVolumeClaim:
+      claimName: media-movies

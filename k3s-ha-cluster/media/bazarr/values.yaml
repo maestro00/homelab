@@ -1,0 +1,54 @@
+namespace: media
+replicaCount: 1
+
+image:
+  name: bazarr
+  repository: linuxserver/bazarr
+  tag: "1.4.5"
+
+service:
+  port: 6767
+  loadBalancerIP: 192.168.0.214
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+config:
+  PUID: "1000"
+  PGID: "1000"
+  TZ: Europe/Helsinki
+
+volumeMounts:
+  - name: config
+    mountPath: /config
+  - name: downloads
+    mountPath: /downloads
+  - name: movies
+    mountPath: /movies
+  - name: tv
+    mountPath: /tv
+  - name: subtitles
+    mountPath: /subtitles
+
+volumes:
+  - name: config
+    hostPath:
+      path: /var/lib/media/bazarr
+      type: DirectoryOrCreate
+  - name: downloads
+    persistentVolumeClaim:
+      claimName: media-downloads
+  - name: movies
+    persistentVolumeClaim:
+      claimName: media-movies
+  - name: tv
+    persistentVolumeClaim:
+      claimName: media-tv
+  - name: subtitles
+    persistentVolumeClaim:
+      claimName: media-subtitles
