@@ -2,13 +2,13 @@ namespace: media
 replicaCount: 1
 
 image:
-  name: prowlarr
-  repository: linuxserver/prowlarr
-  tag: latest
+  name: seerr
+  repository: ghcr.io/seerr-team/seerr
+  tag: develop
 
 service:
-  port: 9696
-  loadBalancerIP: 192.168.0.211
+  port: 5055
+  loadBalancerIP: 192.168.0.218
 
 resources:
   requests:
@@ -29,6 +29,5 @@ volumeMounts:
 
 volumes:
   - name: config
-    hostPath:
-      path: /var/lib/media/prowlarr
-      type: DirectoryOrCreate
+    persistentVolumeClaim:
+      claimName: media-seerr-config
