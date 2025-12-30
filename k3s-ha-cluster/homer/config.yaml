@@ -86,3 +86,48 @@ services:
         url: "https://login.tailscale.com/admin"
         subtitle: "VPN Overlay"
         tag: "private"
+
+  - name: "Media Automation"
+    icon: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/sonarr.png"
+    items:
+      - name: "Sonarr"
+        logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/sonarr.png"
+        url: "http://192.168.0.212:8989"
+        subtitle: "TV Show Management"
+        tag: "private"
+
+      - name: "Radarr"
+        logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/radarr.png"
+        url: "http://192.168.0.213:7878"
+        subtitle: "Movie Management"
+        tag: "private"
+
+      - name: "Bazarr"
+        logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/bazarr.png"
+        url: "http://192.168.0.214:6767"
+        subtitle: "Subtitle Management"
+        tag: "private"
+
+      - name: "Prowlarr"
+        logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/prowlarr.png"
+        url: "http://192.168.0.211:9696"
+        subtitle: "Indexer Management"
+        tag: "private"
+
+      - name: "Flaresolverr"
+        logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/flaresolverr.png"
+        url: "http://192.168.0.217:8191"
+        subtitle: "CAPTCHA Solver"
+        tag: "private"
+
+      - name: "Jellyfin"
+        logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/jellyfin.png"
+        url: "http://192.168.0.215:8096"
+        subtitle: "Media Playback"
+        tag: "public"
+
+      - name: "Jellyseerr"
+        logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/jellyseerr.png"
+        url: "http://192.168.0.218:5055"
+        subtitle: "Media Requests"
+        tag: "public"

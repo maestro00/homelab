@@ -46,12 +46,10 @@ securityContext:
 # @default -- See values.yaml
 persistence:
   config:
-    enabled: true
-    mountPath: /www/assets
-    size: 1Gi
-    accessMode: ReadWriteOnce
-    storageClass: longhorn
+    enabled: false
 
 configmap:
   config:
-    enabled: false
+    enabled: true
+    name: homer-config
+    existingClaim: ""
