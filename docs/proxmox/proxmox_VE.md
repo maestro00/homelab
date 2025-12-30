@@ -34,6 +34,50 @@ Verify that the locale is set correctly:
 locale -a # Your selected locale should appear in the output
 ```
 
+### Configure Free Version Repositories
+
+To use Proxmox VE without a subscription, disable the enterprise repositories
+and enable the no-subscription repositories.
+
+#### 1. Disable Enterprise PVE Repository
+
+```bash
+nano /etc/apt/sources.list.d/pve-enterprise.list
+# Comment out the line:
+# deb https://enterprise.proxmox.com/debian/pve bookworm pve-enterprise
+```
+
+#### 2. Disable Enterprise Ceph Repository
+
+```bash
+nano /etc/apt/sources.list.d/ceph.list
+# Comment out any enterprise entries, e.g.:
+# deb https://enterprise.proxmox.com/debian/ceph-quincy bookworm enterprise
+```
+
+#### 3. Enable PVE No-Subscription Repository
+
+```bash
+nano /etc/apt/sources.list.d/pve-no-subscription.list
+# Add the following line:
+deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription
+```
+
+#### 4. Enable Ceph No-Subscription Repository
+
+```bash
+nano /etc/apt/sources.list.d/ceph-no-subscription.list
+# Add the following line:
+deb http://download.proxmox.com/debian/ceph-quincy bookworm no-subscription
+```
+
+#### 5. Update APT and Upgrade System
+
+```bash
+apt update
+apt full-upgrade
+```
+
 ## Proxmox Cloud Image Attachment
 
 To automate VM provisioning, you need to create a cloud-init enabled Proxmox
