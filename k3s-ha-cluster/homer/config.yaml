@@ -17,7 +17,7 @@ services:
 
       - name: "Kubernetes Dashboard 🔒"
         logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/kubernetes.png"
-        url: "https://dashboard.yukselcloud.com"
+        url: "https://192.168.0.209"
         subtitle: "Cluster Management"
         tag: "private"
 
@@ -124,10 +124,16 @@ services:
         logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/jellyfin.png"
         url: "http://192.168.0.215:8096"
         subtitle: "Media Playback"
-        tag: "public"
+        tag: "private"
 
       - name: "Jellyseerr"
         logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/jellyseerr.png"
         url: "http://192.168.0.218:5055"
         subtitle: "Media Requests"
-        tag: "public"
+        tag: "private"
+
+      - name: "Profilarr"
+        logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/profilarr.png"
+        url: "http://192.168.0.219:6868"
+        subtitle: "Media Profiling"
+        tag: "private"
