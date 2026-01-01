@@ -1,0 +1,34 @@
+namespace: media
+replicaCount: 1
+
+image:
+  name: profilarr
+  repository: santiagosayshey/profilarr
+  tag: latest
+
+service:
+  port: 6868
+  loadBalancerIP: 192.168.0.219
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 192Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+
+config:
+  PUID: "1000"
+  PGID: "1000"
+  TZ: Europe/Helsinki
+
+volumeMounts:
+  - name: config
+    mountPath: /config
+
+volumes:
+  - name: config
+    hostPath:
+      path: /var/lib/media/profilarr
+      type: DirectoryOrCreate
