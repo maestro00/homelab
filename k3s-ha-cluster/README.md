@@ -401,7 +401,7 @@ kubectl create secret generic keycloak-secret \
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo update
 
-helm install keycloak bitnami/keycloak \
+helm upgrade --install keycloak bitnami/keycloak \
   --namespace keycloak \
   -f keycloak/values.yaml
 ```
@@ -532,7 +532,7 @@ access and OIDC authentication via Keycloak.
   ```bash
   helm repo add vaultwarden https://guerzon.github.io/vaultwarden
   helm repo update
-  helm install vaultwarden vaultwarden/vaultwarden \
+  helm upgrade --install vaultwarden vaultwarden/vaultwarden \
     -n vaultwarden --create-namespace \
     -f vaultwarden/values.yaml
   ```
@@ -955,9 +955,11 @@ helm upgrade \
 **Sonarr** → `http://192.168.0.212:8989` - TV show management
 **Radarr** → `http://192.168.0.213:7878` - Movie management
 **Bazarr** → `http://192.168.0.214:6767` - Subtitle management
-**Prowlarr** → `http://192.168.0.211:9117` - Indexer management
+**Prowlarr** → `http://192.168.0.211:9696` - Indexer management
 **Flaresolverr** → `http://192.168.0.217:8191` - CAPTCHA solving
 **Jellyfin** → `http://192.168.0.215:8096` - Media playback
+**Seerr** → `http://192.168.0.218:5055` - Media request management
+**Profilarr** → `http://192.168.0.219:6868` - Media profile management
 
 ### 🔄 qBittorrent with Gluetun VPN
 
