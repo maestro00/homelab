@@ -9,37 +9,78 @@ data:
         demo.yukselcloud.com {
             reverse_proxy demo-service.caddy-web-demo.svc.cluster.local:80
         }
-        keycloak.yukselcloud.com {
-            reverse_proxy keycloak.keycloak.svc.cluster.local:80
-        }
-        nextcloud.yukselcloud.com {
-            reverse_proxy 192.168.0.205:80
-        }
-        vaultwarden.yukselcloud.com {
-            reverse_proxy 192.168.0.206:80
-        }
-        git.yukselcloud.com {
-            encode zstd gzip
+        # keycloak.yukselcloud.com {
+        #     reverse_proxy keycloak.keycloak.svc.cluster.local:80
+        # }
+        # nextcloud.yukselcloud.com {
+        #     reverse_proxy 192.168.0.205:80
+        # }
+        # vaultwarden.yukselcloud.com {
+        #     reverse_proxy 192.168.0.206:80
+        # }
+        # git.yukselcloud.com {
+        #     encode zstd gzip
 
-            # Increase limits for big image layers (adjust to taste)
-            request_body {
-                max_size 10GB
-            }
+        #     # Increase limits for big image layers (adjust to taste)
+        #     request_body {
+        #         max_size 10GB
+        #     }
 
-            # Recommended headers to preserve scheme/host for Forgejo
-            header {
-                X-Forwarded-Proto {scheme}
-                X-Forwarded-Host  {host}
-                X-Real-IP         {remote_host}
-            }
+        #     # Recommended headers to preserve scheme/host for Forgejo
+        #     header {
+        #         X-Forwarded-Proto {scheme}
+        #         X-Forwarded-Host  {host}
+        #         X-Real-IP         {remote_host}
+        #     }
 
-            reverse_proxy http://forgejo-http.forgejo.svc.cluster.local:3000 {
-                flush_interval -1
-                transport http {
-                read_buffer  0
-                write_buffer 0
-                response_header_timeout 5m
-                dial_timeout            30s
-                }
-            }
+        #     reverse_proxy http://forgejo-http.forgejo.svc.cluster.local:3000 {
+        #         flush_interval -1
+        #         transport http {
+        #         read_buffer  0
+        #         write_buffer 0
+        #         response_header_timeout 5m
+        #         dial_timeout            30s
+        #         }
+        #     }
+        # }
+
+        # Media services - each accessible via its own IP with self-signed HTTPS - WIP
+        192.168.0.215 {
+            tls internal
+            reverse_proxy 192.168.0.215:8096
+        }
+
+        192.168.0.213 {
+            tls internal
+            reverse_proxy 192.168.0.213:7878
+        }
+
+        192.168.0.212 {
+            tls internal
+            reverse_proxy 192.168.0.212:8989
+        }
+
+        192.168.0.211 {
+            tls internal
+            reverse_proxy 192.168.0.211:9696
+        }
+
+        192.168.0.214 {
+            tls internal
+            reverse_proxy 192.168.0.214:6767
+        }
+
+        192.168.0.218 {
+            tls internal
+            reverse_proxy 192.168.0.218:5055
+        }
+
+        192.168.0.219 {
+            tls internal
+            reverse_proxy 192.168.0.219:6868
+        }
+
+        192.168.0.217 {
+            tls internal
+            reverse_proxy 192.168.0.217:8191
         }
