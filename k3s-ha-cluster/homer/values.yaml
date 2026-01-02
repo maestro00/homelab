@@ -46,10 +46,9 @@ securityContext:
 # @default -- See values.yaml
 persistence:
   config:
-    enabled: false
-
-configmap:
-  config:
     enabled: true
+    type: configMap
     name: homer-config
-    existingClaim: ""
+    globalMounts:
+      - path: /www/config.yml
+        subPath: config.yml
