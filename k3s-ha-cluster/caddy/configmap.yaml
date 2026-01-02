@@ -15,9 +15,9 @@ data:
         # nextcloud.yukselcloud.com {
         #     reverse_proxy 192.168.0.205:80
         # }
-        # vaultwarden.yukselcloud.com {
-        #     reverse_proxy 192.168.0.206:80
-        # }
+        vaultwarden.yukselcloud.com {
+            reverse_proxy 192.168.0.204:80
+        }
         # git.yukselcloud.com {
         #     encode zstd gzip
 

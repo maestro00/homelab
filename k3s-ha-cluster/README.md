@@ -547,7 +547,7 @@ for Vaultwarden:
 
 ```caddyfile
 vaultwarden.yukselcloud.com {
-    reverse_proxy 192.168.0.206:80 # you can use svc address as well
+    reverse_proxy 192.168.0.204:80 # you can use svc address as well
 }
 ```
 

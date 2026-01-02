@@ -8,14 +8,10 @@ domain: "https://vaultwarden.yukselcloud.com"
 adminToken:
   value: "" # Set this to your admin token
 
-env:
-  WEBSOCKET_ENABLED: "true"
-  SIGNUPS_ALLOWED: "false"
-
 service:
   enabled: true
   type: LoadBalancer
-  loadBalancerIP: 192.168.0.206
+  loadBalancerIP: 192.168.0.204
   ports:
     http:
       port: 80
