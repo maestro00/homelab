@@ -1,18 +1,20 @@
----
-replicaCount: 3
+replicaCount: 1
+
+image:
+  registry: docker.io
+  repository: bitnamilegacy/keycloak
+  tag: "26.3.3-debian-12-r0"
 
 auth:
   existingSecret: keycloak-secret
 
 service:
   type: LoadBalancer
+  loadBalancerIP: "192.168.0.202"
 
 ingress:
   enabled: false
 
-# These extra vars are needed for Keycloak to work with Caddy as a reverse proxy
-# If you don't want to expose Keycloak via ingress, you can remove these and use
-# only the LoadBalancer service for other services access
 extraEnvVars:
   - name: KC_HOSTNAME
     value: keycloak.yukselcloud.com
@@ -22,7 +24,18 @@ extraEnvVars:
     value: "true"
   - name: KC_PROXY
     value: edge
+  - name: KC_PROXY_HEADERS
+    value: "xforwarded"
   - name: KC_HTTP_ENABLED
     value: "true"
+  - name: KEYCLOAK_PRODUCTION
+    value: "true"
+
+postgresql:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/postgresql
+    tag: "17.6.0-debian-12-r4"
 
 proxy: edge

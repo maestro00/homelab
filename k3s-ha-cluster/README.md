@@ -414,11 +414,15 @@ obtain an API token for your user.
 ```bash
 kubectl get svc -n keycloak
 NAME                     TYPE           CLUSTER-IP     EXTERNAL-IP     PORT(S)
-keycloak                 LoadBalancer   10.43.215.69   192.168.0.204   80:31215/TCP
+keycloak                 LoadBalancer   10.43.215.69   192.168.0.202   80:31215/TCP
 keycloak-headless        ClusterIP      None           <none>          8080/TCP
 keycloak-postgresql      ClusterIP      10.43.52.242   <none>          5432/TCP
 keycloak-postgresql-hl   ClusterIP      None           <none>          5432/TCP
 ```
+
+Login with default admin user and credentials you defined in the `keycloak-secret`.
+Create a permanent admin user and assign all the admin roles. Then, delete the
+initial temporary admin user by the new admin.
 
 Use [keycloak/setup_realm.sh](/k3s-ha-cluster/keycloak/setup_realm.sh) to bootstrap
 a new realm named `homelab`.
