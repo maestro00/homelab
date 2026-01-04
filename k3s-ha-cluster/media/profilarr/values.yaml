@@ -29,6 +29,9 @@ volumeMounts:
 
 volumes:
   - name: config
-    hostPath:
-      path: /var/lib/media/profilarr
-      type: DirectoryOrCreate
+    persistentVolumeClaim:
+      claimName: media-profilarr-config
+
+pvc:
+  name: media-profilarr-config
+  size: 512Mi

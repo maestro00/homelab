@@ -33,12 +33,15 @@ volumeMounts:
 
 volumes:
   - name: config
-    hostPath:
-      path: /var/lib/media/sonarr
-      type: DirectoryOrCreate
+    persistentVolumeClaim:
+      claimName: media-sonarr-config
   - name: tv
     persistentVolumeClaim:
       claimName: media-tv
   - name: downloads
     persistentVolumeClaim:
       claimName: media-downloads
+
+pvc:
+  name: media-sonarr-config
+  size: 512Mi

@@ -33,12 +33,15 @@ volumeMounts:
 
 volumes:
   - name: config
-    hostPath:
-      path: /var/lib/media/radarr
-      type: DirectoryOrCreate
+    persistentVolumeClaim:
+      claimName: media-radarr-config
   - name: downloads
     persistentVolumeClaim:
       claimName: media-downloads
   - name: movies
     persistentVolumeClaim:
       claimName: media-movies
+
+pvc:
+  name: media-radarr-config
+  size: 512Mi

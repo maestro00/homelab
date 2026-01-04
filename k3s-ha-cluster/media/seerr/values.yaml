@@ -31,3 +31,7 @@ volumes:
   - name: config
     persistentVolumeClaim:
       claimName: media-seerr-config
+
+pvc:
+  name: media-seerr-config
+  size: 512Mi

@@ -29,6 +29,9 @@ volumeMounts:
 
 volumes:
   - name: config
-    hostPath:
-      path: /var/lib/media/flaresolverr
-      type: DirectoryOrCreate
+    persistentVolumeClaim:
+      claimName: media-flaresolverr-config
+
+pvc:
+  name: media-flaresolverr-config
+  size: 512Mi

@@ -29,6 +29,9 @@ volumeMounts:
 
 volumes:
   - name: config
-    hostPath:
-      path: /var/lib/media/prowlarr
-      type: DirectoryOrCreate
+    persistentVolumeClaim:
+      claimName: media-prowlarr-config
+
+pvc:
+  name: media-prowlarr-config
+  size: 512Mi

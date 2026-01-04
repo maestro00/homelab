@@ -37,9 +37,8 @@ volumeMounts:
 
 volumes:
   - name: config
-    hostPath:
-      path: /var/lib/media/bazarr
-      type: DirectoryOrCreate
+    persistentVolumeClaim:
+      claimName: media-bazarr-config
   - name: downloads
     persistentVolumeClaim:
       claimName: media-downloads
@@ -52,3 +51,7 @@ volumes:
   - name: subtitles
     persistentVolumeClaim:
       claimName: media-subtitles
+
+pvc:
+  name: media-bazarr-config
+  size: 512Mi
