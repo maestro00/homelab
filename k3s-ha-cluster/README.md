@@ -826,6 +826,51 @@ helm upgrade --install forgejo \
   -f forgejo/values.yaml
 ```
 
+### Forgejo git settings
+
+I maintain both GitHub and Forgejo as active repositories. This allows me to:
+
+- Push code changes to both repositories simultaneously
+- Use Forgejo's issues, milestones, and automation features
+- Keep both repos in sync without manual syncing
+
+**Setup multi-remote configuration:**
+
+```sh
+# Remove any existing origin
+git remote remove origin
+
+# Add GitHub as origin (fetch & push)
+git remote add origin https://github.com/maestro00/homelab.git
+
+# Add Forgejo as additional push destination
+git remote set-url origin --push --add https://github.com/maestro00/homelab.git
+git remote set-url origin --push --add https://git.yukselcloud.com/lab/homelab.git
+
+# Add Forgejo for fetch-only (optional, for pulling latest)
+git remote add forgejo https://git.yukselcloud.com/lab/homelab.git
+
+# Verify setup
+git remote -v
+```
+
+**Development workflow:**
+
+```bash
+# Pull from GitHub (primary)
+git pull origin master
+
+# Create feature branch and commit
+git checkout -b feature/XX-description
+git commit -m "feat: description"
+
+# Push to BOTH GitHub and Forgejo automatically
+git push origin
+
+# Or use forgejo remote to push to Forgejo only
+git push forgejo master
+```
+
 ### 🔐 Keycloak SSO Integration
 
 - Create a Keycloak client named `forgejo` in your `homelab` realm.
