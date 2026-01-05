@@ -1,9 +1,15 @@
 # Storage
 persistence:
   enabled: true
+  create: true
+  mount: true
+  claimName: gitea-shared-storage
   size: 10Gi
+  accessModes:
+    - ReadWriteOnce
   storageClass: longhorn
-  accessModes: ["ReadWriteOnce"]
+  annotations:
+    helm.sh/resource-policy: keep
 
 # We use Caddy as the edge; no k8s Ingress for Forgejo
 ingress:
@@ -29,17 +35,20 @@ redis:
 gitea:
   admin:
     existingSecret: forgejo-admin
-    usernameKey: username
+    username: forgejo
     passwordKey: password
     emailKey: email
 
   # App config written to app.ini (safe, no secrets)
   config:
+    APP_NAME: "Forgejo"
+    RUN_MODE: prod
     server:
       DOMAIN: git.yukselcloud.com
       ROOT_URL: https://git.yukselcloud.com/
       PROTOCOL: http # behind reverse proxy
       HTTP_PORT: 3000
+      SSH_PORT: 22
       SSH_DOMAIN: git.yukselcloud.com
     security:
       INSTALL_LOCK: true
@@ -57,9 +66,9 @@ gitea:
     oauth2_client:
       ENABLE_AUTO_REGISTRATION: true # optional; handy with Keycloak
       ACCOUNT_LINKING: auto
-  service:
-    DISABLE_REGISTRATION: true
-    ALLOW_ONLY_EXTERNAL_REGISTRATION: false
+    service:
+      DISABLE_REGISTRATION: true
+      ALLOW_ONLY_EXTERNAL_REGISTRATION: false
 
   # Feed secrets via env (DB password + crypto keys)
   additionalConfigFromEnvs:

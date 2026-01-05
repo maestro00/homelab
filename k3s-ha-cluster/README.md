@@ -822,7 +822,7 @@ kubectl apply -f forgejo/internal.yaml
 helm upgrade --install forgejo \
   oci://code.forgejo.org/forgejo-helm/forgejo \
   --namespace forgejo \
-  --version 13.0.1 \
+  --version 15.0.3 \
   -f forgejo/values.yaml
 ```
 
