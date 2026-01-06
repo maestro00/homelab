@@ -826,52 +826,90 @@ helm upgrade --install forgejo \
   -f forgejo/values.yaml
 ```
 
-### Forgejo git settings
+#### Forgejo + GitHub Dual-Repository Workflow
 
-I maintain both GitHub and Forgejo as active repositories. This allows me to:
+##### Overview
 
-- Push code changes to both repositories simultaneously
-- Use Forgejo's issues, milestones, and automation features
-- Keep both repos in sync without manual syncing
+This project uses **Forgejo (private)** for development and **GitHub (public)**
+as a curated mirror.
 
-**Setup multi-remote configuration:**
+###### Goals
 
-```sh
-# Remove any existing origin
-git remote remove origin
+- Forgejo is the primary development repository
+- Feature branches never go to GitHub
+- Only `master` is pushed to GitHub
+- Forgejo issues and automation are the source of truth
+- No accidental public pushes
 
-# Add GitHub as origin (fetch & push)
-git remote add origin https://github.com/maestro00/homelab.git
+---
 
-# Add Forgejo as additional push destination
-git remote set-url origin --push --add https://github.com/maestro00/homelab.git
-git remote set-url origin --push --add https://git.yukselcloud.com/lab/homelab.git
+##### Repository Roles
 
-# Add Forgejo for fetch-only (optional, for pulling latest)
-git remote add forgejo https://git.yukselcloud.com/lab/homelab.git
+| Repository | Purpose                                  |
+|------------|------------------------------------------|
+| Forgejo    | Development, feature branches, issues    |
+| GitHub     | Public mirror (`master` only)            |
 
-# Verify setup
-git remote -v
-```
+---
 
-**Development workflow:**
+##### Remote Configuration
+
+Forgejo is the default remote (`origin`). GitHub is explicit.
 
 ```bash
-# Pull from GitHub (primary)
-git pull origin master
+git remote remove origin 2>/dev/null || true
+git remote remove github 2>/dev/null || true
 
-# Create feature branch and commit
-git checkout -b feature/XX-description
-git commit -m "feat: description"
-
-# Push to BOTH GitHub and Forgejo automatically
-git push origin
-
-# Or use forgejo remote to push to Forgejo only
-git push forgejo master
+git remote add origin https://git.yukselcloud.com/lab/homelab.git
+git remote add github https://github.com/maestro00/homelab.git
 ```
 
-### 🔐 Keycloak SSO Integration
+**Note**: Allow pushing only master to GitHub avoiding many branches everywhere:
+
+```bash
+git config remote.github.push '!refs/heads/*'
+git config --add remote.github.push refs/heads/master
+```
+
+##### Development Workflow
+
+```bash
+git checkout master
+git pull origin master
+git checkout -b feature/XX-description
+git commit
+# Deploy lldap to home cluster
+# Fixes #2
+#
+git push -u origin feature/XX-description
+git checkout master
+git merge feature/XX-description
+```
+
+### Auth
+
+Architecture
+
+```txt
+Browser
+ └─ Caddy (192.168.0.201)
+     └─ forward_auth → Authelia
+         └─ LDAP → lldap
+     └─ App (Radarr, Sonarr, etc.)
+```
+
+```bash
+helm repo add authelia https://charts.authelia.com
+helm repo update
+```
+
+Create secrets for authelia
+
+```sh
+kubectl apply -f auth/authelia/secret.yaml
+```
+
+#### 🔐 Keycloak SSO Integration
 
 - Create a Keycloak client named `forgejo` in your `homelab` realm.
 - In Forgejo UI:
@@ -889,6 +927,16 @@ In Forgejo UI (as admin → Site Administration → Authentication Sources → A
 > OpenID Connect Auto Discovery URL: <https://keycloak.yukselcloud.com/realms/homelab/.well-known/openid-configuration>
 
 Enable Auto Registration: ✅
+
+#### LLDAP
+
+TBD:
+
+```sh
+kubectl create namespace auth
+helm install lldap ./auth/lldap -n auth
+
+```
 
 ## 📺 Media Server Stack (Sonarr, Radarr, Prowlarr, Bazarr, Jellyfin, Flaresolverr)
 

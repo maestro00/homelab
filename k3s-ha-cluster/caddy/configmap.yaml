@@ -6,6 +6,9 @@ metadata:
     namespace: caddy
 data:
     Caddyfile: |
+        auth.yukselcloud.com {
+            reverse_proxy authelia.auth.svc.cluster.local:9091
+        }
         demo.yukselcloud.com {
             reverse_proxy demo-service.caddy-web-demo.svc.cluster.local:80
         }

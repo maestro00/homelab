@@ -1,0 +1,66 @@
+image:
+  repository: authelia/authelia
+  tag: latest
+
+service:
+  type: ClusterIP
+  port: 9091
+
+ingress:
+  enabled: false
+
+persistence:
+  enabled: true
+  existingClaim: authelia-config
+
+secret:
+  existingSecret: authelia-secrets
+
+configMap:
+  theme: dark
+
+  log:
+    level: info
+
+  authentication_backend:
+    ldap:
+      enabled: true
+      implementation: lldap
+      address: ldap://lldap.auth.svc.cluster.local:3890
+      base_dn: dc=yukselcloud,dc=com
+      user: uid=lab,ou=people,dc=yukselcloud,dc=com
+
+  session:
+    name: authelia_session
+    expiration: 1h
+    inactivity: 5m
+    remember_me: 30d
+    cookies:
+      - domain: yukselcloud.com
+        authelia_url: https://auth.yukselcloud.com
+
+  storage:
+    local:
+      enabled: true
+      path: /config/db.sqlite3
+
+  notifier:
+    filesystem:
+      enabled: true
+      filename: /config/notification.txt
+
+  access_control:
+    default_policy: deny
+    rules:
+      - domain: "*.yukselcloud.com"
+        subject:
+          - "group:infra"
+        policy: one_factor
+
+      - domain:
+          - radarr.yukselcloud.com
+          - sonarr.yukselcloud.com
+          - jellyfin.yukselcloud.com
+        subject:
+          - "group:media"
+        policy: one_factor
