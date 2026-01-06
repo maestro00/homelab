@@ -12,6 +12,9 @@ data:
         keycloak.yukselcloud.com {
             reverse_proxy 192.168.0.202:80
         }
+        lldap.yukselcloud.com {
+            reverse_proxy lldap-service.auth.svc.cluster.local:17170
+        }
         # nextcloud.yukselcloud.com {
         #     reverse_proxy 192.168.0.205:80
         # }
@@ -42,45 +45,4 @@ data:
                 dial_timeout            30s
                 }
             }
-        }
-
-        # Media services - each accessible via its own IP with self-signed HTTPS - WIP
-        192.168.0.215 {
-            tls internal
-            reverse_proxy 192.168.0.215:8096
-        }
-
-        192.168.0.213 {
-            tls internal
-            reverse_proxy 192.168.0.213:7878
-        }
-
-        192.168.0.212 {
-            tls internal
-            reverse_proxy 192.168.0.212:8989
-        }
-
-        192.168.0.211 {
-            tls internal
-            reverse_proxy 192.168.0.211:9696
-        }
-
-        192.168.0.214 {
-            tls internal
-            reverse_proxy 192.168.0.214:6767
-        }
-
-        192.168.0.218 {
-            tls internal
-            reverse_proxy 192.168.0.218:5055
-        }
-
-        192.168.0.219 {
-            tls internal
-            reverse_proxy 192.168.0.219:6868
-        }
-
-        192.168.0.217 {
-            tls internal
-            reverse_proxy 192.168.0.217:8191
         }
