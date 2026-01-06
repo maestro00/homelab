@@ -19,7 +19,7 @@ kind: Service
 metadata:
   name: {{ .Values.service.ldap.name }}
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: lldap.yukselcloud.com
+    external-dns.alpha.kubernetes.io/hostname: ldap.yukselcloud.com
   namespace: {{ .Values.namespace }}
   labels:
     app: lldap

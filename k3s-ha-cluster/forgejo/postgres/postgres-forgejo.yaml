@@ -4,7 +4,7 @@ metadata:
   name: forgejo-pg
   namespace: forgejo
 spec:
-  instances: 3
+  instances: 1
   storage:
     size: 10Gi
     storageClass: longhorn
