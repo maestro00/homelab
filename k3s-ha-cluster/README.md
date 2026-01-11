@@ -903,11 +903,44 @@ helm repo add authelia https://charts.authelia.com
 helm repo update
 ```
 
-Create secrets for authelia
+Create secrets for authelia by following and paste them in the
+[secret.yaml](/k3s-ha-cluster/auth/authelia/secret.yaml).
 
 ```sh
+echo "OIDC_HMAC_KEY: $(openssl rand -base64 48)"
+echo "RESET_ENCRYPTION_KEY: $(openssl rand -base64 48)"
+echo "SESSION_ENCRYPTION_KEY: $(openssl rand -base64 32 | head -c 32)"
+echo "STORAGE_ENCRYPTION_KEY: $(openssl rand -base64 32 | head -c 32)"
+
 kubectl apply -f auth/authelia/secret.yaml
 ```
+
+Create clients in [values.yaml](/k3s-ha-cluster/auth/authelia/values.yaml) clients
+section and configure their secrets.
+Use following to create hash of your super secret by authelia image.
+
+```sh
+docker run --rm docker.io/authelia/authelia:latest authelia \
+  crypto hash generate pbkdf2 --password 'mysupersecretpassword'
+```
+
+Lastly, run helm install command to deploy authelia helm chart.
+
+```sh
+helm upgrade
+  --install authelia authelia/authelia \
+  -n auth \
+  --values auth/authelia/values.yaml
+```
+
+In the client side, example in forgejo, configure ssh authentication source for
+Authelia. Provide at least following parameters:
+
+- Client ID,
+- Client Secret (In plain format what pasted in `values.yaml`),
+- OpenID Connect Auto Discovery URL (e.g. <https://auth.yukselcloud.com/.well-known/openid-configuration>)
+- Skip Local 2FA (checked),
+- Additional scopes: `groups`
 
 #### 🔐 Keycloak SSO Integration
 

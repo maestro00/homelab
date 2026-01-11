@@ -15,6 +15,11 @@ persistence:
 
 secret:
   existingSecret: authelia-secrets
+  additionalSecrets:
+    jwk-rsa:
+      items:
+        - key: private.pem
+          path: private.pem
 
 configMap:
   theme: dark
@@ -29,12 +34,20 @@ configMap:
       address: ldap://lldap.auth.svc.cluster.local:3890
       base_dn: dc=yukselcloud,dc=com
       user: uid=lab,ou=people,dc=yukselcloud,dc=com
+      users_filter: (&({username_attribute}={input})(objectClass=person))
+      groups_filter: (member={dn})
+      attributes:
+        username: uid
+        display_name: displayName
+        mail: mail
+        group_name: cn
 
   session:
     name: authelia_session
     expiration: 1h
     inactivity: 5m
     remember_me: 30d
+    same_site: none
     cookies:
       - domain: yukselcloud.com
         authelia_url: https://auth.yukselcloud.com
@@ -52,6 +65,16 @@ configMap:
   access_control:
     default_policy: deny
     rules:
+      - domain: auth.yukselcloud.com
+        policy: bypass
+        resources:
+          - "^/api/.*$"
+          - "^/.well-known/.*$"
+          - "^/static/.*$"
+
+      - domain: git.yukselcloud.com
+        policy: one_factor
+
       - domain: "*.yukselcloud.com"
         subject:
           - "group:infra"
@@ -61,6 +84,78 @@ configMap:
           - radarr.yukselcloud.com
           - sonarr.yukselcloud.com
           - jellyfin.yukselcloud.com
-        subject:
-          - "group:media"
         policy: one_factor
+
+  identity_providers:
+    oidc:
+      enabled: true
+      cors:
+        endpoints:
+          - authorization
+          - token
+          - revocation
+          - introspection
+          - userinfo
+        allowed_origins:
+          - https://git.yukselcloud.com
+          - https://jellyfin.yukselcloud.com
+        allowed_origins_from_client_redirect_uris: true
+
+      claims_policies:
+        legacy:
+          id_token:
+            - email
+            - email_verified
+            - alt_emails
+            - name
+            - preferred_username
+            - groups
+
+      jwks:
+        - key_id: default
+          algorithm: RS256
+          use: sig
+          key:
+            path: /secrets/jwk-rsa/private.pem
+
+      clients:
+        - client_id: forgejo
+          client_name: Forgejo
+          client_secret: "<clientsecretforge>"
+          public: false
+          authorization_policy: one_factor
+          require_pkce: true
+          redirect_uris:
+            - https://git.yukselcloud.com/user/oauth2/Authelia/callback
+          scopes:
+            - openid
+            - email
+            - profile
+            - groups
+            - offline_access
+          grant_types:
+            - authorization_code
+            - refresh_token
+          response_types:
+            - code
+          claims_policy: legacy
+        - client_id: jellyfin
+          client_name: Jellyfin
+          client_secret: "<clientsecretjellyfin>"
+          public: false
+          authorization_policy: one_factor
+          require_pkce: true
+          redirect_uris:
+            - https://jellyfin.yukselcloud.com/sso/OID/redirect/Authelia
+          scopes:
+            - openid
+            - email
+            - profile
+            - groups
+            - offline_access
+          grant_types:
+            - authorization_code
+            - refresh_token
+          response_types:
+            - code
+          claims_policy: legacy

@@ -7,7 +7,18 @@ metadata:
 data:
     Caddyfile: |
         auth.yukselcloud.com {
-            reverse_proxy authelia.auth.svc.cluster.local:9091
+            reverse_proxy authelia.auth.svc.cluster.local:9091 {
+                header_up X-Forwarded-Proto https
+                header_up X-Forwarded-Host {host}
+                header_up X-Forwarded-Uri {uri}
+                header_up X-Forwarded-For {remote_host}
+
+                transport http {
+                    read_timeout 30s
+                    write_timeout 30s
+                    dial_timeout 10s
+                }
+            }
         }
         demo.yukselcloud.com {
             reverse_proxy demo-service.caddy-web-demo.svc.cluster.local:80
@@ -24,28 +35,22 @@ data:
         vaultwarden.yukselcloud.com {
             reverse_proxy 192.168.0.204:80
         }
+        jellyfin.yukselcloud.com {
+            reverse_proxy jellyfin.media.svc.cluster.local:8096 {
+                header_up X-Forwarded-Proto {scheme}
+                header_up X-Forwarded-Host {host}
+                header_up X-Real-IP {remote_host}
+            }
+        }
         git.yukselcloud.com {
-            encode zstd gzip
+            reverse_proxy forgejo-http.forgejo.svc.cluster.local:3000 {
+                header_up X-Forwarded-Proto https
+                header_up X-Forwarded-Host {host}
+                header_up X-Forwarded-For {remote_host}
 
-            # Increase limits for big image layers (adjust to taste)
-            request_body {
-                max_size 10GB
-            }
-
-            # Recommended headers to preserve scheme/host for Forgejo
-            header {
-                X-Forwarded-Proto {scheme}
-                X-Forwarded-Host  {host}
-                X-Real-IP         {remote_host}
-            }
-
-            reverse_proxy http://forgejo-http.forgejo.svc.cluster.local:3000 {
-                flush_interval -1
                 transport http {
-                read_buffer  0
-                write_buffer 0
-                response_header_timeout 5m
-                dial_timeout            30s
+                    read_timeout 30s
+                    write_timeout 30s
                 }
             }
         }
