@@ -826,6 +826,21 @@ helm upgrade --install forgejo \
   -f forgejo/values.yaml
 ```
 
+### 🤖 Deploy Forgejo Runner (CI/CD)
+
+For Actions Runner setup, see [forgejo/runner/README.md](forgejo/runner/README.md).
+
+Quick steps:
+
+```sh
+# Register runner on Forgejo server
+forgejo forgejo-cli actions register --secret <hex> --name k8s-runner-1
+kubectl create secret generic \
+  forgejo-runner-token \
+  --from-literal=runner-token=<hex> -n forgejo
+helm upgrade --install forgejo-runner ./forgejo/runner -n forgejo
+```
+
 #### Forgejo + GitHub Dual-Repository Workflow
 
 ##### Overview

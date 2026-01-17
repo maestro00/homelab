@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "forgejo-runner.fullname" . }}
+  labels:
+    app: {{ include "forgejo-runner.name" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "forgejo-runner.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "forgejo-runner.name" . }}
+    spec:
+      serviceAccountName: {{ include "forgejo-runner.serviceAccountName" . }}
+      automountServiceAccountToken: false
+      initContainers:
+        - name: register-runner
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            runAsUser: 0
+          command:
+            - /bin/sh
+            - -c
+            - |
+              mkdir -p /data
+              chmod 777 /data
+              if [ ! -f /data/.runner ]; then
+                echo "Registering runner using create-runner-file..."
+                cd /data
+                SECRET=$(cat /run/secrets/runner-token | tr -d '\n')
+                forgejo-runner create-runner-file \
+                  --instance "{{ .Values.runner.instanceUrl }}" \
+                  --secret "$SECRET"
+              else
+                echo "Runner already registered."
+              fi
+          volumeMounts:
+            - name: runner-data
+              mountPath: /data
+            - name: runner-token
+              mountPath: /run/secrets
+              readOnly: true
+      containers:
+        - name: forgejo-runner
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            runAsUser: 0
+          command:
+            - forgejo-runner
+            - daemon
+          workingDir: /data
+          env:
+            - name: RUNNER_CAPACITY
+              value: "{{ .Values.runner.capacity }}"
+          volumeMounts:
+            - name: runner-data
+              mountPath: /data
+            - name: docker-sock
+              mountPath: /var/run/docker.sock
+          resources:
+            requests:
+              cpu: {{ .Values.resources.requests.cpu }}
+              memory: {{ .Values.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.resources.limits.cpu }}
+              memory: {{ .Values.resources.limits.memory }}
+      volumes:
+        - name: runner-data
+          persistentVolumeClaim:
+            claimName: {{ include "forgejo-runner.fullname" . }}-data
+        - name: docker-sock
+          hostPath:
+            path: {{ .Values.hostPath.dockerSock.path }}
+        - name: runner-token
+          secret:
+            secretName: {{ .Values.secret.existingSecret }}
+            items:
+              - key: {{ .Values.secret.tokenKey }}
+                path: runner-token

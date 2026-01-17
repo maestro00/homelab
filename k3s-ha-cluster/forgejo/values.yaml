@@ -11,6 +11,10 @@ persistence:
   annotations:
     helm.sh/resource-policy: keep
 
+deployment:
+  strategy:
+    type: Recreate
+
 # We use Caddy as the edge; no k8s Ingress for Forgejo
 ingress:
   enabled: false
@@ -43,6 +47,8 @@ gitea:
   config:
     APP_NAME: "Forgejo"
     RUN_MODE: prod
+    actions:
+      ENABLED: true
     server:
       DOMAIN: git.yukselcloud.com
       ROOT_URL: https://git.yukselcloud.com/
