@@ -1,0 +1,10 @@
+name: Test Action
+on: [push]
+
+jobs:
+  test:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run a test
+        run: echo "Hello from Forgejo Actions!"
