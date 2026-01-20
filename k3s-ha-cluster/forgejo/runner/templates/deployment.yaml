@@ -57,6 +57,8 @@ spec:
           env:
             - name: RUNNER_CAPACITY
               value: "{{ .Values.runner.capacity }}"
+            - name: RUNNER_LABELS
+              value: "{{ .Values.runner.labels }}"
           volumeMounts:
             - name: runner-data
               mountPath: /data
