@@ -12,6 +12,13 @@ homelab.
 - Stores users and groups only
 - Internal access only (ClusterIP/LoadbalancerIP)
 
+### Redis
+
+- Session storage for Authelia
+- Enables session persistence across Authelia restarts
+- Internal access only (ClusterIP)
+- Requires authentication
+
 ### Authelia
 
 - Authentication gateway

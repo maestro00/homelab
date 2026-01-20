@@ -1,3 +1,4 @@
+# https://github.com/authelia/chartrepo/blob/master/charts/authelia/values.yaml
 image:
   repository: authelia/authelia
   tag: latest
@@ -42,6 +43,12 @@ configMap:
         mail: mail
         group_name: cn
 
+  server:
+    endpoints:
+      authz:
+        auth-request:
+          implementation: "AuthRequest"
+
   session:
     name: authelia_session
     expiration: 1h
@@ -51,6 +58,11 @@ configMap:
     cookies:
       - domain: yukselcloud.com
         authelia_url: https://auth.yukselcloud.com
+        secure: true
+    redis:
+      enabled: true
+      host: redis.auth.svc.cluster.local
+      port: 6379
 
   storage:
     local:
@@ -147,6 +159,26 @@ configMap:
           require_pkce: true
           redirect_uris:
             - https://jellyfin.yukselcloud.com/sso/OID/redirect/Authelia
+          scopes:
+            - openid
+            - email
+            - profile
+            - groups
+            - offline_access
+          grant_types:
+            - authorization_code
+            - refresh_token
+          response_types:
+            - code
+          claims_policy: legacy
+        - client_id: vaultwarden
+          client_name: Vaultwarden
+          client_secret: "<clientsecretvaultwarden>"
+          public: false
+          authorization_policy: one_factor
+          require_pkce: true
+          redirect_uris:
+            - https://vaultwarden.yukselcloud.com/identity/connect/oidc/signin
           scopes:
             - openid
             - email
