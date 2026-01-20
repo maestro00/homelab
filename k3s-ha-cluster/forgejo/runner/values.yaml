@@ -14,7 +14,7 @@ serviceAccount:
   name: ""
 
 runner:
-  instanceUrl: "https://git.yukselcloud.com"
+  instanceUrl: "http://forgejo.forgejo.svc.cluster.local:3000"
   name: "k8s-runner-1"
   labels: "self-hosted,kubernetes,linux"
   capacity: "2"
