@@ -1,11 +1,25 @@
 replicaCount: 1
 
 image:
-  # Official Forgejo OCI images are hosted at data.forgejo.org
   repository: data.forgejo.org/forgejo/runner
-  # Use a specific major tag for stability; change to a version like "11" or "latest" as needed
   tag: "11"
   pullPolicy: IfNotPresent
+
+# Docker-in-Docker sidecar configuration
+dind:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: library/docker
+    tag: "29.1.5-dind"
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
 
 nameOverride: ""
 fullnameOverride: ""
@@ -14,30 +28,21 @@ serviceAccount:
   name: ""
 
 runner:
-  instanceUrl: "http://forgejo.forgejo.svc.cluster.local:3000"
+  instanceUrl: "http://forgejo-http.forgejo.svc.cluster.local:3000"
   name: "k8s-runner-1"
   labels: "self-hosted,kubernetes,linux"
   capacity: "2"
-  # Whether to register the runner automatically on startup
-  autoRegister: true
-  # Config file path (typically .runner in /data)
-  configFile: "/data/.runner"
 
 secret:
   existingSecret: forgejo-runner-token
   tokenKey: runner-token
-  token: "" # Replace with your actual runner token (offline)
+  token: ""
 
 pvc:
-  existingClaim: forgejo-runner-data
+  existingClaim: ""
   accessModes:
     - ReadWriteOnce
   size: 1Gi
-
-hostPath:
-  dockerSock:
-    enabled: true
-    path: /var/run/docker.sock
 
 resources:
   requests:

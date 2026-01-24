@@ -27,7 +27,6 @@ spec:
             - -c
             - |
               mkdir -p /data
-              chmod 777 /data
               if [ ! -f /data/.runner ]; then
                 echo "Registering runner using create-runner-file..."
                 cd /data
@@ -35,6 +34,15 @@ spec:
                 forgejo-runner create-runner-file \
                   --instance "{{ .Values.runner.instanceUrl }}" \
                   --secret "$SECRET"
+                # Add labels to the .runner config file
+                if [ -f /data/.runner ]; then
+                  echo "Adding labels to runner config..."
+                  cp /data/.runner /data/.runner.backup
+                  cat /data/.runner.backup | sed 's/"labels": null/"labels": ["self-hosted","kubernetes","linux"]/' > /data/.runner
+                  rm /data/.runner.backup
+                  echo "Labels configured"
+                  cat /data/.runner
+                fi
               else
                 echo "Runner already registered."
               fi
@@ -59,11 +67,18 @@ spec:
               value: "{{ .Values.runner.capacity }}"
             - name: RUNNER_LABELS
               value: "{{ .Values.runner.labels }}"
+            - name: DOCKER_HOST
+              value: "tcp://127.0.0.1:2376"
+            - name: DOCKER_TLS_VERIFY
+              value: "1"
+            - name: DOCKER_CERT_PATH
+              value: "/certs/client"
           volumeMounts:
             - name: runner-data
               mountPath: /data
-            - name: docker-sock
-              mountPath: /var/run/docker.sock
+            - name: docker-certs
+              mountPath: /certs/client
+              readOnly: true
           resources:
             requests:
               cpu: {{ .Values.resources.requests.cpu }}
@@ -71,13 +86,33 @@ spec:
             limits:
               cpu: {{ .Values.resources.limits.cpu }}
               memory: {{ .Values.resources.limits.memory }}
+        {{- if .Values.dind.enabled }}
+        - name: dind
+          image: "{{ .Values.dind.image.registry }}/{{ .Values.dind.image.repository }}:{{ .Values.dind.image.tag }}"
+          imagePullPolicy: {{ .Values.dind.image.pullPolicy }}
+          securityContext:
+            privileged: true
+          env:
+            - name: DOCKER_TLS_CERTDIR
+              value: "/certs"
+          volumeMounts:
+            - name: docker-certs
+              mountPath: /certs/client
+            - name: dind-storage
+              mountPath: /var/lib/docker
+          {{- if .Values.dind.resources }}
+          resources:
+            {{- toYaml .Values.dind.resources | nindent 12 }}
+          {{- end }}
+        {{- end }}
       volumes:
         - name: runner-data
           persistentVolumeClaim:
-            claimName: {{ include "forgejo-runner.fullname" . }}-data
-        - name: docker-sock
-          hostPath:
-            path: {{ .Values.hostPath.dockerSock.path }}
+            claimName: {{ if .Values.pvc.existingClaim }}{{ .Values.pvc.existingClaim }}{{ else }}{{ include "forgejo-runner.fullname" . }}-data{{ end }}
+        - name: docker-certs
+          emptyDir: {}
+        - name: dind-storage
+          emptyDir: {}
         - name: runner-token
           secret:
             secretName: {{ .Values.secret.existingSecret }}
