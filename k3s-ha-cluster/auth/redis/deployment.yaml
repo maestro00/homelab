@@ -14,6 +14,10 @@ spec:
       labels:
         app: redis
     spec:
+      securityContext:
+        fsGroup: 999
+        runAsUser: 999
+        runAsNonRoot: true
       containers:
         - name: redis
           image: redis:latest
