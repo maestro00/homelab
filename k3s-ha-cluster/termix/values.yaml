@@ -1,0 +1,37 @@
+namespace: termix
+
+replicaCount: 1
+
+image:
+  name: termix
+  repository: ghcr.io/lukegus/termix
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  name: termix
+  type: LoadBalancer
+  port: 8080
+  loadBalancerIP: ""
+
+config:
+  PORT: "8080"
+  TZ: "Europe/Helsinki"
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+pvc:
+  name: termix-data-pvc
+  storage: 500Mi
+  accessMode: ReadWriteOnce
+  storageClassName: longhorn
+
+volumes:
+  name: data
+  mountPath: /app/data
