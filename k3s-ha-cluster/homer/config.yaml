@@ -36,6 +36,12 @@ services:
         subtitle: "Self-hosted Git Service"
         tag: "public"
 
+      - name: "Termix 🔒"
+        logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/terminal.png"
+        url: "http://192.168.0.216:8080"
+        subtitle: "Terminal Multiplexer"
+        tag: "private"
+
   - name: "Identity & Security"
     icon: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/keycloak.png"
     items:
@@ -54,16 +60,16 @@ services:
   - name: "Apps & Docs"
     icon: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/nextcloud.png"
     items:
-      - name: "Nextcloud"
+      - name: "Nextcloud ⚠️"
         logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/nextcloud.png"
         url: "https://nextcloud.yukselcloud.com"
-        subtitle: "Files & Collaboration"
+        subtitle: "Files & Collaboration (DEPRECATED)"
         tag: "public"
 
-      - name: "Paperless-ngx"
+      - name: "Paperless-ngx ⚠️"
         logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/paperless-ngx.png"
         url: "https://paperless.yukselcloud.com"
-        subtitle: "Document Management"
+        subtitle: "Document Management (DEPRECATED)"
         tag: "public"
 
   - name: "Networking & DNS"
