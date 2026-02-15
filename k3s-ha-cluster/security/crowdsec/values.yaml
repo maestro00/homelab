@@ -1,0 +1,79 @@
+# CrowdSec Helm values for Kubernetes with Caddy ingress
+# Documentation: https://docs.crowdsec.net/u/getting_started/installation/kubernetes/
+
+# Container runtime format: json or cri (docker|containerd)
+container_runtime: containerd
+
+agent:
+  acquisition:
+    - namespace: caddy
+      podName: caddy-*
+      program: caddy
+
+  env:
+    # Collections to install
+    # caddy collection for parsing Caddy logs
+    # base-http-scenarios for common web attack detection
+    - name: COLLECTIONS
+      value: "crowdsecurity/caddy crowdsecurity/base-http-scenarios"
+
+lapi:
+  # Persistent storage for LAPI (recommended for production)
+  persistentVolume:
+    config:
+      enabled: true
+      storageClassName: "longhorn" # Using your Longhorn storage
+      accessModes:
+        - ReadWriteOnce
+      size: 1Gi
+    data:
+      enabled: true
+      storageClassName: "longhorn"
+      accessModes:
+        - ReadWriteOnce
+      size: 1Gi
+
+  # Environment variables for LAPI
+  env:
+    - name: COLLECTIONS
+      value: "crowdsecurity/caddy crowdsecurity/base-http-scenarios"
+    # External database configuration (MySQL in db namespace)
+    - name: DB_TYPE
+      value: "mysql"
+    - name: DB_HOST
+      value: "mysql.db.svc.cluster.local"
+    - name: DB_PORT
+      value: "3306"
+    - name: DB_NAME
+      value: "crowdsec"
+    - name: DB_USERNAME
+      value: "crowdsec"
+    - name: DB_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: mysql-secret
+          key: mysql-password
+
+    - name: ENROLL_KEY
+      value: "ENROLL_KEY_VALUE" # Generate a secure key: openssl rand -base64 32
+    - name: ENROLL_INSTANCE_NAME
+      value: "ENROLL_INSTANCE_NAME" # Unique name for this instance
+    - name: ENROLL_TAGS
+      value: "k8s homelab caddy"
+
+    # Pre-configure bouncer API keys (if not using persistent volumes)
+    # Generate a secure key: openssl rand -base64 32
+    - name: BOUNCER_KEY_caddy
+      value: "BOUNCER_KEY_VALUE"
+
+  service:
+    type: LoadBalancer
+    loadBalancerIP: 192.168.0.206
+    annotations: {}
+    labels: {}
+
+  # Metrics for LAPI
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: false # Set to true if you have Prometheus Operator
