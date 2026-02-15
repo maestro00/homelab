@@ -6,7 +6,19 @@ metadata:
     namespace: caddy
 data:
     Caddyfile: |
+        {
+            # CrowdSec bouncer - connects to LAPI to pull ban decisions
+            order crowdsec first
+            crowdsec {
+                api_url http://crowdsec-service.crowdsec.svc.cluster.local:8080
+                api_key {env.CROWDSEC_API_KEY}
+                ticker_interval 15s
+            }
+        }
+
         auth.yukselcloud.com {
+            log
+            crowdsec
             reverse_proxy authelia.auth.svc.cluster.local:9091 {
                 header_up Host {host}
                 header_up X-Forwarded-Proto https
@@ -22,21 +34,33 @@ data:
             }
         }
         demo.yukselcloud.com {
+            log
+            crowdsec
             reverse_proxy demo-service.caddy-web-demo.svc.cluster.local:80
         }
         keycloak.yukselcloud.com {
+            log
+            crowdsec
             reverse_proxy 192.168.0.202:80
         }
         ldap.yukselcloud.com {
+            log
+            crowdsec
             reverse_proxy lldap-service.auth.svc.cluster.local:17170
         }
         # nextcloud.yukselcloud.com {
+        #     log
+        #     crowdsec
         #     reverse_proxy 192.168.0.205:80
         # }
         vaultwarden.yukselcloud.com {
+            log
+            crowdsec
             reverse_proxy 192.168.0.204:80
         }
         jellyfin.yukselcloud.com {
+            log
+            crowdsec
             reverse_proxy jellyfin.media.svc.cluster.local:8096 {
                 header_up X-Forwarded-Proto {scheme}
                 header_up X-Forwarded-Host {host}
@@ -44,6 +68,8 @@ data:
             }
         }
         git.yukselcloud.com {
+            log
+            crowdsec
             reverse_proxy forgejo-http.forgejo.svc.cluster.local:3000 {
                 header_up Host {host}
                 header_up X-Forwarded-Proto https
