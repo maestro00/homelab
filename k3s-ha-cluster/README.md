@@ -254,64 +254,86 @@ Now I can see in my logs that it creates a `A Record` in my cloudflare domain.
 }
 ```
 
-## 🚫 Pi-hole: Local DNS + Ad Blocker
+## 🚫 Pi-hole: Local DNS (Unbound) + Tailscale
 
-### pi-hole DNS Nameserver
-
-🧩 **Deploy secrets for admin access**
-
-```bash
-kubectl create secret generic pihole-password \
-  --from-literal=WEBPASSWORD='admin' \
-  -n pihole
-```
-
-✅ To persist password across restarts, set WEBPASSWORD from the secret as an
-env var. However, volume mounts may still override it
-(TODO: resolve Pi-hole config persistency, `/etc/pihole/pihole.toml`).
-
-🐳 **Pi-hole Deployment (simplified excerpt)**
-
-**NOTE** We are creating two different services to pi-hole to answer DNS
-queries.
-
-> - `hostNetwork: true` is set so it can bind to DNS (port 53) on the host
-> - `dnsPolicy: ClusterFirstWithHostNet` to use cluster DNS correctly
-> - Deployed on infra-pi via `nodeSelector: role=pi-hole`
-
-Note:
-> For both protocols to work, you need to specify them in different services. On
-> MetalLB each service must have a unique IP address.
-> This can be fixed by setting the following annotation in both services for
-> PiHole
-> ref. <https://github.com/pi-hole/docker-pi-hole/issues/862>
+To reduce network overhead, I run Pi-hole, Unbound, and Tailscale directly on
+the bare-metal RPi4.
 
 ```bash
-cd k3s-ha-cluster/deployments/pi-hole
+curl -sSL https://install.pi-hole.net | bash
 
-kubectl apply -f deployment.yaml
-kubectl apply -f service-tcp.yaml
-kubectl apply -f service-udp.yaml
+# During setup:
+# choose: eth0
+# Upstream DNS → choose Custom 127.0.0.1#5335
 ```
 
-📡 **Shared IP for TCP/UDP Services**
+Then install Unbound:
 
-Both TCP and UDP Services use:
+```bash
+sudo apt update
+sudo apt install unbound -y
 
-```yaml
-annotations:
-  metallb.universe.tf/allow-shared-ip: shared
+# create custom config file and paste it
+sudo nano /etc/unbound/unbound.conf.d/pi-hole.conf
+
+server:
+    verbosity: 0
+    interface: 127.0.0.1
+    port: 5335
+    do-ip4: yes
+    do-udp: yes
+    do-tcp: yes
+    root-hints: "/var/lib/unbound/root.hints"
+    harden-glue: yes
+    harden-dnssec-stripped: yes
+    use-caps-for-id: no
+    edns-buffer-size: 1232
+    prefetch: yes
+    num-threads: 1
 ```
 
-and share this IP:
+Download root hints and restart Unbound:
 
-`loadBalancerIP: 192.168.0.202`
+```bash
+sudo wget -O /var/lib/unbound/root.hints https://www.internic.net/domain/named.root
+sudo systemctl restart unbound
+sudo systemctl enable unbound
+```
 
-This enables:
+Install Tailscale on the RPi4 (Bullseye-based):
 
-- `:53` TCP/UDP → DNS
-- `:80` → Web UI
-- `:443` → SSL (optional)
+```bash
+sudo apt-get install apt-transport-https
+TS_BASE_URL="https://pkgs.tailscale.com/stable/raspbian"
+curl -fsSL "$TS_BASE_URL/bullseye.noarmor.gpg" \
+  | sudo tee /usr/share/keyrings/tailscale-archive-keyring.gpg > /dev/null
+curl -fsSL "$TS_BASE_URL/bullseye.tailscale-keyring.list" \
+  | sudo tee /etc/apt/sources.list.d/tailscale.list
+sudo apt-get update
+sudo apt-get install tailscale
+```
+
+After installation, advertise the LAN route and exit node:
+
+```bash
+sudo tailscale up --advertise-exit-node \
+  --advertise-routes=192.168.0.0/24 --accept-dns=false --reset
+```
+
+After it starts successfully, you'll see a new machine named
+`k3s-exit-router` in the *Machines* section of the Tailscale dashboard.
+
+Open that machine, click *Edit route settings*, approve the advertised routes,
+and enable `Use as exit node`.
+
+Now, on any client device (for example Android or iOS):
+
+1. Install the `Tailscale` app.
+2. Sign in with the same account.
+3. Connect and confirm your machines are visible.
+4. Select `k3s-exit-node` as your **exit node**, and enable
+   **Allow local network access**.
+5. In DNS settings, add your Pi's Tailscale IP (`100.x.x.x`) as the nameserver.
 
 ## 🐮 Longhorn Block Storage
 
@@ -435,7 +457,7 @@ used in our authentication services.
 a new secret. After that, restart your ddns pod to add your record immediately before
 the actual `ttl`.
 
-## ☁️ Nextcloud on Kubernetes
+## ☁️ Nextcloud on Kubernetes (Deprecated)
 
 This deployment uses the official
 [Nextcloud Helm chart](https://github.com/nextcloud/helm) with full OpenID
@@ -580,61 +602,7 @@ kubectl apply -f config-cloudflare-ddns-Secret.yaml
 
 Restart deployment or recreate pods to apply the change immediately.
 
-## 🔒 Tailscale VPN
-
-🛠️ **Step 1: Create a Tailscale Account & Auth Key**
-
-> - Go to <https://tailscale.com>
-> - Sign in with Google, GitHub, or email
-> - Visit: <https://login.tailscale.com/admin/settings/keys>
-> - Click "Generate Key":
-> - Type: Reusable key ✅
-> - Scopes:
->
-> - ✅ ephemeral (optional: good for non-persistent nodes)
-> - ✅ preauthorized (optional: skip web login)
-> - ✅ Allow exit node and subnet routing (if desired)
->
-> Copy the tskey-... auth key and keep it handy (we’ll use it in a Kubernetes Secret)
-
-📦 **Step 2: Create Kubernetes Secret with the Auth Key**
-
-```bash
-kubectl create secret generic tailscale-auth \
-  -n kube-system \
-  --from-literal=TS_AUTHKEY='tskey-...' # Replace with your key
-```
-
-Create service account and rbac to allow accessing this secret by our
-deployment and apply it.
-
-```bash
-kubectl apply -f rbac.yaml
-```
-
-Navigate to tailscale folder and apply deployment by configuring your allowed ip
-range for `--exit-node`.
-
-```bash
-kubectl apply -f deployment.yaml
-```
-
-After the deployment is successful, you'll see the added new machine
-`k3s-exit-router` in *machines* in tailscale dashboard.
-
-Click on the machine and *Edit* Route Settings, then approve all the routes we
-defined in our deployment and check the `Use as exit node` checkbox.
-
-Now you can go to any client, for example your phone (Android & iOS) and
-
-1. Download `tailscale` application from the store
-2. Login with the same account you setup tailscale
-3. Configure VPN and now you should be seeing your machines
-4. Select `k3s-exit-node` as your **EXIT NODE** mark also
-**Allow Local Network Access** to be able to get LAN access working.
-5. Test an IP address serving a service from your cluster (192.168.0.202 - pihole)
-
-## 📄 Paperless-ngx: Document Management
+## 📄 Paperless-ngx: Document Management (Deprecated)
 
 Paperless-ngx is a powerful self-hosted document management solution.
 This section guides you through deploying Paperless-ngx on Kubernetes with Redis
