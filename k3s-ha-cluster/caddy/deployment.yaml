@@ -16,17 +16,23 @@ spec:
     spec:
       containers:
         - name: caddy
-          image: caddy:latest
+          image: ghcr.io/serfriz/caddy-cloudflare-crowdsec:latest
           ports:
             - containerPort: 80
             - containerPort: 443
+          env:
+            - name: CROWDSEC_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: crowdsec-bouncer-secret
+                  key: CROWDSEC_API_KEY
           resources:
             requests:
               cpu: 10m
-              memory: 32Mi
+              memory: 64Mi
             limits:
-              cpu: 100m
-              memory: 128Mi
+              cpu: 200m
+              memory: 256Mi
           volumeMounts:
             - name: config
               mountPath: /etc/caddy
