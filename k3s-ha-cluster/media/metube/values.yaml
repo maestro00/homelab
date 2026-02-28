@@ -1,0 +1,52 @@
+namespace: media
+replicaCount: 1
+
+image:
+  name: metube
+  repository: alexta69/metube
+  tag: latest
+
+service:
+  port: 8081
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+env:
+  - name: PUID
+    value: "1000"
+  - name: PGID
+    value: "1000"
+  - name: TZ
+    value: Europe/Helsinki
+  - name: PORT
+    value: "8081"
+  - name: DOWNLOAD_DIR
+    value: "/tv"
+  - name: YTDL_OPTIONS
+    value: '{"format":"bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4"}'
+  - name: OUTPUT_TEMPLATE
+    value: "%(title)s.%(ext)s"
+
+pvc:
+  name: media-metube-config
+  size: 500Mi
+
+volumeMounts:
+  - name: config
+    mountPath: /app/data
+  - name: downloads
+    mountPath: /tv
+
+volumes:
+  - name: config
+    persistentVolumeClaim:
+      claimName: media-metube-config
+  - name: downloads
+    persistentVolumeClaim:
+      claimName: media-downloads
