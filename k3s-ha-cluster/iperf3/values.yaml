@@ -1,0 +1,39 @@
+namespace: iperf3
+replicaCount: 1
+
+image:
+  repository: networkstatic/iperf3
+  tag: latest
+  pullPolicy: IfNotPresent
+  name: iperf3
+
+service:
+  type: LoadBalancer
+  port: 5201
+  targetPort: 5201
+  loadBalancerIP: "192.168.0.220"
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
+
+affinity: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+# iperf3 specific settings
+iperf3:
+  # Run in server mode by default
+  serverMode: true
+  # Additional iperf3 flags
+  flags: "-s"
+
+# DaemonSet configuration for inter-node testing
+daemonset:
+  enabled: true

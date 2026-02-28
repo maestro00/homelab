@@ -1,0 +1,41 @@
+{{- if .Values.daemonset.enabled }}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ .Release.Name }}-ds
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Release.Name }}-ds
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-ds
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-ds
+    spec:
+      hostNetwork: false
+      containers:
+        - name: {{ .Values.image.name }}
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: iperf3
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          args:
+            - "{{ .Values.iperf3.flags }}"
+          resources:
+            requests:
+              cpu: {{ .Values.resources.requests.cpu }}
+              memory: {{ .Values.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.resources.limits.cpu }}
+              memory: {{ .Values.resources.limits.memory }}
+      tolerations:
+        - effect: NoSchedule
+          operator: Exists
+        - effect: NoExecute
+          operator: Exists
+{{- end }}
