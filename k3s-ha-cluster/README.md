@@ -121,9 +121,6 @@ kubectl create secret generic -n metallb-system memberlist \
   --from-literal=secret="$(openssl rand -base64 128)"
 ```
 
-Apply [MetalLB config](/k3s-ha-cluster/deployments/metallb-config.yaml) to
-assign IPs to LoadBalancer services from given `addresses:` in the config file.
-
 📜 **Configure IP Pool**
 
 Apply [MetalLB config](/k3s-ha-cluster/deployments/metallb-config.yaml) to
@@ -137,7 +134,7 @@ metadata:
   namespace: metallb-system
 spec:
   addresses:
-    - 192.168.0.200-192.168.0.220
+    - 192.168.0.200-192.168.0.229
 ---
 apiVersion: metallb.io/v1beta1
 kind: L2Advertisement
