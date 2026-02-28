@@ -1,0 +1,56 @@
+# Values for kube-prometheus-stack deployment
+# see upstream chart for full options: https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack
+
+## grafana
+grafana:
+  enabled: true
+  admin:
+    existingSecret: grafana-admin-credentials
+    userKey: admin-user
+    passwordKey: admin-password
+
+  service:
+    type: ClusterIP
+  persistence:
+    enabled: true
+    size: 5Gi
+    storageClassName: "longhorn"
+
+## prometheus
+prometheus:
+  prometheusSpec:
+    replicas: 2
+    serviceMonitorSelectorNilUsesHelmValues: false
+    serviceMonitorSelector: {}
+    podMonitorSelector: {}
+    retention: 10d
+    resources:
+      requests:
+        memory: 400Mi
+        cpu: 200m
+
+## alertmanager
+alertmanager:
+  alertmanagerSpec:
+    resources:
+      requests:
+        memory: 200Mi
+        cpu: 100m
+
+## kube-state-metrics
+kubeStateMetrics:
+  enabled: true
+
+## kubelet
+kubelet:
+  enabled: true
+
+## node-exporter
+nodeExporter:
+  enabled: true
+  service:
+    type: ClusterIP
+
+# Manage RBAC
+rbac:
+  create: true
