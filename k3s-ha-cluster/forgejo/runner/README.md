@@ -32,7 +32,7 @@ kubectl create secret generic forgejo-runner-token \
 ### 3. Deploy Helm Chart
 
 ```bash
-helm upgrade --install forgejo-runner . -n forgejo
+helm upgrade --install runner . -n forgejo
 ```
 
 The init container will auto-register using the hex secret.

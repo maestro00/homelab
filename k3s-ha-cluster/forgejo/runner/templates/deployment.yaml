@@ -78,6 +78,10 @@ spec:
               mountPath: /data
             - name: docker-certs
               mountPath: /certs/client
+              subPath: client
+              readOnly: true
+            - name: kube-api-access
+              mountPath: /var/run/k8s-sa
               readOnly: true
           resources:
             requests:
@@ -97,7 +101,7 @@ spec:
               value: "/certs"
           volumeMounts:
             - name: docker-certs
-              mountPath: /certs/client
+              mountPath: /certs
             - name: dind-storage
               mountPath: /var/lib/docker
           {{- if .Values.dind.resources }}
@@ -119,3 +123,19 @@ spec:
             items:
               - key: {{ .Values.secret.tokenKey }}
                 path: runner-token
+        - name: kube-api-access
+          projected:
+            sources:
+              - serviceAccountToken:
+                  path: token
+                  expirationSeconds: 3600
+              - configMap:
+                  name: kube-root-ca.crt
+                  items:
+                    - key: ca.crt
+                      path: ca.crt
+              - downwardAPI:
+                  items:
+                    - path: namespace
+                      fieldRef:
+                        fieldPath: metadata.namespace
