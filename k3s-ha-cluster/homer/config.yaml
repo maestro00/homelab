@@ -45,10 +45,10 @@ services:
   - name: "Identity & Security"
     icon: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/keycloak.png"
     items:
-      - name: "Keycloak"
+      - name: "Keycloak ⚠️"
         logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/keycloak.png"
         url: "https://keycloak.yukselcloud.com"
-        subtitle: "Central Authentication"
+        subtitle: "Central Authentication (DEPRECATED)"
         tag: "public"
 
       - name: "Vaultwarden"
@@ -57,19 +57,16 @@ services:
         subtitle: "Password Manager"
         tag: "public"
 
-  - name: "Apps & Docs"
-    icon: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/nextcloud.png"
-    items:
-      - name: "Nextcloud ⚠️"
-        logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/nextcloud.png"
-        url: "https://nextcloud.yukselcloud.com"
-        subtitle: "Files & Collaboration (DEPRECATED)"
+      - name: "lldap Admin 🔒"
+        logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/lldap.png"
+        url: "https://ldap.yukselcloud.com"
+        subtitle: "LDAP Directory"
         tag: "public"
 
-      - name: "Paperless-ngx ⚠️"
-        logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/paperless-ngx.png"
-        url: "https://paperless.yukselcloud.com"
-        subtitle: "Document Management (DEPRECATED)"
+      - name: "Authelia"
+        logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/authelia.png"
+        url: "https://authelia.yukselcloud.com"
+        subtitle: "2FA & SSO"
         tag: "public"
 
   - name: "Networking & DNS"
@@ -143,3 +140,55 @@ services:
         url: "http://192.168.0.219:6868"
         subtitle: "Media Profiling"
         tag: "private"
+
+      - name: "Metube"
+        logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/metube.png"
+        url: "http://192.168.0.222:8080"
+        subtitle: "YouTube Downloader"
+        tag: "private"
+
+      - name: "QBittorrent"
+        logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/qbittorrent.png"
+        url: "http://192.168.0.210:8080"
+        subtitle: "Torrent Client"
+        tag: "private"
+
+  - name: Monitoring
+    icon: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/prometheus.png"
+    items:
+      - name: "Grafana - Main Dashboard"
+        logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/grafana.png"
+        url: "https://grafana.yukselcloud.com"
+        subtitle: "Monitoring Dashboard"
+        tag: "public"
+    widgets:
+      - type: "iframe"
+        url: "https://grafana.yukselcloud.com/d-solo/7d57716318ee0dddbac5a7f451fb7753/node-exporter-nodes?orgId=1&from=now-1h&to=now&panelId=2"
+        width: 450
+        height: 200
+        title: "CPU Usage (All Nodes)"
+      - type: "iframe"
+        url: "https://grafana.yukselcloud.com/d-solo/7d57716318ee0dddbac5a7f451fb7753/node-exporter-nodes?orgId=1&from=now-1h&to=now&panelId=2&var-instance=192.168.0.10:9100"
+        width: 450
+        height: 200
+        title: "CPU Usage - infra-pi (192.168.0.10)"
+      - type: "iframe"
+        url: "https://grafana.yukselcloud.com/d-solo/7d57716318ee0dddbac5a7f451fb7753/node-exporter-nodes?orgId=1&from=now-1h&to=now&panelId=2&var-instance=192.168.0.171:9100"
+        width: 450
+        height: 200
+        title: "CPU Usage - k8s-node-171 (192.168.0.171)"
+      - type: "iframe"
+        url: "https://grafana.yukselcloud.com/d-solo/7d57716318ee0dddbac5a7f451fb7753/node-exporter-nodes?orgId=1&from=now-1h&to=now&panelId=2&var-instance=192.168.0.172:9100"
+        width: 450
+        height: 200
+        title: "CPU Usage - k8s-node-172 (192.168.0.172)"
+      - type: "iframe"
+        url: "https://grafana.yukselcloud.com/d-solo/7d57716318ee0dddbac5a7f451fb7753/node-exporter-nodes?orgId=1&from=now-1h&to=now&panelId=2&var-instance=192.168.0.181:9100"
+        width: 450
+        height: 200
+        title: "CPU Usage - k8s-node-181 (192.168.0.181)"
+      - type: "iframe"
+        url: "https://grafana.yukselcloud.com/d-solo/7d57716318ee0dddbac5a7f451fb7753/node-exporter-nodes?orgId=1&from=now-1h&to=now&panelId=2&var-instance=192.168.0.182:9100"
+        width: 450
+        height: 200
+        title: "CPU Usage - k8s-node-182 (192.168.0.182)"
