@@ -7,8 +7,36 @@ on:
 jobs:
   deploy-homer-config:
     runs-on: self-hosted
+
+    container:
+      image: bitnami/kubectl:latest
+
     steps:
       - uses: actions/checkout@v4
+
+      - name: Setup kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          cat <<EOF > ~/.kube/config
+          apiVersion: v1
+          kind: Config
+          clusters:
+          - cluster:
+              certificate-authority: /var/run/k8s-sa/ca.crt
+              server: https://kubernetes.default.svc
+            name: in-cluster
+          contexts:
+          - context:
+              cluster: in-cluster
+              user: sa
+            name: in-cluster
+          current-context: in-cluster
+          users:
+          - name: sa
+            user:
+              tokenFile: /var/run/k8s-sa/token
+          EOF
+
       - name: Apply Homer ConfigMap
         run: |
           kubectl -n homer create configmap homer-config \
