@@ -37,6 +37,28 @@ helm upgrade --install runner . -n forgejo
 
 The init container will auto-register using the hex secret.
 
+## CI Image for Forgejo Actions (kubectl + Node.js)
+
+To run Forgejo Actions with `kubectl` and Node.js, build and push a custom CI
+image to your Forgejo registry:
+
+```sh
+cd image/
+podman build -t git.yukselcloud.com/<user-or-org>/kubectl-node:latest .
+podman login git.yukselcloud.com
+podman push git.yukselcloud.com/<user-or-org>/kubectl-node:latest
+```
+
+**Use in Forgejo Actions workflow:**
+
+```yaml
+jobs:
+  deploy:
+    runs-on: self-hosted
+    container:
+      image: git.yukselcloud.com/<user-or-org>/kubectl-node:latest
+```
+
 ## Configuration
 
 Edit `values.yaml`:
