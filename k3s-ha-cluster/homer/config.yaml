@@ -80,7 +80,6 @@ services:
 
       - name: "Caddy"
         logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/caddy.png"
-        # url: "https://caddy.yukselcloud.com"
         subtitle: "Ingress Controller"
         tag: "public"
 
