@@ -13,15 +13,12 @@ spec:
       labels:
         app: qbittorrent
     spec:
-      securityContext:
-        fsGroup: 1000
-
       containers:
         # ==========================
         # Gluetun VPN + Proxy
         # ==========================
         - name: gluetun
-          image: qmcgaw/gluetun:latest
+          image: qmcgaw/gluetun:v3.41.0
           securityContext:
             capabilities:
               add:
@@ -44,20 +41,11 @@ spec:
               value: wg0.conf
             - name: FIREWALL
               value: "on"
-            - name: BLOCK_MALICIOUS
-              value: "off"
-            - name: HTTPPROXY
-              value: "on"
-            - name: HTTPPROXY_PORT
-              value: "8888"
-            - name: SOCKSPROXY
-              value: "on"
-            - name: SOCKSPROXY_PORT
-              value: "1080"
           ports:
-            - containerPort: 8888 # HTTP proxy
-            - containerPort: 1080 # SOCKS5 proxy
-            - containerPort: 8000 # healthcheck
+            - containerPort: 8080
+            - containerPort: 6881
+            - containerPort: 6881
+              protocol: UDP
           volumeMounts:
             - name: config
               mountPath: /gluetun
@@ -67,8 +55,6 @@ spec:
         # ==========================
         - name: qbittorrent
           image: linuxserver/qbittorrent:latest
-          ports:
-            - containerPort: 8080
           resources:
             requests:
               cpu: 50m
@@ -85,6 +71,10 @@ spec:
               value: "1000"
             - name: WEBUI_PORT
               value: "8080"
+            - name: DOCKER_MODS
+              value: ghcr.io/vuetorrent/vuetorrent-lsio-mod:latest
+            - name: WEBUI_ALTERNATIVE
+              value: "true" # Set chown -R 1000:1000 vuetorrent for permission fix
 
           volumeMounts:
             - name: config
