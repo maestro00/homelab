@@ -10,7 +10,6 @@ jobs:
 
     container:
       image: git.yukselcloud.com/lab/kubectl-node:latest
-
     steps:
       - uses: actions/checkout@v4
 
