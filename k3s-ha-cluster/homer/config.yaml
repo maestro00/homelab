@@ -161,7 +161,7 @@ services:
         url: "https://grafana.yukselcloud.com"
         subtitle: "Monitoring Dashboard"
         tag: "public"
-    widgets:
+    widgets: # TODO: Fix iframes, they don't work yet
       - type: "iframe"
         url: "https://grafana.yukselcloud.com/d-solo/7d57716318ee0dddbac5a7f451fb7753/node-exporter-nodes?orgId=1&from=now-1h&to=now&panelId=2"
         width: 450

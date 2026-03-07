@@ -10,27 +10,21 @@ jobs:
 
     container:
       image: git.yukselcloud.com/lab/kubectl-node:latest
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Inject K8s Credentials
+      - name: Setup Kubeconfig
         run: |
-          export K8S_TOKEN=$(cat /var/run/k8s-sa/token)
-          echo "K8S_TOKEN=$K8S_TOKEN" >> $GITHUB_ENV
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG_DEPLOY }}" > ~/.kube/config
+          chmod 600 ~/.kube/config
 
       - name: Apply Homer ConfigMap
         run: |
           kubectl -n homer create configmap homer-config \
             --from-file=config.yml=k3s-ha-cluster/homer/config.yaml \
-            --server=https://kubernetes.default.svc \
-            --certificate-authority=/var/run/k8s-sa/ca.crt \
-            --token=$K8S_TOKEN \
             -o yaml --dry-run=client | kubectl apply -f -
 
       - name: Rollout Restart Homer
-        run: |
-          export KUBE_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
-          kubectl -n homer rollout restart deploy homer \
-            --server=https://kubernetes.default.svc \
-            --certificate-authority=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt \
-            --token=$KUBE_TOKEN
+        run: kubectl -n homer rollout restart deploy homer

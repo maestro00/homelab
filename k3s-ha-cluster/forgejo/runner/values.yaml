@@ -25,7 +25,8 @@ nameOverride: ""
 fullnameOverride: ""
 
 serviceAccount:
-  name: ""
+  create: true
+  name: runner-forgejo-runner-sa
 
 runner:
   instanceUrl: "http://forgejo-http.forgejo.svc.cluster.local:3000"

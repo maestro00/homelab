@@ -4,7 +4,7 @@ metadata:
   name: {{ include "forgejo-runner.fullname" . }}-clusterrole
 rules:
 - apiGroups: [""]
-  resources: ["pods","pods/status","pods/log","persistentvolumeclaims","secrets","namespaces"]
+  resources: ["pods","pods/status","pods/log","persistentvolumeclaims","secrets","namespaces", "configmaps"]
   verbs: ["get","list","watch","create","delete","update","patch"]
 - apiGroups: ["policy"]
   resources: ["pods/eviction"]

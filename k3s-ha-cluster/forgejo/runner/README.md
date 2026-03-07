@@ -59,6 +59,19 @@ jobs:
       image: git.yukselcloud.com/<user-or-org>/kubectl-node:latest
 ```
 
+## Create a long lived token to use kubernetes operations via runner
+
+```sh
+# Run script below and copy the content of the output yaml file
+./scripts/create_long_lived_sa_token.sh
+```
+
+- Go to your repository on your Forgejo server.
+- Navigate to Settings > Actions > Secrets.
+- Click Add Secret.
+- Name the secret exactly: **KUBECONFIG_DEPLOY**
+- Paste the contents of `kubeconfig-ci.yaml` into the value field and save it.
+
 ## Configuration
 
 Edit `values.yaml`:
