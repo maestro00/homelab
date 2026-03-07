@@ -2,9 +2,10 @@
 
 ## 🏡 High-Availability K3s Cluster for Homelab
 
-Featuring kube-vip for HA control-plane, MetalLB for LoadBalancer services,
-Pi-hole for DNS/ad-blocking, and Caddy as Ingress controller. Built on bare
-metal with mixed ARM/AMD nodes.
+This is a bookkeeping for setup of my infrastucture and services.
+It features kube-vip for HA control-plane, MetalLB for LoadBalancer services,
+Pi-hole for DNS/ad-blocking along with unbound, and Caddy for reverse proxy
+and etc.
 
 ## 🖥️ Physical Lab Inventory
 
@@ -19,17 +20,12 @@ A concise overview of the hardware powering this homelab:
 - 🍓 **Raspberry Pi 4B**
   8GB RAM, 256GB microSD card
 
-- 📶 **TP-Link AX150**
-  Gigabit WiFi 6 Router
-
-- 🔌 **TP-Link 5-Port Gigabit Switch**
-
-This blend of x86 and ARM hardware, combined with robust networking, provides a
-flexible and resilient foundation for experimentation and learning.
+- 📶 **GL.inet Flint 3e - OpenWRT**
+  Wifi-7 Router, with 2.5gigabit ports
 
 ## 🧱 Infrastructure with Proxmox + Terraform
 
-We use Proxmox VE to manage bare-metal virtualization and Terraform to automate
+I use Proxmox VE to manage bare-metal virtualization and Terraform to automate
 VM provisioning:
 
     🖥️ VMs are provisioned on multiple nodes using Proxmox's API.
@@ -50,19 +46,43 @@ VM provisioning:
 
 ## ☸️ High-Availability K3s Cluster
 
-Our HA K3s setup is designed for simplicity and resilience:
+K3s HA setup is designed for simplicity, resilience, and a rich self-hosted ecosystem:
 
-    🛢️ External MariaDB runs on the Proxmox host to serve as the K3s datastore.
+### 🏗️ Core Infrastructure & Storage
 
-    🧠 kube-vip provides a virtual IP (VIP) for accessing the K3s API across masters.
+- 🛢️ **External MariaDB:** Runs on the Proxmox host to serve as K3s datastore.
+- 🧠 **kube-vip:** Provides a virtual IP (VIP) for easy access to the K3s API.
+- 💾 **Longhorn:** Distributed block storage providing persistent,
+replicated volumes across the cluster.
 
-    🌐 MetalLB manages service-level LoadBalancer IPs for internal services.
+### 🌐 Networking & Security
 
-    🌍 Caddy Ingress handles domain-based routing for services.
+- 🧲 **MetalLB:** Manages service-level LoadBalancer IPs for internal cluster services.
+- 🌍 **Caddy Ingress:** Handles clean, domain-based routing and automatic SSL
+for all web services.
+- 👮 **CrowdSec:** Integrates directly with Caddy to detect and block known
+malicious IPs and brute-force attacks.
+- 🧅 **Pi-hole + Unbound:** Runs bare metal rpi4 to serve fast local DNS resolution
+and network-wide ad blocking.
+- 🔄 **Cloudflare DDNS:** Automatically updates my public Cloudflare DNS entries
+by cron run.
+- 🔒 **Tailscale VPN:** Deployed on a bare-metal Raspberry Pi 4 node for secure,
+zero-trust remote network access.
 
-    🧅 Pi-hole runs in-cluster to serve local DNS + ad blocking, accessible at pihole.lab.local.
+### 🛠️ DevOps & Management
 
-**Directory:** [k3s-ha-cluster](/k3s-ha-cluster/)
+- 🐙 **Forgejo Git Server:** Self-hosted Git repository complete with
+local actions runners to automatically deploy configuration changes.
+- 💻 **Termix:** Provides a web-based terminal for easy remote access to nodes
+(accessible securely via Tailscale).
+
+### 🏠 Media & Dashboards
+
+- 📊 **Homer:** A clean, static dashboard for quick access to all homelab services.
+- 🍿 **Media Stack:** The full *Arr* suite paired with Jellyfin for internal
+media management and streaming.
+
+**Directory:** [`/k3s-ha-cluster/`](/k3s-ha-cluster/)
 
 ---
 
@@ -74,9 +94,3 @@ community:
 
 - [Kubernetes Homelab Overview by Jonathan Gazeley](https://jonathangazeley.com/2023/01/15/kubernetes-homelab-part-1-overview/)
 - [TheTaqiTahmid/homeserver GitHub Repository](https://github.com/TheTaqiTahmid/homeserver)
-
-## TODOS
-
-- Develop a way to uncordon/cordon a node in the clsuter, drain it, delete the VM,
-create vm via terraform without manually commenting uncommenting stuff, setup ssh
-access, install k3s back.
