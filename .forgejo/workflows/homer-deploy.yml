@@ -13,6 +13,8 @@ jobs:
       env:
         KUBERNETES_SERVICE_HOST: kubernetes.default.svc
         KUBERNETES_SERVICE_PORT: "443"
+      volumes:
+        - /var/run/secrets/kubernetes.io/serviceaccount:/var/run/secrets/kubernetes.io/serviceaccount
     steps:
       - uses: actions/checkout@v4
 

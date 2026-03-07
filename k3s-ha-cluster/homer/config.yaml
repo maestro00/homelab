@@ -147,8 +147,8 @@ services:
         subtitle: "YouTube Downloader"
         tag: "private"
 
-      - name: "QBittorrent"
-        logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/qbittorrent.png"
+      - name: "QBittorrent - Vuetorrent UI"
+        logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/vuetorrent.png"
         url: "http://192.168.0.210:8080"
         subtitle: "Torrent Client"
         tag: "private"
