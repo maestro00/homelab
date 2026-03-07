@@ -10,10 +10,15 @@ agent:
       podName: caddy-*
       program: caddy
 
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+
   env:
-    # Collections to install
-    # caddy collection for parsing Caddy logs
-    # base-http-scenarios for common web attack detection
     - name: COLLECTIONS
       value: "crowdsecurity/caddy crowdsecurity/base-http-scenarios"
 
@@ -61,7 +66,6 @@ lapi:
     - name: ENROLL_TAGS
       value: "k8s homelab caddy"
 
-    # Pre-configure bouncer API keys (if not using persistent volumes)
     # Generate a secure key: openssl rand -base64 32
     - name: BOUNCER_KEY_caddy
       value: "BOUNCER_KEY_VALUE"
@@ -72,8 +76,15 @@ lapi:
     annotations: {}
     labels: {}
 
-  # Metrics for LAPI
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
   metrics:
     enabled: true
     serviceMonitor:
-      enabled: false # Set to true if you have Prometheus Operator
+      enabled: true
