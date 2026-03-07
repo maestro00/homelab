@@ -19,11 +19,12 @@ grafana:
 ## prometheus
 prometheus:
   prometheusSpec:
-    replicas: 2
+    replicas: 1
     serviceMonitorSelectorNilUsesHelmValues: false
     serviceMonitorSelector: {}
+    scrapeInterval: 60s
     podMonitorSelector: {}
-    retention: 10d
+    retention: 7d
     resources:
       requests:
         memory: 400Mi
