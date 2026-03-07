@@ -10,39 +10,29 @@ jobs:
 
     container:
       image: git.yukselcloud.com/lab/kubectl-node:latest
-
+      env:
+        KUBERNETES_SERVICE_HOST: kubernetes.default.svc
+        KUBERNETES_SERVICE_PORT: "443"
     steps:
       - uses: actions/checkout@v4
 
-      # - name: Setup kubeconfig
-      #   run: |
-      #     mkdir -p ~/.kube
-      #     cat <<EOF > ~/.kube/config
-      #     apiVersion: v1
-      #     kind: Config
-      #     clusters:
-      #     - cluster:
-      #         certificate-authority: /var/run/k8s-sa/ca.crt
-      #         server: https://kubernetes.default.svc
-      #       name: in-cluster
-      #     contexts:
-      #     - context:
-      #         cluster: in-cluster
-      #         user: sa
-      #       name: in-cluster
-      #     current-context: in-cluster
-      #     users:
-      #     - name: sa
-      #       user:
-      #         tokenFile: /var/run/k8s-sa/token
-      #     EOF
-
       - name: Apply Homer ConfigMap
         run: |
+          # Use the ServiceAccount files directly without a full config file
+          # We pass the CA cert and token via command line flags
+          export KUBE_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+
           kubectl -n homer create configmap homer-config \
             --from-file=config.yml=k3s-ha-cluster/homer/config.yaml \
+            --server=https://kubernetes.default.svc \
+            --certificate-authority=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt \
+            --token=$KUBE_TOKEN \
             -o yaml --dry-run=client | kubectl apply -f -
-      - name: Rollout Restart Homer
-        run: kubectl -n homer rollout restart deploy homer
 
-  # error: unable to read certificate-authority /var/run/k8s-sa/ca.crt for in-cluster due to open /var/run/k8s-sa/ca.crt: no such file or directory
+      - name: Rollout Restart Homer
+        run: |
+          export KUBE_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+          kubectl -n homer rollout restart deploy homer \
+            --server=https://kubernetes.default.svc \
+            --certificate-authority=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt \
+            --token=$KUBE_TOKEN
