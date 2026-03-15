@@ -1,0 +1,71 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: speedtest-tracker
+  namespace: speedtest-tracker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: speedtest-tracker
+  template:
+    metadata:
+      labels:
+        app: speedtest-tracker
+    spec:
+      containers:
+        - name: speedtest-tracker
+          image: lscr.io/linuxserver/speedtest-tracker:latest
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+
+          env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: APP_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: speedtest-db-secret
+                  key: app-key
+            - name: APP_TIMEZONE
+              value: Europe/Helsinki
+            - name: DISPLAY_TIMEZONE
+              value: Europe/Helsinki
+            - name: DB_CONNECTION
+              value: mysql
+            - name: DB_HOST
+              value: mysql.db.svc.cluster.local
+            - name: DB_PORT
+              value: "3306"
+            - name: DB_DATABASE
+              value: speedtest_tracker
+            - name: DB_USERNAME
+              value: speedtest
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: speedtest-db-secret
+                  key: password
+            - name: SPEEDTEST_SCHEDULE
+              value: "*/30 * * * *"
+            - name: SPEEDTEST_SERVERS
+              value: "22669,14928,14164,32643"
+
+          volumeMounts:
+            - name: config
+              mountPath: /config
+
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: speedtest-tracker
