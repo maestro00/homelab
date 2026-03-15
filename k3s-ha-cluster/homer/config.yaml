@@ -218,7 +218,7 @@ message:
       <div class="column is-one-third">
         <h4 class="title is-6">Download/Upload Speed</h4>
         <iframe
-          src="https://grafana.yukselcloud.com/d-solo/g7usvhZVk2/speedtest-tracker?orgId=1&from=1773562058549&to=1773583658549&timezone=browser&refresh=5m&panelId=panel-104&__feature.dashboardScene=true""
+          src="https://grafana.yukselcloud.com/d-solo/g7usvhZVk2/speedtest-tracker?orgId=1&from=now-1h&to=now&timezone=browser&refresh=5m&panelId=panel-104&__feature.dashboardScene=true"
           style="width:100%;height:200px;border:0;"
         ></iframe>
       </div>
