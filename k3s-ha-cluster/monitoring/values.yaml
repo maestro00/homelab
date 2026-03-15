@@ -16,6 +16,13 @@ grafana:
     size: 5Gi
     storageClassName: "longhorn"
 
+  grafana.ini:
+    security:
+      allow_embedding: true
+    auth.anonymous:
+      enabled: true
+      org_role: Viewer
+
 ## prometheus
 prometheus:
   prometheusSpec:
