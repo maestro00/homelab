@@ -161,34 +161,58 @@ services:
         url: "https://grafana.yukselcloud.com"
         subtitle: "Monitoring Dashboard"
         tag: "public"
-    widgets: # TODO: Fix iframes, they don't work yet
-      - type: "iframe"
-        url: "https://grafana.yukselcloud.com/d-solo/7d57716318ee0dddbac5a7f451fb7753/node-exporter-nodes?orgId=1&from=now-1h&to=now&panelId=2"
-        width: 450
-        height: 200
-        title: "CPU Usage (All Nodes)"
-      - type: "iframe"
-        url: "https://grafana.yukselcloud.com/d-solo/7d57716318ee0dddbac5a7f451fb7753/node-exporter-nodes?orgId=1&from=now-1h&to=now&panelId=2&var-instance=192.168.0.10:9100"
-        width: 450
-        height: 200
-        title: "CPU Usage - infra-pi (192.168.0.10)"
-      - type: "iframe"
-        url: "https://grafana.yukselcloud.com/d-solo/7d57716318ee0dddbac5a7f451fb7753/node-exporter-nodes?orgId=1&from=now-1h&to=now&panelId=2&var-instance=192.168.0.171:9100"
-        width: 450
-        height: 200
-        title: "CPU Usage - k8s-node-171 (192.168.0.171)"
-      - type: "iframe"
-        url: "https://grafana.yukselcloud.com/d-solo/7d57716318ee0dddbac5a7f451fb7753/node-exporter-nodes?orgId=1&from=now-1h&to=now&panelId=2&var-instance=192.168.0.172:9100"
-        width: 450
-        height: 200
-        title: "CPU Usage - k8s-node-172 (192.168.0.172)"
-      - type: "iframe"
-        url: "https://grafana.yukselcloud.com/d-solo/7d57716318ee0dddbac5a7f451fb7753/node-exporter-nodes?orgId=1&from=now-1h&to=now&panelId=2&var-instance=192.168.0.181:9100"
-        width: 450
-        height: 200
-        title: "CPU Usage - k8s-node-181 (192.168.0.181)"
-      - type: "iframe"
-        url: "https://grafana.yukselcloud.com/d-solo/7d57716318ee0dddbac5a7f451fb7753/node-exporter-nodes?orgId=1&from=now-1h&to=now&panelId=2&var-instance=192.168.0.182:9100"
-        width: 450
-        height: 200
-        title: "CPU Usage - k8s-node-182 (192.168.0.182)"
+
+      - name: "Speedtest Tracker"
+        logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/speedtest.png"
+        url: "http://192.168.0.223"
+        type: SpeedtestTracker
+
+message:
+  style: "is-info"
+  title: "Cluster CPU (Grafana)"
+  icon: "fas fa-microchip"
+  content: >
+    <div class="columns is-multiline">
+      <div class="column is-one-third">
+        <h4 class="title is-6">CPU Usage (All Nodes)</h4>
+        <iframe
+          src="https://grafana.yukselcloud.com/d-solo/7d57716318ee0dddbac5a7f451fb7753/node-exporter-nodes?orgId=1&from=now-1h&to=now&panelId=2"
+          style="width:100%;height:200px;border:0;overflow:hidden;"
+        ></iframe>
+      </div>
+      <div class="column is-one-third">
+        <h4 class="title is-6">CPU Usage - infra-pi (192.168.0.10)</h4>
+        <iframe
+          src="https://grafana.yukselcloud.com/d-solo/7d57716318ee0dddbac5a7f451fb7753/node-exporter-nodes?orgId=1&from=now-1h&to=now&panelId=2&var-instance=192.168.0.10:9100"
+          style="width:100%;height:200px;border:0;overflow:hidden;"
+        ></iframe>
+      </div>
+      <div class="column is-one-third">
+        <h4 class="title is-6">CPU Usage - k8s-node-171 (192.168.0.171)</h4>
+        <iframe
+          src="https://grafana.yukselcloud.com/d-solo/7d57716318ee0dddbac5a7f451fb7753/node-exporter-nodes?orgId=1&from=now-1h&to=now&panelId=2&var-instance=192.168.0.171:9100"
+          style="width:100%;height:200px;border:0;overflow:hidden;"
+        ></iframe>
+      </div>
+      <div class="column is-one-third">
+        <h4 class="title is-6">CPU Usage - k8s-node-172 (192.168.0.172)</h4>
+        <iframe
+          src="https://grafana.yukselcloud.com/d-solo/7d57716318ee0dddbac5a7f451fb7753/node-exporter-nodes?orgId=1&from=now-1h&to=now&panelId=2&var-instance=192.168.0.172:9100"
+          style="width:100%;height:200px;border:0;overflow:hidden;"
+        ></iframe>
+      </div>
+      <div class="column is-one-third">
+        <h4 class="title is-6">CPU Usage - k8s-node-181 (192.168.0.181)</h4>
+        <iframe
+          src="https://grafana.yukselcloud.com/d-solo/7d57716318ee0dddbac5a7f451fb7753/node-exporter-nodes?orgId=1&from=now-1h&to=now&panelId=2&var-instance=192.168.0.181:9100"
+          style="width:100%;height:200px;border:0;overflow:hidden;"
+        ></iframe>
+      </div>
+      <div class="column is-one-third">
+        <h4 class="title is-6">CPU Usage - k8s-node-182 (192.168.0.182)</h4>
+        <iframe
+          src="https://grafana.yukselcloud.com/d-solo/7d57716318ee0dddbac5a7f451fb7753/node-exporter-nodes?orgId=1&from=now-1h&to=now&panelId=2&var-instance=192.168.0.182:9100"
+          style="width:100%;height:200px;border:0;overflow:hidden;"
+        ></iframe>
+      </div>
+    </div>
