@@ -1,0 +1,28 @@
+name: Deploy Homer Config
+on:
+  push:
+    paths:
+      - "k3s-ha-cluster/caddy/configmap.yaml"
+
+jobs:
+  deploy-homer-config:
+    runs-on: self-hosted
+
+    container:
+      image: git.yukselcloud.com/lab/kubectl-node:latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG_DEPLOY }}" > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Apply Caddy ConfigMap
+        run: |
+          kubectl -n caddy apply -f k3s-ha-cluster/caddy/configmap.yaml
+
+      - name: Rollout Restart Caddy
+        run: kubectl -n caddy rollout restart deploy caddy
