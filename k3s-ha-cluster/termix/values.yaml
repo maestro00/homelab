@@ -5,7 +5,7 @@ replicaCount: 1
 image:
   name: termix
   repository: ghcr.io/lukegus/termix
-  tag: latest
+  tag: release-2.0.0
   pullPolicy: IfNotPresent
 
 service:

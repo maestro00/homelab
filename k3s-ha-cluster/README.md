@@ -907,7 +907,7 @@ docker run --rm docker.io/authelia/authelia:latest authelia \
 Lastly, run helm install command to deploy authelia helm chart.
 
 ```sh
-helm upgrade
+helm upgrade \
   --install authelia authelia/authelia \
   -n auth \
   --values auth/authelia/values.yaml
