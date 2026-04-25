@@ -167,6 +167,12 @@ services:
         url: "http://192.168.0.223"
         type: SpeedtestTracker
 
+      - name: "ntfy"
+        logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/ntfy.png"
+        url: "https://ntfy.yukselcloud.com"
+        subtitle: "Push Notifications"
+        tag: "public"
+
 message:
   style: "is-info"
   title: "Cluster CPU (Grafana)"
