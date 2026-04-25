@@ -28,3 +28,17 @@ jobs:
 
       - name: Rollout Restart Homer
         run: kubectl -n homer rollout restart deploy homer
+
+      - name: Notify
+        if: always()
+        run: |
+          STATUS="${{ job.status }}"
+          PRIORITY=$([[ "$STATUS" == "success" ]] && echo "default" || echo "high")
+          TAGS=$([[ "$STATUS" == "success" ]] && echo "white_check_mark" || echo "warning")
+          curl -sf \
+            -H "Title: homer deploy: $STATUS" \
+            -H "Priority: $PRIORITY" \
+            -H "Tags: $TAGS" \
+            -H "Authorization: Bearer ${{ secrets.NTFY_TOKEN }}" \
+            -d "Homer config applied and rollout restarted — $STATUS" \
+            https://ntfy.yukselcloud.com/homelab-deploys
