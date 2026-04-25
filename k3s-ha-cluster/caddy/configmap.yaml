@@ -99,6 +99,15 @@ data:
                 }
             }
         }
+        ntfy.yukselcloud.com {
+            log
+            crowdsec
+            reverse_proxy ntfy.ntfy.svc.cluster.local:80 {
+                header_up Host {host}
+                header_up X-Forwarded-Proto https
+                header_up X-Forwarded-For {remote_host}
+            }
+        }
         stirlingpdf.yukselcloud.com {
             log
             crowdsec
