@@ -59,6 +59,20 @@ jobs:
       image: git.yukselcloud.com/<user-or-org>/kubectl-node:latest
 ```
 
+## Create imagePullSecrets per namespace
+
+Once you need to use the image from this private Forgejo registry, you need to
+have `docker registry secret` in the namespace available, and then can reference
+it in manifests to be able to pull image from our registry.
+
+```sh
+kubectl create secret docker-registry forgejo-registry \
+  -n ntfy \
+  --docker-server=git.yukselcloud.com \
+  --docker-username=<your-username> \
+  --docker-password=<your-password>
+```
+
 ## Create a long lived token to use kubernetes operations via runner
 
 ```sh
