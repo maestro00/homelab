@@ -30,6 +30,15 @@ ntfy reads `NTFY_AUTH_USERS` and `NTFY_AUTH_TOKENS` on every startup and syncs
 them into the auth DB. The token (`tk_...`) is what you use as `NTFY_TOKEN` in
 Forgejo secrets and all `curl` calls.
 
+Create a secret using this token in order to reference in requests as bearer
+token:
+
+```sh
+kubectl create secret generic ntfy-node-token -n ntfy \
+  --from-literal=token=$(kubectl get secret -n ntfy \
+  ntfy-auth -o jsonpath='{.data.auth-tokens}' | base64 -d | awk -F: '{print $2}')
+```
+
 ## Install
 
 ```bash
@@ -52,6 +61,20 @@ curl -H "Authorization: Bearer tk_YOURTOKEN" \
      -d "Hello from homelab" \
      https://ntfy.yukselcloud.com/homelab-deploys
 ```
+
+## Node disk alerts
+
+A node-level alert can post to a generic topic like `homelab-node` using a DaemonSet.
+This runs one pod per node and checks the host filesystem every hour.
+
+Apply the manifest in the `ntfy` namespace and create a token secret before use:
+
+```bash
+kubectl apply -f ntfy/node-disk-alerts.yaml
+```
+
+If you want the alert topic to be more specific, change `NTFY_TOPIC` in the
+manifest from `homelab-node` to any topic you prefer.
 
 ## Integrations
 

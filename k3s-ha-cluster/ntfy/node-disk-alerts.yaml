@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: ntfy-node-disk-alert
+  namespace: ntfy
+spec:
+  selector:
+    matchLabels:
+      app: ntfy-node-disk-alert
+  template:
+    metadata:
+      labels:
+        app: ntfy-node-disk-alert
+    spec:
+      tolerations:
+        - operator: Exists
+      nodeSelector:
+        kubernetes.io/arch: amd64
+      imagePullSecrets:
+        - name: forgejo-registry
+      securityContext:
+        runAsUser: 0
+      volumes:
+        - name: host-root
+          hostPath:
+            path: /
+            type: Directory
+      containers:
+        - name: disk-alert
+          image: git.yukselcloud.com/lab/kubectl-node:latest
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: NTFY_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: ntfy-node-token
+                  key: token
+            - name: NTFY_TOPIC
+              value: homelab-node
+            - name: NTFY_URL
+              value: https://ntfy.yukselcloud.com
+          command:
+            - /usr/local/bin/node-disk-alert.sh
+          volumeMounts:
+            - name: host-root
+              mountPath: /host
+              readOnly: true
