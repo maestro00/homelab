@@ -1,0 +1,22 @@
+image:
+  repository: dgtlmoon/changedetection.io
+  tag: "latest"
+
+service:
+  type: ClusterIP
+  port: 5000
+
+strategy:
+  type: Recreate
+
+persistence:
+  storageClass: longhorn
+  size: 2Gi
+
+resources:
+  requests:
+    memory: 128Mi
+    cpu: 50m
+  limits:
+    memory: 256Mi
+    cpu: 500m

@@ -951,6 +951,18 @@ helm install lldap ./auth/lldap -n auth
 
 ```
 
+## 🔍 Changedetection.io
+
+Self-hosted website change detection and monitoring.
+
+```bash
+helm upgrade --install changedetection ./changedetection \
+  --namespace changedetection \
+  --create-namespace
+```
+
+See [changedetection/README.md](changedetection/README.md) for details.
+
 ## 📺 Media Server Stack (Sonarr, Radarr, Prowlarr, Bazarr, Jellyfin, Flaresolverr)
 
 A unified Helm-based deployment for media applications(a.k.a *arr stack) sharing

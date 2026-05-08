@@ -108,6 +108,15 @@ data:
                 header_up X-Forwarded-For {remote_host}
             }
         }
+        changedetection.yukselcloud.com {
+            log
+            crowdsec
+            reverse_proxy changedetection.changedetection.svc.cluster.local:5000 {
+                header_up Host {host}
+                header_up X-Forwarded-Proto https
+                header_up X-Forwarded-For {remote_host}
+            }
+        }
         stirlingpdf.yukselcloud.com {
             log
             crowdsec
