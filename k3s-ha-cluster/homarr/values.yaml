@@ -1,0 +1,28 @@
+image:
+  tag: "latest"
+
+env:
+  TZ: "Europe/Helsinki"
+  AUTH_PROVIDERS: "oidc"
+  AUTH_OIDC_ISSUER: "https://auth.yukselcloud.com"
+  AUTH_OIDC_CLIENT_NAME: "Authelia"
+  AUTH_OIDC_AUTO_LOGIN: "false" # set true after onboarding
+  AUTH_OIDC_FORCE_USERINFO: "true"
+  AUTH_OIDC_SCOPE_OVERWRITE: "openid email profile groups"
+  AUTH_OIDC_GROUPS_ATTRIBUTE: "groups"
+  AUTH_LOGOUT_REDIRECT_URL: "https://auth.yukselcloud.com/logout"
+
+envSecrets:
+  authOidcCredentials:
+    existingSecret: "auth-oidc-secret"
+    oidcClientId: "oidc-client-id"
+    oidcClientSecret: "oidc-client-secret"
+  dbEncryption:
+    existingSecret: "db-encryption"
+    key: "db-encryption-key"
+
+persistence:
+  homarrDatabase:
+    enabled: true
+    storageClassName: "longhorn"
+    size: "1Gi"
