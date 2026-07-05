@@ -33,10 +33,10 @@ data:
                 }
             }
         }
-        demo.yukselcloud.com {
+        portfolio.yukselcloud.com {
             log
             crowdsec
-            reverse_proxy demo-service.caddy-web-demo.svc.cluster.local:80
+            reverse_proxy portfolio-service.portfolio.svc.cluster.local:80
         }
         grafana.yukselcloud.com {
             log
