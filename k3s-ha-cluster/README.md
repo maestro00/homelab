@@ -146,7 +146,7 @@ metadata:
 ## 🌐 Caddy
 
 Caddy is used as the Ingress Controller to handle TLS, routing, and hostname-based
-services (like demo.yukselcloud.com and pihole.yukselcloud.com).
+services (like portfolio.yukselcloud.com and pihole.yukselcloud.com).
 
 ### 🚀 Deploying Caddy Ingress
 
@@ -199,8 +199,8 @@ For example:
 ```yaml
 data:
   Caddyfile: |
-    demo.yukselcloud.com {
-        reverse_proxy demo-service.caddy-web-demo.svc.cluster.local:80
+    portfolio.yukselcloud.com {
+        reverse_proxy portfolio-service.portfolio.svc.cluster.local:80
     }
     caddy-web.yukselcloud.com {
         reverse_proxy caddy-web.caddy-web.svc.cluster.local:80

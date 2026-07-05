@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: demo-html
+  name: portfolio-html
   namespace: portfolio
 data:
   index.html: |
