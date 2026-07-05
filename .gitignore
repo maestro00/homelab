@@ -5,5 +5,5 @@ terraform/.terraform/
 terraform/terraform.tfstate
 terraform/terraform.tfstate.backup
 terraform/.terraform.lock.hcl
-k3s-ha-cluster/demo-website/html/
+k3s-ha-cluster/portfolio/html/
 .kiro/steering/

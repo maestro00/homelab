@@ -1,0 +1,35 @@
+name: Deploy portfolio
+
+on:
+  push:
+    paths:
+      - "k3s-ha-cluster/portfolio/**"
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    container:
+      image: git.yukselcloud.com/lab/kubectl-node:latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG_DEPLOY }}" > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Delete old Pod (if still exists)
+        run: kubectl -n portfolio delete pod portfolio-site --ignore-not-found=true
+
+      - name: Apply ConfigMap and Deployment
+        run: |
+          kubectl -n portfolio apply -f k3s-ha-cluster/portfolio/configmap.yaml
+          kubectl -n portfolio apply -f k3s-ha-cluster/portfolio/deployment.yaml
+          kubectl -n portfolio apply -f k3s-ha-cluster/portfolio/service.yaml
+
+      - name: Rollout restart (picks up new ConfigMap content)
+        run: kubectl -n portfolio rollout restart deployment/portfolio-site
+
+      - name: Wait for rollout
+        run: kubectl -n portfolio rollout status deployment/portfolio-site --timeout=90s
