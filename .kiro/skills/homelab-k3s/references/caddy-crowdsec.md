@@ -6,7 +6,7 @@ Based on actual `caddy/configmap.yaml` from the repo.
 
 ## Caddy Image
 
-```
+```bash
 ghcr.io/serfriz/caddy-cloudflare-crowdsec
 ```
 
@@ -89,6 +89,7 @@ demo.yukselcloud.com {
 ## Adding a New Route — Step by Step
 
 ### 1. Find the service DNS name and port
+
 ```bash
 kubectl get svc -n <namespace>
 # format: <svc-name>.<namespace>.svc.cluster.local:<port>
@@ -97,6 +98,7 @@ kubectl get svc -n <namespace>
 ### 2. Decide on template
 
 **Standard service** (most cases — use the full header set with transport block):
+
 ```caddyfile
 myservice.yukselcloud.com {
   log
@@ -117,6 +119,7 @@ myservice.yukselcloud.com {
 ```
 
 **Simple service** (no auth layer, no special headers needed):
+
 ```caddyfile
 myservice.yukselcloud.com {
   log
@@ -126,9 +129,11 @@ myservice.yukselcloud.com {
 ```
 
 ### 3. Edit `caddy/configmap.yaml`
+
 Add the new block to the `Caddyfile: |` data section.
 
 ### 4. Apply + restart
+
 ```bash
 kubectl apply -f k3s-ha-cluster/caddy/configmap.yaml
 kubectl rollout restart deployment/caddy -n caddy
@@ -136,11 +141,15 @@ kubectl rollout status deployment/caddy -n caddy
 ```
 
 ### 5. If externally accessible — update DDNS
+
 Add to `ddns/config.json`:
+
 ```json
 { "name": "myservice", "proxied": false }
 ```
+
 Then regenerate and apply the secret:
+
 ```bash
 kubectl create secret generic config-cloudflare-ddns \
   --from-file=config.json \
@@ -184,7 +193,9 @@ Add new OIDC client to `auth/authelia/values.yaml` under `identity_providers.oid
 ```yaml
 - client_id: my-service
   client_name: My Service
-  client_secret: '$argon2id$...'   # generate: docker run authelia/authelia:latest authelia crypto hash generate pbkdf2 --password 'mysecret'
+  client_secret: '$argon2id$...'
+  # generate: docker run authelia/authelia:latest authelia crypto hash generate
+  # pbkdf2 --password 'mysecret'
   public: false
   authorization_policy: one_factor
   redirect_uris:
@@ -199,6 +210,7 @@ Add new OIDC client to `auth/authelia/values.yaml` under `identity_providers.oid
 ```
 
 After editing values.yaml:
+
 ```bash
 helm upgrade authelia authelia/authelia -n auth --values auth/authelia/values.yaml
 ```
@@ -210,12 +222,14 @@ helm upgrade authelia authelia/authelia -n auth --values auth/authelia/values.ya
 The bouncer key links Caddy to the CrowdSec LAPI. It must be set in two places:
 
 **1. CrowdSec Helm values** (`security/crowdsec/values.yaml`):
+
 ```yaml
 config:
   BOUNCER_KEY_caddy: "your-generated-key"  # openssl rand -base64 32
 ```
 
 **2. Caddy secret** (`caddy/crowdsec-bouncer-secret.yaml`):
+
 ```yaml
 apiVersion: v1
 kind: Secret
@@ -234,9 +248,11 @@ The Caddy deployment mounts this secret as an env var, which Caddy reads as `{en
 ## CrowdSec Useful Commands
 
 ```bash
-LAPI_POD=$(kubectl get pods -n crowdsec -l k8s-app=crowdsec,type=lapi -o name | head -1)
+LAPI_POD=$(
+  kubectl get pods -n crowdsec -l k8s-app=crowdsec,type=lapi -o name | head -1
+)
 
-kubectl exec -n crowdsec -it $LAPI_POD -- cscli bouncers list    # check bouncer connected
+kubectl exec -n crowdsec -it $LAPI_POD -- cscli bouncers list    # check bouncer
 kubectl exec -n crowdsec -it $LAPI_POD -- cscli alerts list      # detected attacks
 kubectl exec -n crowdsec -it $LAPI_POD -- cscli decisions list   # active IP bans
 kubectl exec -n crowdsec -it $LAPI_POD -- cscli metrics          # parsing stats
@@ -264,5 +280,6 @@ helm upgrade authelia authelia/authelia -n auth --values auth/authelia/values.ya
 # Login loop          → CORS or session cookie domain mismatch in Authelia config
 # Timeout on /        → access_control rules catching the root path
 # OIDC redirect error → redirect_uri doesn't match exactly (trailing slash matters)
-# CrowdSec 403        → real IP not preserved; check externalTrafficPolicy: Local on Caddy svc
+# CrowdSec 403        → real IP not preserved; check externalTrafficPolicy: Local
+#                       on Caddy svc
 ```

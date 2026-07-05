@@ -3,7 +3,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: demo-site
-  namespace: caddy-web-demo
+  namespace: portfolio
   labels:
     app: demo-site
 spec:

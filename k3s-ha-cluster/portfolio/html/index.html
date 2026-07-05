@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Yusuf Taylan Yuksel — Software Developer &amp; DevOps</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Design Tokens ───────────────────────────────────────── */
+    :root {
+      --bg:           #0a0f1e;
+      --bg-surface:   #111827;
+      --bg-card:      rgba(17,24,39,0.8);
+      --border:       rgba(99,118,160,0.18);
+      --text:         #e2e8f0;
+      --text-muted:   #94a3b8;
+      --accent:       #06b6d4;
+      --accent-glow:  rgba(6,182,212,0.18);
+      --accent2:      #6366f1;
+      --accent2-glow: rgba(99,102,241,0.15);
+      --success:      #10b981;
+      --radius:       12px;
+      --radius-sm:    8px;
+      --transition:   0.25s ease;
+      --font:         'Inter', system-ui, sans-serif;
+      --font-mono:    'JetBrains Mono', monospace;
+      --shadow:       0 4px 24px rgba(0,0,0,0.4);
+      --shadow-card:  0 2px 12px rgba(0,0,0,0.3);
+    }
+
+    [data-theme="light"] {
+      --bg:           #f1f5f9;
+      --bg-surface:   #ffffff;
+      --bg-card:      rgba(255,255,255,0.9);
+      --border:       rgba(100,116,139,0.2);
+      --text:         #1e293b;
+      --text-muted:   #64748b;
+      --accent:       #0891b2;
+      --accent-glow:  rgba(8,145,178,0.12);
+      --accent2:      #4f46e5;
+      --accent2-glow: rgba(79,70,229,0.1);
+      --shadow:       0 4px 24px rgba(0,0,0,0.08);
+      --shadow-card:  0 2px 12px rgba(0,0,0,0.06);
+    }
+
+    /* ── Reset ───────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      transition: background var(--transition), color var(--transition);
+      min-height: 100vh;
+    }
+    a { color: var(--accent); text-decoration: none; transition: opacity var(--transition); }
+    a:hover { opacity: 0.8; }
+    ul { list-style: none; }
+
+    /* ── Background mesh ─────────────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 20% 10%, var(--accent-glow), transparent),
+        radial-gradient(ellipse 60% 60% at 80% 80%, var(--accent2-glow), transparent);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Nav ─────────────────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(10,15,30,0.8);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 clamp(16px, 5vw, 64px);
+      transition: background var(--transition);
+    }
+    [data-theme="light"] nav { background: rgba(241,245,249,0.85); }
+
+    .nav-logo {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--accent);
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+    .nav-logo span { color: var(--text-muted); }
+
+    .nav-links {
+      display: flex;
+      gap: 28px;
+      align-items: center;
+    }
+    .nav-links a {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+    .nav-links a:hover { color: var(--accent); opacity: 1; }
+
+    .theme-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 6px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .theme-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Layout ──────────────────────────────────────────────── */
+    main {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 80px clamp(16px, 5vw, 32px) 80px;
+    }
+
+    section { margin-bottom: 80px; }
+
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--accent);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: clamp(22px, 3.5vw, 30px);
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .section-divider {
+      width: 40px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 2px;
+      margin-bottom: 32px;
+    }
+
+    /* ── Card ────────────────────────────────────────────────── */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: var(--shadow-card);
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .card:hover {
+      border-color: rgba(6,182,212,0.35);
+      box-shadow: 0 4px 24px rgba(6,182,212,0.08);
+    }
+
+    /* ── Hero ────────────────────────────────────────────────── */
+    #hero {
+      min-height: calc(100vh - 60px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding-top: 40px;
+      margin-bottom: 40px;
+    }
+
+    .hero-tag {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--accent);
+      margin-bottom: 20px;
+      opacity: 0;
+      animation: fadeUp 0.6s ease 0.1s forwards;
+    }
+
+    .hero-name {
+      font-size: clamp(36px, 7vw, 72px);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+      opacity: 0;
+      animation: fadeUp 0.6s ease 0.2s forwards;
+    }
+    .hero-name .accent { color: var(--accent); }
+
+    .hero-role {
+      font-size: clamp(16px, 2.5vw, 22px);
+      color: var(--text-muted);
+      font-weight: 400;
+      margin-bottom: 24px;
+      opacity: 0;
+      animation: fadeUp 0.6s ease 0.3s forwards;
+    }
+    .hero-role strong { color: var(--text); font-weight: 600; }
+
+    .hero-desc {
+      max-width: 600px;
+      font-size: 16px;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 40px;
+      opacity: 0;
+      animation: fadeUp 0.6s ease 0.4s forwards;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      opacity: 0;
+      animation: fadeUp 0.6s ease 0.5s forwards;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      border: none;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #0a0f1e;
+    }
+    .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); color: #0a0f1e; }
+    .btn-outline {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); opacity: 1; transform: translateY(-1px); }
+
+    .hero-stats {
+      display: flex;
+      gap: 40px;
+      margin-top: 60px;
+      opacity: 0;
+      animation: fadeUp 0.6s ease 0.65s forwards;
+    }
+    .stat-num {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--accent);
+      font-family: var(--font-mono);
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-top: 4px;
+    }
+
+    /* ── Animations ──────────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .animate-in {
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .animate-in.visible { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+<!-- ── Nav ───────────────────────────────────────────────────── -->
+<nav>
+  <div class="nav-logo"><span>~/</span>taylan</div>
+  <div class="nav-links">
+    <a href="#about">About</a>
+    <a href="#experience">Experience</a>
+    <a href="#skills">Skills</a>
+    <a href="#education">Education</a>
+    <a href="#contact">Contact</a>
+    <button class="theme-btn" onclick="toggleTheme()" aria-label="Toggle theme">
+      <span id="theme-icon">☀️</span>
+    </button>
+  </div>
+</nav>
+
+<!-- ── Hero ──────────────────────────────────────────────────── -->
+<main>
+<section id="hero">
+  <p class="hero-tag">// hello world</p>
+  <h1 class="hero-name">Yusuf Taylan<br><span class="accent">Yuksel</span></h1>
+  <p class="hero-role"><strong>Software Developer</strong> &amp; DevOps Engineer</p>
+  <p class="hero-desc">
+    Building reliable systems at the intersection of software and infrastructure.
+    Passionate about CI/CD automation, Kubernetes, and self-hosted everything.
+    Currently at <strong>Ericsson</strong>, Helsinki.
+  </p>
+  <div class="hero-actions">
+    <a href="#contact" class="btn btn-primary">Get in touch</a>
+    <a href="#experience" class="btn btn-outline">View experience</a>
+  </div>
+  <div class="hero-stats">
+    <div>
+      <div class="stat-num">4+</div>
+      <div class="stat-label">Years experience</div>
+    </div>
+    <div>
+      <div class="stat-num">5</div>
+      <div class="stat-label">Countries lived in</div>
+    </div>
+    <div>
+      <div class="stat-num">K3s</div>
+      <div class="stat-label">Home cluster</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── About ─────────────────────────────────────────────────── -->
+<section id="about" class="animate-in">
+  <p class="section-label">01 / about</p>
+  <h2 class="section-title">Who I Am</h2>
+  <div class="section-divider"></div>
+  <div class="card">
+    <p style="color:var(--text-muted); line-height:1.8; font-size:15px;">
+      I'm a software developer and DevOps engineer based in <strong style="color:var(--text)">Helsinki, Finland</strong>,
+      currently working at <strong style="color:var(--text)">Ericsson</strong> where I design CI/CD pipelines,
+      manage Kubernetes clusters, and automate infrastructure.
+    </p>
+    <p style="color:var(--text-muted); line-height:1.8; font-size:15px; margin-top:14px;">
+      My background spans IoT, blockchain, payment systems, and telecom — across five countries and three degrees.
+      Outside of work I run a self-hosted <strong style="color:var(--accent)">K3s HA cluster</strong> at home
+      with Longhorn storage, MetalLB, Caddy, Authelia, and a full Arr media stack — because the best way
+      to learn infrastructure is to break it at home first.
+    </p>
+    <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:20px;">
+      <a href="https://fi.linkedin.com/in/yusuf-taylan-yuksel" class="btn btn-outline" style="padding:8px 16px; font-size:13px;">LinkedIn ↗</a>
+      <a href="https://github.com/maestro00" class="btn btn-outline" style="padding:8px 16px; font-size:13px;">GitHub ↗</a>
+      <a href="mailto:ytaylanyuksel@gmail.com" class="btn btn-outline" style="padding:8px 16px; font-size:13px;">Email ↗</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── Experience ─────────────────────────────────────────────── -->
+<section id="experience" class="animate-in">
+  <p class="section-label">02 / experience</p>
+  <h2 class="section-title">Work History</h2>
+  <div class="section-divider"></div>
+  <div class="timeline">
+
+    <div class="tl-item animate-in">
+      <div class="tl-dot"></div>
+      <div class="tl-content card">
+        <div class="tl-header">
+          <div>
+            <h3 class="tl-role">Software Developer</h3>
+            <p class="tl-company">Ericsson <span class="tl-location">· Helsinki, Finland</span></p>
+          </div>
+          <span class="tl-date">Oct 2022 — Present</span>
+        </div>
+        <ul class="tl-bullets">
+          <li>Designed and managed CI/CD pipelines using Jenkins, Groovy, and Helm</li>
+          <li>Owned full lab infrastructure lifecycle: planning, equipment, and setup</li>
+          <li>Managed Kubernetes clusters and automated infrastructure as code</li>
+          <li>Collaborated on secure, high-performance development environments</li>
+        </ul>
+        <div class="tl-tags">
+          <span class="tag">Jenkins</span><span class="tag">Kubernetes</span><span class="tag">Helm</span><span class="tag">Groovy</span><span class="tag">IaC</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item animate-in">
+      <div class="tl-dot"></div>
+      <div class="tl-content card">
+        <div class="tl-header">
+          <div>
+            <h3 class="tl-role">Software Developer</h3>
+            <p class="tl-company">Templari SRL <span class="tl-location">· Italy</span></p>
+          </div>
+          <span class="tl-date">Feb 2021 — Sep 2022</span>
+        </div>
+        <ul class="tl-bullets">
+          <li>Maintained IoT Bridge applications and MQTT-based services</li>
+          <li>Built .NET Core MVC web interfaces to visualize client sensor data</li>
+          <li>Handled large datasets generated by on-premise IoT devices</li>
+        </ul>
+        <div class="tl-tags">
+          <span class="tag">.NET Core</span><span class="tag">MQTT</span><span class="tag">IoT</span><span class="tag">C#</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item animate-in">
+      <div class="tl-dot"></div>
+      <div class="tl-content card">
+        <div class="tl-header">
+          <div>
+            <h3 class="tl-role">Backend Developer Intern</h3>
+            <p class="tl-company">Tradenet Services <span class="tl-location">· Italy</span></p>
+          </div>
+          <span class="tl-date">Sep 2021 — Jul 2022</span>
+        </div>
+        <ul class="tl-bullets">
+          <li>Developed Go-based backend interacting with the Commercio blockchain</li>
+          <li>Created REST APIs and integrated comprehensive test suites</li>
+        </ul>
+        <div class="tl-tags">
+          <span class="tag">Go</span><span class="tag">REST API</span><span class="tag">Blockchain</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item animate-in">
+      <div class="tl-dot"></div>
+      <div class="tl-content card">
+        <div class="tl-header">
+          <div>
+            <h3 class="tl-role">Computer Engineer</h3>
+            <p class="tl-company">Mobilitypay <span class="tl-location">· Turkey</span></p>
+          </div>
+          <span class="tl-date">Jun 2019 — Jan 2021</span>
+        </div>
+        <ul class="tl-bullets">
+          <li>Developed smart card and payment solutions (EMV standard, C#, WCF)</li>
+          <li>Maintained Windows services and ASP.NET systems</li>
+          <li>Worked with secure personalization tools and RSA encryption</li>
+        </ul>
+        <div class="tl-tags">
+          <span class="tag">C#</span><span class="tag">ASP.NET</span><span class="tag">EMV</span><span class="tag">RSA</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item animate-in">
+      <div class="tl-dot" style="background:var(--text-muted);"></div>
+      <div class="tl-content card">
+        <div class="tl-header">
+          <div>
+            <h3 class="tl-role">Engineer Trainee</h3>
+            <p class="tl-company">Częstochowa Univ. of Technology <span class="tl-location">· Poland</span></p>
+          </div>
+          <span class="tl-date">Jul — Aug 2017</span>
+        </div>
+        <ul class="tl-bullets">
+          <li>Researched CUDA GPU performance with image processing algorithms in MATLAB</li>
+        </ul>
+        <div class="tl-tags">
+          <span class="tag">CUDA</span><span class="tag">MATLAB</span><span class="tag">GPU</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── Skills ─────────────────────────────────────────────────── -->
+<section id="skills" class="animate-in">
+  <p class="section-label">03 / skills</p>
+  <h2 class="section-title">Tech Stack</h2>
+  <div class="section-divider"></div>
+  <div class="skills-grid">
+
+    <div class="card animate-in">
+      <div class="skill-icon">⚙️</div>
+      <h4 class="skill-cat">DevOps &amp; Infrastructure</h4>
+      <div class="skill-tags">
+        <span class="tag tag-accent">Kubernetes</span>
+        <span class="tag tag-accent">K3s</span>
+        <span class="tag">Helm</span>
+        <span class="tag">Docker</span>
+        <span class="tag">Terraform</span>
+        <span class="tag">Ansible</span>
+        <span class="tag">Jenkins</span>
+        <span class="tag">MetalLB</span>
+        <span class="tag">Longhorn</span>
+      </div>
+    </div>
+
+    <div class="card animate-in">
+      <div class="skill-icon">💻</div>
+      <h4 class="skill-cat">Languages</h4>
+      <div class="skill-tags">
+        <span class="tag tag-accent">Go</span>
+        <span class="tag tag-accent">C#</span>
+        <span class="tag">Python</span>
+        <span class="tag">Bash</span>
+        <span class="tag">JavaScript</span>
+        <span class="tag">Java</span>
+        <span class="tag">Groovy</span>
+      </div>
+    </div>
+
+    <div class="card animate-in">
+      <div class="skill-icon">🗄️</div>
+      <h4 class="skill-cat">Databases</h4>
+      <div class="skill-tags">
+        <span class="tag tag-accent">PostgreSQL</span>
+        <span class="tag">MySQL</span>
+        <span class="tag">MSSQL</span>
+        <span class="tag">SQLite</span>
+        <span class="tag">MariaDB</span>
+        <span class="tag">Redis</span>
+      </div>
+    </div>
+
+    <div class="card animate-in">
+      <div class="skill-icon">🐧</div>
+      <h4 class="skill-cat">Systems &amp; Networking</h4>
+      <div class="skill-tags">
+        <span class="tag tag-accent">Linux</span>
+        <span class="tag">Ubuntu</span>
+        <span class="tag">Debian</span>
+        <span class="tag">SUSE</span>
+        <span class="tag">Caddy</span>
+        <span class="tag">Nginx</span>
+        <span class="tag">Proxmox</span>
+        <span class="tag">OpenWRT</span>
+      </div>
+    </div>
+
+    <div class="card animate-in">
+      <div class="skill-icon">🔒</div>
+      <h4 class="skill-cat">Security &amp; Auth</h4>
+      <div class="skill-tags">
+        <span class="tag">Authelia</span>
+        <span class="tag">CrowdSec</span>
+        <span class="tag">Vaultwarden</span>
+        <span class="tag">LDAP</span>
+        <span class="tag">Tailscale</span>
+        <span class="tag">RSA / TLS</span>
+      </div>
+    </div>
+
+    <div class="card animate-in">
+      <div class="skill-icon">🔄</div>
+      <h4 class="skill-cat">GitOps &amp; CI/CD</h4>
+      <div class="skill-tags">
+        <span class="tag tag-accent">Forgejo</span>
+        <span class="tag tag-accent">GitLab</span>
+        <span class="tag">GitHub Actions</span>
+        <span class="tag">Jenkins</span>
+        <span class="tag">GitOps</span>
+        <span class="tag">Pipelines</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── Education ──────────────────────────────────────────────── -->
+<section id="education" class="animate-in">
+  <p class="section-label">04 / education</p>
+  <h2 class="section-title">Academic Background</h2>
+  <div class="section-divider"></div>
+  <div class="edu-grid">
+
+    <div class="card edu-card animate-in">
+      <div class="edu-degree">MSc — ICT for Internet and Multimedia</div>
+      <div class="edu-school">University of Padova</div>
+      <div class="edu-meta">Italy &nbsp;·&nbsp; 2020 – 2022</div>
+    </div>
+
+    <div class="card edu-card animate-in">
+      <div class="edu-degree">Bachelor — Computer Engineering</div>
+      <div class="edu-school">Fırat University</div>
+      <div class="edu-meta">Turkey &nbsp;·&nbsp; 2013 – 2019</div>
+    </div>
+
+    <div class="card edu-card animate-in">
+      <div class="edu-degree">Erasmus — Computer Science</div>
+      <div class="edu-school">Białystok University of Technology</div>
+      <div class="edu-meta">Poland &nbsp;·&nbsp; 2016 – 2018</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── Contact ───────────────────────────────────────────────── -->
+<section id="contact" class="animate-in">
+  <p class="section-label">05 / contact</p>
+  <h2 class="section-title">Get In Touch</h2>
+  <div class="section-divider"></div>
+  <div class="card" style="text-align:center; padding:48px 32px;">
+    <p style="color:var(--text-muted); font-size:16px; max-width:500px; margin:0 auto 32px; line-height:1.7;">
+      Open to interesting problems in infrastructure, distributed systems, and backend engineering.
+      Feel free to reach out.
+    </p>
+    <a href="mailto:ytaylanyuksel@gmail.com" class="btn btn-primary" style="font-size:15px; padding:14px 32px;">
+      ytaylanyuksel@gmail.com
+    </a>
+    <div style="display:flex; justify-content:center; gap:24px; margin-top:32px;">
+      <a href="https://fi.linkedin.com/in/yusuf-taylan-yuksel" style="color:var(--text-muted); font-size:13px; font-weight:500; text-transform:uppercase; letter-spacing:0.06em;">LinkedIn ↗</a>
+      <a href="https://github.com/maestro00" style="color:var(--text-muted); font-size:13px; font-weight:500; text-transform:uppercase; letter-spacing:0.06em;">GitHub ↗</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ── Footer ────────────────────────────────────────────────── -->
+<footer>
+  <p>
+    <span style="color:var(--accent); font-family:var(--font-mono)">Yusuf Taylan Yuksel</span>
+    &nbsp;·&nbsp; Helsinki, Finland
+    &nbsp;·&nbsp;
+    <span style="color:var(--text-muted)">Self-hosted on K3s @ yukselcloud.com</span>
+  </p>
+</footer>
+
+<style>
+  /* ── Timeline ────────────────────────────────────────────────── */
+  .timeline { position: relative; padding-left: 24px; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 7px; top: 8px; bottom: 8px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--accent), var(--accent2), transparent);
+    opacity: 0.3;
+  }
+  .tl-item { position: relative; margin-bottom: 24px; }
+  .tl-dot {
+    position: absolute;
+    left: -20px; top: 24px;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--bg);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+  .tl-content { margin-left: 8px; }
+  .tl-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .tl-role { font-size: 16px; font-weight: 600; color: var(--text); }
+  .tl-company { font-size: 14px; color: var(--accent); margin-top: 2px; }
+  .tl-location { color: var(--text-muted); }
+  .tl-date {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    background: var(--bg-surface);
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .tl-bullets {
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1.7;
+    padding-left: 16px;
+    list-style: disc;
+    margin-bottom: 14px;
+  }
+  .tl-bullets li { margin-bottom: 4px; }
+
+  /* ── Tags ────────────────────────────────────────────────────── */
+  .tl-tags, .skill-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+  .tag-accent {
+    border-color: rgba(6,182,212,0.4);
+    color: var(--accent);
+    background: var(--accent-glow);
+  }
+
+  /* ── Skills grid ─────────────────────────────────────────────── */
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  .skill-icon { font-size: 24px; margin-bottom: 10px; }
+  .skill-cat {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+
+  /* ── Education ───────────────────────────────────────────────── */
+  .edu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  .edu-card { border-left: 3px solid var(--accent); border-radius: 0 var(--radius) var(--radius) 0; }
+  .edu-degree { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .edu-school { font-size: 15px; font-weight: 700; color: var(--accent); margin-bottom: 6px; }
+  .edu-meta { font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); }
+
+  /* ── Footer ──────────────────────────────────────────────────── */
+  footer {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 32px clamp(16px,5vw,64px);
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  /* ── Responsive ──────────────────────────────────────────────── */
+  @media (max-width: 640px) {
+    .nav-links a:not(:last-child) { display: none; }
+    .hero-stats { gap: 24px; }
+    .tl-header { flex-direction: column; }
+    .tl-date { align-self: flex-start; }
+  }
+</style>
+
+<script>
+  // Theme toggle
+  function toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    document.getElementById('theme-icon').textContent = isDark ? '🌙' : '☀️';
+  }
+
+  // Intersection Observer for scroll animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.animate-in').forEach(el => observer.observe(el));
+
+  // Stagger children within animated parents
+  document.querySelectorAll('.skills-grid .animate-in, .edu-grid .animate-in, .tl-item.animate-in')
+    .forEach((el, i) => { el.style.transitionDelay = `${i * 80}ms`; });
+</script>
+
+</body>
+</html>
