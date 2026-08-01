@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: beszel-agent
+  namespace: monitoring
+  labels:
+    app: beszel-agent
+spec:
+  selector:
+    matchLabels:
+      app: beszel-agent
+  updateStrategy:
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 100%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: beszel-agent
+    spec:
+      hostNetwork: true
+      containers:
+        - name: beszel-agent
+          image: henrygd/beszel-agent:0.18.7
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 45876
+              hostPort: 45876
+          env:
+            - name: LISTEN
+              value: "45876"
+            - name: HUB_URL
+              value: "http://192.168.0.225:8090"
+            - name: KEY
+              valueFrom:
+                secretKeyRef:
+                  name: beszel-agent
+                  key: key
+            - name: TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: beszel-agent
+                  key: token
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "200m"
+      restartPolicy: Always
+      tolerations:
+        - operator: Exists
+          effect: NoSchedule
+        - operator: Exists
+          effect: NoExecute

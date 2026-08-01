@@ -1,0 +1,47 @@
+name: Deploy Beszel
+on:
+  push:
+    paths:
+      - "k3s-ha-cluster/monitoring/beszel/**"
+
+jobs:
+  deploy-beszel:
+    runs-on: self-hosted
+
+    container:
+      image: git.yukselcloud.com/lab/kubectl-node:latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG_DEPLOY }}" > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Apply Beszel
+        run: |
+          # secret.yaml is a placeholder — real secret applied manually
+          # (kubectl -n monitoring create secret generic beszel-agent ...)
+          kubectl -n monitoring apply -f k3s-ha-cluster/monitoring/beszel/deployment.yaml
+          kubectl -n monitoring apply -f k3s-ha-cluster/monitoring/beszel/service.yaml
+          kubectl -n monitoring apply -f k3s-ha-cluster/monitoring/beszel/pvc.yaml
+          kubectl -n monitoring apply -f k3s-ha-cluster/monitoring/beszel/agent-daemonset.yaml
+
+      - name: Rollout Restart Beszel
+        run: kubectl -n monitoring rollout restart deploy beszel
+
+      - name: Notify
+        if: always()
+        run: |
+          STATUS="${{ job.status }}"
+          PRIORITY=$([[ "$STATUS" == "success" ]] && echo "default" || echo "high")
+          TAGS=$([[ "$STATUS" == "success" ]] && echo "white_check_mark" || echo "warning")
+          curl -sf \
+            -H "Title: beszel deploy: $STATUS" \
+            -H "Priority: $PRIORITY" \
+            -H "Tags: $TAGS" \
+            -H "Authorization: Bearer ${{ secrets.NTFY_TOKEN }}" \
+            -d "Beszel applied and rollout restarted — $STATUS" \
+            https://ntfy.yukselcloud.com/homelab-deploys
