@@ -129,7 +129,6 @@ data:
         }
         beszel.yukselcloud.com {
             log
-            crowdsec
             reverse_proxy beszel.monitoring.svc.cluster.local:8090 {
                 header_up Host {host}
                 header_up X-Forwarded-Proto https
