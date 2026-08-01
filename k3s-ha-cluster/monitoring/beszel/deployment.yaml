@@ -23,9 +23,8 @@ spec:
             - name: http
               containerPort: 8090
           env:
-            # ponytail: change to https://beszel.yukselcloud.com when the Caddy route lands (issue #11 step 6)
             - name: APP_URL
-              value: "http://192.168.0.225:8090"
+              value: "https://beszel.yukselcloud.com"
           resources:
             requests:
               memory: "64Mi"
