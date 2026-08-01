@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - "k3s-ha-cluster/monitoring/beszel/**"
+  workflow_dispatch:
 
 jobs:
   deploy-beszel:

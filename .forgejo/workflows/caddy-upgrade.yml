@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - "k3s-ha-cluster/caddy/configmap.yaml"
+  workflow_dispatch:
 
 jobs:
   deploy-homer-config:
