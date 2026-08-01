@@ -40,4 +40,4 @@ jobs:
             -H "Tags: $TAGS" \
             -H "Authorization: Bearer ${{ secrets.NTFY_TOKEN }}" \
             -d "Caddy configmap applied and rollout restarted — $STATUS" \
-            https://ntfy.yukselcloud.com/homelab-deploys
+            http://ntfy.ntfy.svc.cluster.local/homelab-deploys

@@ -10,7 +10,7 @@ rules:
   resources: ["pods/eviction"]
   verbs: ["create"]
 - apiGroups: ["apps"]
-  resources: ["deployments","replicasets","statefulsets"]
+  resources: ["deployments","replicasets","statefulsets","daemonsets"]
   verbs: ["get","list","watch","create","update","patch","delete"]
 - apiGroups: [""]
   resources: ["nodes"]
