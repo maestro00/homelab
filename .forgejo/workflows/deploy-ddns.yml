@@ -1,0 +1,54 @@
+name: Deploy DDNS Config
+on:
+  push:
+    paths:
+      - "k3s-ha-cluster/ddns/**"
+  workflow_dispatch:
+
+jobs:
+  deploy-ddns:
+    runs-on: self-hosted
+
+    container:
+      image: git.yukselcloud.com/lab/kubectl-node:latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG_DEPLOY }}" > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Render Config
+        run: |
+          sed "s/__CLOUDFLARE_API_TOKEN__/${{ secrets.CLOUDFLARE_DDNS_API_TOKEN }}/" \
+            k3s-ha-cluster/ddns/config.json > /tmp/config.json
+
+      - name: Apply DDNS Secret
+        run: |
+          kubectl -n ddns create secret generic config-cloudflare-ddns \
+            --from-file=config.json=/tmp/config.json \
+            --dry-run=client -oyaml | kubectl -n ddns apply -f -
+
+      - name: Apply Deployment
+        run: |
+          kubectl -n ddns apply -f k3s-ha-cluster/ddns/deployment.yaml
+
+      - name: Rollout Restart DDNS
+        run: kubectl -n ddns rollout restart deploy cloudflare-ddns
+
+      - name: Notify
+        if: always()
+        run: |
+          STATUS="${{ job.status }}"
+          PRIORITY=$([[ "$STATUS" == "success" ]] && echo "default" || echo "high")
+          TAGS=$([[ "$STATUS" == "success" ]] && echo "white_check_mark" || echo "warning")
+          curl -sf \
+            -H "Title: ddns deploy: $STATUS" \
+            -H "Priority: $PRIORITY" \
+            -H "Tags: $TAGS" \
+            -H "Authorization: Bearer ${{ secrets.NTFY_TOKEN }}" \
+            -d "DDNS config applied and rollout restarted — $STATUS" \
+            http://ntfy.ntfy.svc.cluster.local/homelab-deploys

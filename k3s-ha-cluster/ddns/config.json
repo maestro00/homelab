@@ -1,0 +1,88 @@
+{
+    "cloudflare": [
+        {
+            "authentication": {
+                "api_token": "__CLOUDFLARE_API_TOKEN__"
+            },
+            "zone_id": "3e9dce3eff6af4489968993610f205e7",
+            "subdomains": [
+                {
+                    "name": "caddy",
+                    "proxied": false
+                },
+                {
+                    "name": "portfolio",
+                    "proxied": false
+                },
+                {
+                    "name": "keycloak",
+                    "proxied": false
+                },
+                {
+                    "name": "pihole",
+                    "proxied": false
+                },
+                {
+                    "name": "nextcloud",
+                    "proxied": false
+                },
+                {
+                    "name": "vaultwarden",
+                    "proxied": false
+                },
+                {
+                    "name": "paperless",
+                    "proxied": false
+                },
+                {
+                    "name": "git",
+                    "proxied": false
+                },
+                {
+                    "name": "ldap",
+                    "proxied": false
+                },
+                {
+                    "name": "auth",
+                    "proxied": false
+                },
+                {
+                    "name": "jellyfin",
+                    "proxied": false
+                },
+                {
+                    "name": "grafana",
+                    "proxied": false
+                },
+                {
+                    "name": "stirlingpdf",
+                    "proxied": false
+                },
+                {
+                    "name": "ntfy",
+                    "proxied": false
+                },
+                {
+                    "name": "changedetection",
+                    "proxied": false
+                },
+                {
+                    "name": "homarr",
+                    "proxied": false
+                },
+                {
+                    "name": "beszel",
+                    "proxied": false
+                },
+                {
+                    "name": "uptime-kuma",
+                    "proxied": false
+                }
+            ]
+        }
+    ],
+    "a": true,
+    "aaaa": true,
+    "purgeUnknownRecords": false,
+    "ttl": 3600
+}
