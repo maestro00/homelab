@@ -5,10 +5,10 @@ Keeps `yukselcloud.com` DNS records pointed at your home IP. Runs
 
 ## Files
 
-| File            | Purpose                                   |
-| --------------- | ----------------------------------------- |
-| `config.json`   | Cloudflare zone + subdomain list (token is a `__CLOUDFLARE_API_TOKEN__` placeholder) |
-| `deployment.yaml` | Deployment + mounts the `config-cloudflare-ddns` Secret |
+| File              | Purpose                          |
+| ----------------- | -------------------------------- |
+| `config.json`     | Cloudflare zone + subdomain list |
+| `deployment.yaml` | Deployment + mounts ddns Secret  |
 
 ## Adding a subdomain for a new service
 

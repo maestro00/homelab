@@ -11,7 +11,7 @@ are now automated via Forgejo Actions on push to `master`.
 
 Edit `k3s-ha-cluster/caddy/configmap.yaml` and add a site block:
 
-```
+```caddyfile
 service.yukselcloud.com {
     log
     crowdsec
@@ -48,6 +48,7 @@ Push both changes to `master`. The workflows handle apply + rollout restart.
 - `temp/config.json` is also used locally to manually refresh
   `config-cloudflare-ddns-Secret.yaml` if you need to deploy outside the
   workflow:
+
   ```bash
   kubectl -n ddns create secret generic config-cloudflare-ddns \
       --from-file=config.json=temp/config.json \

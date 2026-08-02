@@ -26,18 +26,26 @@ docs consistent and diffable.
 - Lists: `-` bullets, numbered `1.` only for ordered steps. Sub-lists indent 2 spaces.
 - Break long paragraphs at a readable line width (~80 chars) at natural points.
 - Use `---` horizontal rules sparingly, only between major sections.
+- Keep lines under 80 characters (MD013). Hard-wrap prose at natural points.
 
 ## Code & commands
 
-- Fenced code blocks with a language tag: ` ```bash `, ` ```yaml `, ` ```text `.
+- Fenced code blocks with a language tag (MD040): ` ```bash `, ` ```yaml `,
+  ` ```text `, ` ```caddyfile `. Never leave a fence without a language.
+- Surround every fenced block with blank lines (MD031) — never glue a block
+  directly to a paragraph or list item.
 - Inline code with single backticks for files, paths, commands, flags, values.
-- Shell commands shown as `$ ` prefix inside bash blocks, or plain for copy-paste.
-- Never wrap a bare command in prose — use inline code or a block.
+  No spaces inside the backticks (MD038).
+- Shell prompts are written as `$` inside bash blocks; omit it for pure
+  copy-paste. Never wrap a bare command in prose — use inline code or a block.
 
 ## Tables
 
-- Pipe tables for tabular data. Header row + separator row always.
-- Align columns with padding for readability; end every row with a pipe.
+- Pipe tables for tabular data. Header row + separator row always (MD055).
+- Align all pipes to the widest cell in each column, header included (MD060,
+  style `aligned`). Left-align text; pad with spaces, not tabs.
+- Keep table rows under 80 chars; split wide columns or move long prose into a
+  following note.
 
 ## Emphasis & links
 
