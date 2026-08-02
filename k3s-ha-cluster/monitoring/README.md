@@ -30,6 +30,20 @@ The DaemonSet already runs an agent on every node. Add a host in the Beszel
 UI using its node IP and port 45876 with the KEY from the `beszel-agent`
 secret.
 
+## Uptime Kuma (synthetic checks + TLS cert expiry)
+
+Raw manifests in `uptime-kuma/` — Deployment + ClusterIP service + Longhorn PVC
+(`uptime-kuma-data`), proxied by Caddy at `https://uptime-kuma.yukselcloud.com`.
+
+```bash
+kubectl apply -f monitoring/uptime-kuma/
+```
+
+On first login, create the admin account at `https://uptime-kuma.yukselcloud.com`,
+then add HTTP(S) monitors for the public services plus TLS certificate monitors,
+with notifications sent to the ntfy provider
+(`https://ntfy.yukselcloud.com/homelab-alerts`).
+
 ## Notes
 
 - Agents use `hostNetwork: true` so the hub reaches them at `<node-ip>:45876`.
