@@ -1,61 +1,39 @@
-# Monitoring (Prometheus/Grafana)
+# Monitoring (Beszel)
 
-This directory holds Helm values and instructions for deploying the
-[kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack)
-(prometheus, node-exporter, alertmanager, grafana, etc.) into the cluster.
+This directory holds raw manifests for [Beszel](https://beszel.com), the
+lightweight host/container monitoring stack. It replaces the former
+Grafana/Prometheus (kube-prometheus-stack) deployment.
 
-## Installation
+## Components
+
+| File | What it creates |
+|------|-----------------|
+| `deployment.yaml` | Beszel hub (web UI + database), served at `https://beszel.yukselcloud.com` |
+| `service.yaml` | LoadBalancer `192.168.0.225` → hub port 8090 |
+| `pvc.yaml` | Longhorn PVC `beszel-data` (2Gi, hub database) |
+| `secret.yaml` | `beszel-agent` secret (KEY/TOKEN for agent registration) |
+| `agent-daemonset.yaml` | `beszel-agent` DaemonSet — one agent pod per node (host network, port 45876) |
+
+## Deploying
 
 ```bash
-helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-helm repo update
-
-kubectl apply -f monitoring/grafana-admin-secret.yaml
-
-helm upgrade --install prometheus \
-  prometheus-community/kube-prometheus-stack \
-  --namespace monitoring --create-namespace \
-  -f monitoring/values.yaml
+kubectl apply -f monitoring/beszel/
 ```
 
-## Customising
+Caddy serves the hub via the `beszel.yukselcloud.com` block in
+`caddy/configmap.yaml`; the `beszel.monitoring.svc.cluster.local:8090` backend
+is referenced there.
 
-Edit `values.yaml` to change storage sizes, enable ingress, set Grafana
-credentials, etc.  Values are passed directly through to the upstream chart.
+## Adding a node
 
-## Scraping extra targets
+The DaemonSet already runs an agent on every node. Add a host in the Beszel
+UI using its node IP and port 45876 with the KEY from the `beszel-agent`
+secret.
 
-```yaml
-# example ServiceMonitor for a service in the "demo" namespace
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
-metadata:
-  name: demo-web
-  namespace: monitoring
-  labels:
-    release: prometheus    # corresponds to the helm release name
-spec:
-  selector:
-    matchLabels:
-      app: demo-web
-  namespaceSelector:
-    matchNames:
-      - demo-website
-  endpoints:
-    - port: http
-      path: /metrics
-      interval: 15s
-```
+## Notes
 
-Alternatively, add annotations to your Deployment/Service pods:
-
-```yaml
-metadata:
-  annotations:
-    prometheus.io/scrape: "true"
-    prometheus.io/path: /metrics
-    prometheus.io/port: "8080"
-```
-
-These annotations are picked up by the default `ServiceMonitor` shipped in
-`kube-prometheus-stack`.
+- Agents use `hostNetwork: true` so the hub reaches them at `<node-ip>:45876`.
+- The hub itself is pinned to the MetalLB IP `192.168.0.225`; keep this in
+  sync with the agent's `HUB_URL` and the Caddy backend.
+- Alerting is handled by Uptime Kuma (see `monitoring/uptime-kuma/`) — Beszel
+  covers system metrics, Uptime Kuma covers endpoint health checks.

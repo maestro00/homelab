@@ -38,23 +38,6 @@ data:
             crowdsec
             reverse_proxy portfolio-service.portfolio.svc.cluster.local:80
         }
-        grafana.yukselcloud.com {
-            log
-            crowdsec
-            reverse_proxy prometheus-grafana.monitoring.svc.cluster.local:80 {
-                header_up Host {host}
-                header_up X-Forwarded-Proto https
-                header_up X-Forwarded-Host {host}
-                header_up X-Forwarded-Uri {uri}
-                header_up X-Forwarded-For {remote_host}
-
-                transport http {
-                    read_timeout 30s
-                    write_timeout 30s
-                    dial_timeout 10s
-                }
-            }
-        }
         keycloak.yukselcloud.com {
             log
             crowdsec
@@ -130,6 +113,15 @@ data:
         beszel.yukselcloud.com {
             log
             reverse_proxy beszel.monitoring.svc.cluster.local:8090 {
+                header_up Host {host}
+                header_up X-Forwarded-Proto https
+                header_up X-Forwarded-Host {host}
+                header_up X-Forwarded-For {remote_host}
+            }
+        }
+        uptime-kuma.yukselcloud.com {
+            log
+            reverse_proxy uptime-kuma.monitoring.svc.cluster.local:3001 {
                 header_up Host {host}
                 header_up X-Forwarded-Proto https
                 header_up X-Forwarded-Host {host}
