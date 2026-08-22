@@ -169,6 +169,10 @@ jobs:
 - For Helm deploys: use `helm upgrade --install ...` in the workflow step instead of `kubectl apply`
 - For ConfigMap-only changes (like Caddy): apply + rollout restart
 
+> Forgejo API access (tokens, issues, workflow runs), the current workflow
+> inventory, and the container-registry pull-secret pattern are documented in
+> [references/forgejo-api-and-ci.md](references/forgejo-api-and-ci.md).
+
 ---
 
 ## Deployment Decision: Helm vs Raw Manifests
