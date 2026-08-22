@@ -145,3 +145,8 @@ data:
                 }
             }
         }
+        opengym.yukselcloud.com {
+            log
+            crowdsec
+            reverse_proxy opengym.opengym.svc.cluster.local:80
+        }

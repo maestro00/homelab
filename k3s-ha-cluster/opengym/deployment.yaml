@@ -1,0 +1,134 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: opengym
+  namespace: opengym
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: opengym
+  template:
+    metadata:
+      labels:
+        app: opengym
+    spec:
+      imagePullSecrets:
+        - name: forgejo-registry
+
+      # One-time download of exercise images + GIFs (~140 MB, CC licensed).
+      # Skipped when media/img is already populated, so pod restarts are cheap.
+      initContainers:
+        - name: media
+          image: alpine/git:latest
+          command:
+            - /bin/sh
+            - -c
+            - |
+              if [ -z "$(ls -A /out/img 2>/dev/null)" ]; then
+                echo "Downloading exercise media (~140 MB, one time)..."
+                git clone --depth 1 https://github.com/hasaneyldrm/exercises-dataset /tmp/ds
+                cp /tmp/ds/images/*.jpg /out/img/ && cp /tmp/ds/videos/*.gif /out/gif/
+                echo "Exercise media ready."
+              else
+                echo "Exercise media already present - skipping."
+              fi
+          volumeMounts:
+            - name: data
+              mountPath: /out/img
+              subPath: media/img
+            - name: data
+              mountPath: /out/gif
+              subPath: media/gif
+
+      containers:
+        # Passkey auth + per-user data (Node, no framework). Data is plain JSON.
+        - name: api
+          image: git.yukselcloud.com/lab/opengym-api:v1.2.7
+          ports:
+            - containerPort: 3000
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          env:
+            - name: PORT
+              value: "3000"
+            - name: DATA_DIR
+              value: /data
+            # Passkeys are bound to this exact hostname and only work over
+            # HTTPS (localhost excepted), so these point at the final Caddy
+            # domain. Until it is exposed, use guest mode over HTTP.
+            - name: RP_ID
+              value: opengym.yukselcloud.com
+            - name: ORIGIN
+              value: https://opengym.yukselcloud.com
+            - name: RP_NAME
+              value: openGym
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          volumeMounts:
+            - name: data
+              mountPath: /data
+              subPath: data
+
+        # nginx serving the React build; proxies /api -> api on localhost
+        # (both containers share the pod network namespace).
+        - name: web
+          image: git.yukselcloud.com/lab/opengym-web:v1.2.7
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          env:
+            - name: NGINX_PORT
+              value: "80"
+            - name: BACKEND
+              value: "127.0.0.1"
+            - name: PORT
+              value: "3000"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          volumeMounts:
+            - name: data
+              mountPath: /usr/share/nginx/html/img
+              subPath: media/img
+              readOnly: true
+            - name: data
+              mountPath: /usr/share/nginx/html/gif
+              subPath: media/gif
+              readOnly: true
+
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: opengym-data

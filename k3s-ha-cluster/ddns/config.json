@@ -77,6 +77,10 @@
                 {
                     "name": "uptime-kuma",
                     "proxied": false
+                },
+                {
+                    "name": "opengym",
+                    "proxied": false
                 }
             ]
         }
