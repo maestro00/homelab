@@ -90,5 +90,4 @@ After logging in:
 
 ## Visualization
 
-Metrics are exported by enabling the prometheus from settings in UI and frames are
-exported via [service-monitor](../monitoring/service-monitor/speedtest-tracker.yaml).
+Metrics are exported by enabling the prometheus from settings in UI.

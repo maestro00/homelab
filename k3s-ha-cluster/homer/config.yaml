@@ -43,14 +43,8 @@ services:
         tag: "private"
 
   - name: "Identity & Security"
-    icon: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/keycloak.png"
+    icon: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/authelia.png"
     items:
-      - name: "Keycloak ⚠️"
-        logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/keycloak.png"
-        url: "https://keycloak.yukselcloud.com"
-        subtitle: "Central Authentication (DEPRECATED)"
-        tag: "public"
-
       - name: "Vaultwarden"
         logo: "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/vaultwarden.png"
         url: "https://vaultwarden.yukselcloud.com"

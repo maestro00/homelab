@@ -70,7 +70,7 @@ gitea:
       MODE: console
       LEVEL: info
     oauth2_client:
-      ENABLE_AUTO_REGISTRATION: true # optional; handy with Keycloak
+      ENABLE_AUTO_REGISTRATION: true # optional; handy with Authelia
       ACCOUNT_LINKING: auto
     service:
       DISABLE_REGISTRATION: true

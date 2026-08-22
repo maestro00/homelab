@@ -20,7 +20,8 @@ for your operating system.
 ## Spin Up Your First VM
 
 1. Configure the Terraform files with your specific values.
-2. Generate a password to be used in the [cloud-init file](../cloud-init/node1.yaml)
+2. Generate a password to be used in the
+   [cloud-init file](cloud-init/kubernetes-node.yaml)
 by running:
 
    ```bash

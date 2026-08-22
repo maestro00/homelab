@@ -15,23 +15,11 @@
                     "proxied": false
                 },
                 {
-                    "name": "keycloak",
-                    "proxied": false
-                },
-                {
                     "name": "pihole",
                     "proxied": false
                 },
                 {
-                    "name": "nextcloud",
-                    "proxied": false
-                },
-                {
                     "name": "vaultwarden",
-                    "proxied": false
-                },
-                {
-                    "name": "paperless",
                     "proxied": false
                 },
                 {

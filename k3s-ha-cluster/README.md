@@ -18,7 +18,7 @@ With this setup, we can host;
 - Self-hosted GitOps tools (e.g. ArgoCD, Flux)
 - Media servers (Plex, Jellyfin)
 - Monitoring (Prometheus, Grafana)
-- Web apps (Nextcloud, Ghost, etc.)
+- Web apps (Forgejo, Vaultwarden, etc.)
 - Homelab dashboards, like Homer
 
 ## 🛠️ Infrastructure Overview
@@ -123,7 +123,7 @@ kubectl create secret generic -n metallb-system memberlist \
 
 📜 **Configure IP Pool**
 
-Apply [MetalLB config](/k3s-ha-cluster/deployments/metallb-config.yaml) to
+Apply [MetalLB config](/k3s-ha-cluster/metallb/metallb-config.yaml) to
 assign IPs to LoadBalancer services from given `addresses:` in the config file.
 
 ```yaml
@@ -193,7 +193,7 @@ the requests are forwarded to my caddy ingress.
 
 ### 📝 Customizing Caddyfile
 
-Edit `deployments/caddy/configmap.yaml` to add or change domain routing rules.
+Edit `caddy/configmap.yaml` to add or change domain routing rules.
 For example:
 
 ```yaml
@@ -405,142 +405,10 @@ echo "dm_crypt" | sudo tee -a /etc/modules
 either restart the node or the manager pod of that node to get updated status in
 longhorn UI.
 
-## 🔑 Keycloak - Central Authentication
-
-Keycloak provides central authentication for our services via OAuth2 / OIDC / SAML.
-
-Install it via helm
-
-```bash
-kubectl create namespace keycloak
-kubectl create secret generic keycloak-secret \
-  --from-literal=admin-password=password \ # By default admin username is 'user'
-  -n keycloak
-
-helm repo add bitnami https://charts.bitnami.com/bitnami
-helm repo update
-
-helm upgrade --install keycloak bitnami/keycloak \
-  --namespace keycloak \
-  -f keycloak/values.yaml
-```
-
-### Keycloak Setup
-
-To create our Realm and clients via Rest API, get `svc` LoadBalancer IP and
-obtain an API token for your user.
-
-```bash
-kubectl get svc -n keycloak
-NAME                     TYPE           CLUSTER-IP     EXTERNAL-IP     PORT(S)
-keycloak                 LoadBalancer   10.43.215.69   192.168.0.202   80:31215/TCP
-keycloak-headless        ClusterIP      None           <none>          8080/TCP
-keycloak-postgresql      ClusterIP      10.43.52.242   <none>          5432/TCP
-keycloak-postgresql-hl   ClusterIP      None           <none>          5432/TCP
-```
-
-Login with default admin user and credentials you defined in the `keycloak-secret`.
-Create a permanent admin user and assign all the admin roles. Then, delete the
-initial temporary admin user by the new admin.
-
-Use [keycloak/setup_realm.sh](/k3s-ha-cluster/keycloak/setup_realm.sh) to bootstrap
-a new realm named `homelab`.
-
-Create a client by updating `CLIENT_NAME` and `CLIENT_DOMAIN` environment variables
-in [keycloak/create_client.sh](/k3s-ha-cluster/keycloak/create_client.sh) to be
-used in our authentication services.
-
-> **Note**: To add DNS record in cloudflare, update your `config.json` and generate
-a new secret. After that, restart your ddns pod to add your record immediately before
-the actual `ttl`.
-
-## ☁️ Nextcloud on Kubernetes (Deprecated)
-
-This deployment uses the official
-[Nextcloud Helm chart](https://github.com/nextcloud/helm) with full OpenID
-Connect (OIDC) integration via Keycloak, optional external MariaDB and Redis
-support, and production-readiness features like PVC persistence and support for
-scaling (with some caveats).
-
----
-
-### 🔐 OIDC Configuration
-
-Before deploying, create a Kubernetes secret for OICD credentials, find
-`CLIENT_ID` and `CLIENT_SECRET` either from UI or using API.
-
-```bash
-kubectl create namespace nextcloud
-kubectl apply -f nextcloud/secret.yaml
-```
-
-Then, apply a custom ConfigMap that modifies the login redirection to point to
-your OIDC provider:
-
-```bash
-kubectl apply -f nextcloud/configmap.yaml
-```
-
-Your nextcloud/secret.yaml should look like:
-
-```bash
-apiVersion: v1
-kind: Secret
-metadata:
-  name: nextcloud-oidc-secret
-  namespace: nextcloud
-type: Opaque
-stringData:
-  OIDC_CLIENT_ID: myclientid
-  OIDC_CLIENT_SECRET: myclientsecret
-  OIDC_ISSUER_URL: https://keycloak.example.com/realms/myrealm
-```
-
-Create a longhorn backed PVC for a space you need, to support replicas, apply
-storage `accessModes` as `ReadWriteMany`.
-
-```bash
-kubectl apply -f nextcloud/pvc.yaml
-```
-
-The Helm chart is configured to read these values and enable the oidc_login
-Nextcloud app automatically.
-
-### ☸️ Install via Helm
-
-```bash
-helm repo add nextcloud https://nextcloud.github.io/helm/
-helm repo update
-
-helm upgrade --install nextcloud nextcloud/nextcloud \
-  -f nextcloud/values.yaml \
-  -n nextcloud
-```
-
-### 🧠 Redis and Database
-
-You can use the built-in MariaDB (`mariadb.enabled=true`) for testing, or configure
-externalDatabase to connect to an external MariaDB instance for production.
-
-Redis is optional but strongly recommended for performance and locking. Enable
-it via `redis.enabled=true` in your [values.yaml](/k3s-ha-cluster/nextcloud/values.yaml).
-
-### 📱 Mobile Client Support (iOS/Android)
-
-Since the OIDC login flow disables the native login endpoints (`/login/v2/poll`),
-the mobile apps will not log in using the default browser OIDC flow.
-
-Instead:
-
-1. Log into the web UI
-2. Go to Settings → Security
-3. Generate a new App Password
-4. Use the generated credentials in your iOS/Android Nextcloud app
-
 ## 🛡️ Vaultwarden
 
-Vaultwarden is deployed for self-hosted password management, with secure admin
-access and OIDC authentication via Keycloak.
+Vaultwarden is deployed for self-hosted password management with secure admin
+access.
 
 - Generated a strong `ADMIN_TOKEN` using:
 
@@ -561,7 +429,7 @@ access and OIDC authentication via Keycloak.
   ```
 
 **Ingress with Caddy:**
-Added the following entry to `deployments/caddy/configmap.yaml` to route traffic
+Added the following entry to `caddy/configmap.yaml` to route traffic
 for Vaultwarden:
 
 ```caddyfile
@@ -598,88 +466,6 @@ kubectl apply -f config-cloudflare-ddns-Secret.yaml
 ```
 
 Restart deployment or recreate pods to apply the change immediately.
-
-## 📄 Paperless-ngx: Document Management (Deprecated)
-
-Paperless-ngx is a powerful self-hosted document management solution.
-This section guides you through deploying Paperless-ngx on Kubernetes with Redis
-and persistent storage.
-
-### 1️⃣ Deploy Redis
-
-Create a Redis password secret:
-
-```bash
-kubectl create secret generic redis-secret \
-  --from-literal=redis-password="maestroredispaperless" \
-  --namespace=paperless
-```
-
-Install Redis using the Bitnami Helm chart:
-
-```bash
-helm install paperless-redis bitnami/redis \
-  -n paperless \
-  --create-namespace \
-  -f paperless-ngx/redis/values.yaml
-```
-
-Get the Redis service name and connection details:
-
-```bash
-kubectl get svc -n paperless
-
-NAME                       TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)    AGE
-paperless-redis-headless   ClusterIP   None         <none>        6379/TCP   21h
-paperless-redis-master     ClusterIP   10.43.4.92   <none>        6379/TCP   21h
-```
-
-Compose your `PAPERLESS_REDIS` environment variable using the service name:
-
-```text
-redis://:<password>@paperless-redis-master.paperless.svc.cluster.local:6379
-```
-
-### 2️⃣ Deploy Persistent Storage
-
-Apply the PVC manifest to provide persistent storage for Paperless-ngx:
-
-```bash
-kubectl apply -f paperless-ngx/pvc.yaml
-```
-
-### 3️⃣ Deploy Paperless-ngx
-
-Apply the deployment manifest:
-
-```bash
-kubectl apply -f paperless-ngx/deployment.yaml
-```
-
-### 4️⃣ Expose Paperless-ngx Service
-
-Expose Paperless-ngx via a LoadBalancer service:
-
-```bash
-kubectl apply -f paperless-ngx/service.yaml
-```
-
-Check the assigned external IP:
-
-```bash
-kubectl get svc -n paperless -o wide
-```
-
-Access Paperless-ngx at `http://<EXTERNAL-IP>`.
-
----
-
-**Notes:**
-
-- The deployment uses Longhorn for persistent storage.
-- Redis is required for optimal performance and locking.
-- OIDC authentication can be configured via Keycloak for SSO.
-- Update environment variables in the deployment manifest as needed for your setup.
 
 ## 📊 Kubernetes Dashboard
 
@@ -762,7 +548,7 @@ kubectl -n homer create configmap homer-config \
 
 ## 🛠️ Forgejo: Self-hosted Git Service
 
-Forgejo provides a lightweight, self-hosted Git platform with Keycloak SSO.
+Forgejo provides a lightweight, self-hosted Git platform with Authelia OIDC SSO.
 
 ### 🚀 Deploy Forgejo
 
@@ -921,25 +707,6 @@ Authelia. Provide at least following parameters:
 - OpenID Connect Auto Discovery URL (e.g. <https://auth.yukselcloud.com/.well-known/openid-configuration>)
 - Skip Local 2FA (checked),
 - Additional scopes: `groups`
-
-#### 🔐 Keycloak SSO Integration
-
-- Create a Keycloak client named `forgejo` in your `homelab` realm.
-- In Forgejo UI:
-  Site Administration → Authentication Sources → Add OAuth2
-  - Name: Keycloak
-  - Provider: OpenID Connect
-  - Client ID/Secret: from Keycloak
-  - Discovery URL: `https://keycloak.yukselcloud.com/realms/homelab/.well-known/openid-configuration`
-  - Enable Auto Registration
-In Forgejo UI (as admin → Site Administration → Authentication Sources → Add OAuth2):
-
-> Name: Keycloak
-> OAuth2 provider: OpenID Connect
-> Client ID/Secret: # copy from Keycloak
-> OpenID Connect Auto Discovery URL: <https://keycloak.yukselcloud.com/realms/homelab/.well-known/openid-configuration>
-
-Enable Auto Registration: ✅
 
 #### LLDAP
 
