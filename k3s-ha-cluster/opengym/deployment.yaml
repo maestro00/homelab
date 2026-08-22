@@ -69,6 +69,14 @@ spec:
               value: https://opengym.yukselcloud.com
             - name: RP_NAME
               value: openGym
+            # Invite-only signup; admins generate codes from the dashboard.
+            # Guest mode off: instance is for known people only.
+            - name: ADMIN_UIDS
+              value: O7QMkJfrPaRZwHsu
+            - name: INVITE_ONLY
+              value: "1"
+            - name: ALLOW_GUEST
+              value: "0"
           readinessProbe:
             httpGet:
               path: /api/health
