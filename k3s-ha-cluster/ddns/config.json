@@ -43,15 +43,7 @@
                     "proxied": false
                 },
                 {
-                    "name": "stirlingpdf",
-                    "proxied": false
-                },
-                {
                     "name": "ntfy",
-                    "proxied": false
-                },
-                {
-                    "name": "changedetection",
                     "proxied": false
                 },
                 {

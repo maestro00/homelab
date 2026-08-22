@@ -106,7 +106,6 @@ k3s-ha-cluster/
 │   ├── values.yaml
 │   ├── service-account.yaml
 │   └── rbac.yaml
-└── stirling-pdf/               # Helm chart
 ```
 
 ---
@@ -127,7 +126,6 @@ k3s-ha-cluster/
 | `media` | qbittorrent, prowlarr, radarr, sonarr, bazarr, jellyfin, seerr, flaresolverr, profilarr, metube, scraperr | 192.168.0.210–222 | Custom Helm umbrella |
 | `monitoring` | prometheus, grafana, alertmanager, node-exporter | grafana: ClusterIP | Helm (kube-prometheus-stack) |
 | `speedtest-tracker` | speedtest-tracker | 192.168.0.223 | — |
-| `stirling-pdf` | stirling-pdf | 192.168.0.224 | Helm |
 | `termix` | termix | 192.168.0.216 | Custom Helm chart |
 | `vaultwarden` | vaultwarden | 192.168.0.204 | Helm |
 
@@ -177,7 +175,7 @@ jobs:
 
 | Approach | When to use | Examples |
 |----------|-------------|---------|
-| **Upstream Helm chart** (preferred) | Maintained chart exists | Authelia, Vaultwarden, MySQL, Homer, Prometheus, Forgejo, Stirling PDF |
+| **Upstream Helm chart** (preferred) | Maintained chart exists | Authelia, Vaultwarden, MySQL, Homer, Prometheus, Forgejo |
 | **Custom Helm chart** | No upstream chart or too complex | `media/` (umbrella), `termix/`, `auth/lldap/`, `forgejo/runner/` |
 | **Raw manifests** | Simple service or multi-container | Caddy, DDNS, qBittorrent+Gluetun |
 
@@ -190,3 +188,6 @@ Always use Helm when possible. Raw manifests only when a chart can't handle the 
 - `references/caddy-crowdsec.md` — Real Caddyfile patterns, CrowdSec integration, Authelia forward-auth, adding new routes
 - `references/patterns.md` — Helm values conventions, manifest templates, media stack, database patterns
 - `references/kubectl-workflows.md` — kubectl commands scoped to this cluster
+- `references/router-and-tailscale.md` — GL.iNet/OpenWrt router (DHCP leases,
+  DNS chain, firewall zones), Tailscale tailnet devices and cluster routing
+  status

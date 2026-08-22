@@ -46,7 +46,7 @@ auth.yukselcloud.com {
   }
 }
 
-# --- Standard service (Grafana, Stirling PDF, Forgejo) ---
+# --- Standard service (Grafana, Forgejo) ---
 grafana.yukselcloud.com {
   log
   crowdsec

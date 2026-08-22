@@ -81,15 +81,6 @@ data:
                 header_up X-Forwarded-For {remote_host}
             }
         }
-        changedetection.yukselcloud.com {
-            log
-            crowdsec
-            reverse_proxy changedetection.changedetection.svc.cluster.local:5000 {
-                header_up Host {host}
-                header_up X-Forwarded-Proto https
-                header_up X-Forwarded-For {remote_host}
-            }
-        }
         homarr.yukselcloud.com {
             log
             crowdsec
@@ -116,23 +107,6 @@ data:
                 header_up X-Forwarded-Proto https
                 header_up X-Forwarded-Host {host}
                 header_up X-Forwarded-For {remote_host}
-            }
-        }
-        stirlingpdf.yukselcloud.com {
-            log
-            crowdsec
-            reverse_proxy stirling-pdf-stirling-pdf-chart.stirling-pdf.svc.cluster.local:8080 {
-                header_up Host {host}
-                header_up X-Forwarded-Proto https
-                header_up X-Forwarded-Host {host}
-                header_up X-Forwarded-Uri {uri}
-                header_up X-Forwarded-For {remote_host}
-
-                transport http {
-                    read_timeout 30s
-                    write_timeout 30s
-                    dial_timeout 10s
-                }
             }
         }
         opengym.yukselcloud.com {

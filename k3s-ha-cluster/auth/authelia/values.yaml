@@ -133,7 +133,7 @@ configMap:
       clients:
         - client_id: forgejo
           client_name: Forgejo
-          client_secret: "<clientsecretforge>"
+          client_secret: "$pbkdf2-sha512$310000$xcIipZZRUvCxyF2PQZTfCg$aM96WaO2Gt1Ut7RS.eVnpBJIpihWk9M8eY5kYK5DG6F7ICuF1Z0ijgo5DyEDbOQ1cP9fbY3ovnrv1eo9kPgL8g"
           public: false
           authorization_policy: one_factor
           require_pkce: true
@@ -153,7 +153,7 @@ configMap:
           claims_policy: legacy
         - client_id: jellyfin
           client_name: Jellyfin
-          client_secret: "<clientsecretjellyfin>"
+          client_secret: "$pbkdf2-sha512$310000$bqQbNCRnBPgBqRg8b20Sxg$3ZFPwbQ6RHN8WTx41M1cBnn2Jh5TCtj.buEhuNKjGxRnkzFMX.UT2cLNWsmwnChbBWeXw10wau94O6nY/sPuhw"
           public: false
           authorization_policy: one_factor
           require_pkce: true
@@ -173,7 +173,7 @@ configMap:
           claims_policy: legacy
         - client_id: vaultwarden
           client_name: Vaultwarden
-          client_secret: "<clientsecretvaultwarden>"
+          client_secret: "$pbkdf2-sha512$310000$DLxf0AmuupjG96/k.DAWTA$jGxbYD/nHX/kk/Nj2XXMSCJyO/.a1V6nSaDbylbcbFd.Zh.6ECUfRVYHsSa55YL6GuNu7echBtsUG83aMXfLtg"
           public: false
           authorization_policy: one_factor
           require_pkce: true
@@ -188,6 +188,24 @@ configMap:
           grant_types:
             - authorization_code
             - refresh_token
+          response_types:
+            - code
+          claims_policy: legacy
+        - client_id: homarr
+          client_name: Homarr
+          client_secret: "$pbkdf2-sha512$310000$suciIlHCbfAyuSK2Ia6Diw$kxzF8HCygIfFCPk1CIfwNzqxIsp.ZiWvoao3b2yryEQnHe1CODQFRisv.UvxqOA1LLBArp/lapu1LyuT45BJ3Q"
+          public: false
+          authorization_policy: one_factor
+          require_pkce: true
+          redirect_uris:
+            - https://homarr.yukselcloud.com/api/auth/callback/oidc
+          scopes:
+            - openid
+            - email
+            - profile
+            - groups
+          grant_types:
+            - authorization_code
           response_types:
             - code
           claims_policy: legacy
