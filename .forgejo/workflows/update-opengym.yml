@@ -1,0 +1,116 @@
+name: Update openGym
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Upstream tag (e.g. v1.2.11). Leave empty for latest."
+        required: false
+        type: string
+
+jobs:
+  update:
+    runs-on: self-hosted
+    container:
+      image: git.yukselcloud.com/lab/kubectl-node:latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG_DEPLOY }}" > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Resolve version
+        id: version
+        run: |
+          CURRENT=$(sed -n 's/.*opengym-api:v\([0-9.]*\).*/\1/p' \
+            k3s-ha-cluster/opengym/deployment.yaml)
+          echo "current=$CURRENT" >> "$GITHUB_OUTPUT"
+
+          if [ -n "${{ inputs.version }}" ]; then
+            LATEST="${{ inputs.version }}"
+          else
+            LATEST=$(curl -sf "https://gitlab.com/api/v4/projects/85678327/releases/permalink" \
+              | jq -r '.tag_name' | sed 's/^v//')
+          fi
+          echo "latest=$LATEST" >> "$GITHUB_OUTPUT"
+          echo "Current: $CURRENT | Target: $LATEST"
+
+      - name: Skip if already up to date
+        if: steps.version.outputs.current == steps.version.outputs.latest
+        run: |
+          echo "Already running v${{ steps.version.outputs.current }}, nothing to do."
+          exit 0
+
+      - name: Build and push images
+        if: steps.version.outputs.current != steps.version.outputs.latest
+        run: |
+          TAG="v${{ steps.version.outputs.latest }}"
+          REGISTRY="git.yukselcloud.com/lab"
+
+          # Check if images already exist in registry
+          if skopeo list-tags "docker://${REGISTRY}/opengym-api" 2>/dev/null \
+              | jq -e ".Tags | index(\"$TAG\")" >/dev/null 2>&1; then
+            echo "Images for $TAG already in registry, skipping build."
+          else
+            echo "Cloning upstream at $TAG..."
+            git clone --depth 1 --branch "$TAG" \
+              https://gitlab.com/DuarteSantos8/opengym.git /tmp/upstream
+
+            echo "Building api..."
+            podman build -t "${REGISTRY}/opengym-api:${TAG}" \
+              --build-arg VERSION="$TAG" /tmp/upstream/api
+
+            echo "Building web..."
+            podman build -t "${REGISTRY}/opengym-web:${TAG}" \
+              --build-arg VERSION="$TAG" -f web/Dockerfile /tmp/upstream
+
+            echo "Pushing..."
+            podman push "${REGISTRY}/opengym-api:${TAG}"
+            podman push "${REGISTRY}/opengym-web:${TAG}"
+          fi
+
+      - name: Update deployment.yaml
+        if: steps.version.outputs.current != steps.version.outputs.latest
+        run: |
+          TAG="v${{ steps.version.outputs.latest }}"
+          FILE="k3s-ha-cluster/opengym/deployment.yaml"
+          sed -i "s/opengym-api:v[0-9.]*/opengym-api:${TAG}/" "$FILE"
+          sed -i "s/opengym-web:v[0-9.]*/opengym-web:${TAG}/" "$FILE"
+          echo "Updated to $TAG:"
+          grep "image:" "$FILE"
+
+      - name: Commit and push
+        if: steps.version.outputs.current != steps.version.outputs.latest
+        run: |
+          TAG="v${{ steps.version.outputs.latest }}"
+          git config user.name "forgejo-bot"
+          git config user.email "bot@yukselcloud.com"
+          git add k3s-ha-cluster/opengym/deployment.yaml
+          git commit -m "opengym: update to ${TAG}"
+          git push
+
+      - name: Deploy to cluster
+        if: steps.version.outputs.current != steps.version.outputs.latest
+        run: |
+          kubectl -n opengym apply -f k3s-ha-cluster/opengym/
+          kubectl -n opengym rollout restart deploy opengym
+          kubectl -n opengym rollout status deploy opengym --timeout=120s
+
+      - name: Notify
+        if: always()
+        run: |
+          STATUS="${{ job.status }}"
+          VERSION="${{ steps.version.outputs.latest }}"
+          PRIORITY=$([[ "$STATUS" == "success" ]] && echo "default" || echo "high")
+          TAGS=$([[ "$STATUS" == "success" ]] && echo "white_check_mark" || echo "warning")
+          curl -sf \
+            -H "Title: openGym update: $STATUS" \
+            -H "Priority: $PRIORITY" \
+            -H "Tags: $TAGS" \
+            -H "Authorization: Bearer ${{ secrets.NTFY_TOKEN }}" \
+            -d "openGym updated to v${VERSION} — $STATUS" \
+            http://ntfy.ntfy.svc.cluster.local/homelab-deploys

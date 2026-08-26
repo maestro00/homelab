@@ -3,8 +3,7 @@
 Self-hosted gym and body-weight tracker: plan routines, log workouts, track
 weight and progress. Passkey login, PWA. AGPL-3.0.
 
-Upstream: <https://gitea.com/DuarteSantos/openGym> (GitHub mirror:
-DuarteSantos8/openGym). Issue: #49.
+Upstream: <https://gitlab.com/DuarteSantos8/opengym>
 
 ## Architecture
 
@@ -17,7 +16,7 @@ Single pod, two containers sharing one Longhorn PVC (`opengym-data`):
 | web       | `git.yukselcloud.com/lab/opengym-web`     | nginx serving React build, proxies `/api`       |
 
 Images are built from the upstream source with podman and pushed to the local
-Forgejo registry (pinned to `v1.2.7`) — no dependency on upstream ghcr.
+Forgejo registry (pinned to `v1.2.11`) — no dependency on upstream ghcr.
 The `forgejo-registry` pull secret must exist in the namespace (copied from
 `ntfy`).
 
@@ -76,17 +75,40 @@ kubectl -n opengym port-forward svc/opengym 8080:80
 
 ## Upgrading
 
-Rebuild + push both images with a new tag, bump the tags in
-`deployment.yaml`, re-apply:
+Automated via Forgejo workflow `update-opengym.yml` — trigger from the
+Actions tab with an optional version tag (leave empty for latest).
+
+The workflow fetches the upstream release from GitLab, builds both images
+with podman, pushes to the Forgejo registry, updates `deployment.yaml`,
+commits the change, and rolling-restarts the deployment.
+
+Manual upgrade (same thing, local machine):
 
 ```bash
+# clone upstream at the target tag
+git clone --depth 1 --branch vX.Y.Z \
+    https://gitlab.com/DuarteSantos8/opengym.git /tmp/opengym-src
+
+# build and push
 podman build -t git.yukselcloud.com/lab/opengym-api:vX.Y.Z \
-    --build-arg VERSION=vX.Y.Z /tmp/opencode/opengym-src/api
+    --build-arg VERSION=vX.Y.Z /tmp/opengym-src/api
 podman build -t git.yukselcloud.com/lab/opengym-web:vX.Y.Z \
-    --build-arg VERSION=vX.Y.Z -f web/Dockerfile .
+    --build-arg VERSION=vX.Y.Z -f web/Dockerfile /tmp/opengym-src
 podman push git.yukselcloud.com/lab/opengym-api:vX.Y.Z
 podman push git.yukselcloud.com/lab/opengym-web:vX.Y.Z
+
+# bump tags in deployment.yaml and apply
+sed -i "s/opengym-api:v[0-9.]*/opengym-api:vX.Y.Z/" k3s-ha-cluster/opengym/deployment.yaml
+sed -i "s/opengym-web:v[0-9.]*/opengym-web:vX.Y.Z/" k3s-ha-cluster/opengym/deployment.yaml
+kubectl -n opengym apply -f k3s-ha-cluster/opengym/
+kubectl -n opengym rollout restart deploy opengym
 ```
 
 Data is plain JSON in `/data` — back up the `opengym-data` PVC (Longhorn
 snapshot suffices).
+
+### Runner note
+
+The workflow runs in the `kubectl-node` container. If podman is not
+available in that image, build locally and use the manual steps above, or
+add podman to the runner image.
