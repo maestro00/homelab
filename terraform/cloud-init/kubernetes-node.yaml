@@ -6,7 +6,7 @@ users:
     shell: /bin/bash
     groups: users, admin
     lock_passwd: false
-    passwd: "password"
+    passwd: ${lab_password_hash}
 
 ssh_pwauth: true
 

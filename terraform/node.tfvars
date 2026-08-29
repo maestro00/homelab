@@ -1,7 +1,6 @@
 proxmox_url      = "https://192.168.0.51:8006/api2/json"
 proxmox_user     = "root@pam"
-proxmox_password = "password"
-target_node      = "lab-pve1"
+proxmox_password = "PASSWORD_LOADED_FROM_GITIGNORED_OVERRIDE"
 vm_ipv4_gateway  = "192.168.0.1"
 nodes = [
   {
@@ -12,7 +11,7 @@ nodes = [
     vm_template_vm_id    = 9000
     cpu_cores            = 2
     cpu_sockets          = 1
-    memory_dedicated     = 7680
+    memory_dedicated     = 6144
     disk_size            = 40
     storage_datastore_id = "local-lvm"
   },
@@ -24,7 +23,7 @@ nodes = [
     vm_template_vm_id    = 9000
     cpu_cores            = 2
     cpu_sockets          = 1
-    memory_dedicated     = 7680
+    memory_dedicated     = 6144
     disk_size            = 40
     storage_datastore_id = "shared-nfs"
   },
@@ -36,7 +35,7 @@ nodes = [
     vm_template_vm_id    = 9001
     cpu_cores            = 2
     cpu_sockets          = 1
-    memory_dedicated     = 7680
+    memory_dedicated     = 6144
     disk_size            = 40
     storage_datastore_id = "local-lvm"
   },
@@ -48,7 +47,7 @@ nodes = [
     vm_template_vm_id    = 9001
     cpu_cores            = 2
     cpu_sockets          = 1
-    memory_dedicated     = 7680
+    memory_dedicated     = 6144
     disk_size            = 40
     storage_datastore_id = "shared-nfs"
   }

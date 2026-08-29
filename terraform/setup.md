@@ -40,9 +40,11 @@ by running:
 
    # Review your plan and check for any missing variables
    terraform plan -var-file="node.tfvars"
+   # to include secrets, add -var-file=temp/proxmox.tfvars
 
    # If everything looks correct, apply the configuration:
    terraform apply -var-file="node.tfvars"
+   # to include secrets, add -var-file=temp/proxmox.tfvars
    # ...
    # Enter a value: -> Yes
    # ...

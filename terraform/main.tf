@@ -83,7 +83,7 @@ resource "proxmox_virtual_environment_file" "cloud_init" {
   node_name    = each.value.vm_target_node
 
   source_raw {
-    data      = templatefile("${path.module}/cloud-init/kubernetes-node.yaml", { hostname = each.value.vm_name })
+    data      = templatefile("${path.module}/cloud-init/kubernetes-node.yaml", { hostname = each.value.vm_name, lab_password_hash = var.lab_password_hash })
     file_name = "cloud-init-${each.value.vm_name}.yaml"
   }
 }
