@@ -1,0 +1,19 @@
+# Cluster-wide READ access using Kubernetes' built-in "view" ClusterRole.
+# "view" deliberately excludes Secrets, Roles, and RoleBindings — an agent
+# with broad read access for debugging shouldn't also be able to read every
+# namespace's secrets or see how RBAC is wired.
+#
+# This is the only cluster-wide grant opencode gets. Everything that lets it
+# actually change state is namespace-scoped — see rolebinding-*-edit.yaml.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: opencode-agent-view
+subjects:
+  - kind: ServiceAccount
+    name: opencode-agent
+    namespace: opencode-agent
+roleRef:
+  kind: ClusterRole
+  name: view
+  apiGroup: rbac.authorization.k8s.io

@@ -1,0 +1,22 @@
+# WRITE access, scoped to ONE namespace, using the built-in "edit" ClusterRole
+# (create/update/delete on most objects — but not RBAC, and not Secrets it
+# doesn't already have visibility into cluster-wide, since "view" excludes
+# those).
+#
+# Copy this file per namespace you actually want opencode managing hands-off.
+# Change only `metadata.namespace`. Start with namespaces you're comfortable
+# handing over (media, monitoring); leave auth/, db/, forgejo/, security/,
+# caddy/ out until the agent has a track record you trust.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: opencode-agent-edit
+  namespace: media
+subjects:
+  - kind: ServiceAccount
+    name: opencode-agent
+    namespace: opencode-agent
+roleRef:
+  kind: ClusterRole
+  name: edit
+  apiGroup: rbac.authorization.k8s.io
