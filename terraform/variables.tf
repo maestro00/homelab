@@ -24,3 +24,9 @@ variable "lab_password_hash" {
   sensitive   = true
   default     = "$6$placeholder$PLACEHOLDER_REPLACE_VIA_GITIGNORED_OVERRIDE"
 }
+
+variable "container_ssh_public_key" {
+  type        = string
+  description = "Path to the SSH public key injected into LXC containers' root account."
+  default     = "~/.ssh/id_rsa.pub"
+}

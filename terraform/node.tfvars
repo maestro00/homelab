@@ -52,3 +52,20 @@ nodes = [
     storage_datastore_id = "shared-nfs"
   }
 ]
+
+containers = [
+  {
+    name                 = "opencode"
+    ct_id                = 253
+    hostname             = "opencode"
+    ipv4_address         = "192.168.0.53/24"
+    target_node          = "lab-pve2"
+    cpu_cores            = 2
+    # 1 GiB was too tight: opencode (Bun) + tailscaled + systemd hit 99% and
+    # the container thrashed (sshd banner timeout, web UI hang)
+    memory_mb            = 2048
+    disk_size            = 16
+    storage_datastore_id = "local-lvm"
+    description          = "Always-on opencode server (Tailscale-only, no reverse proxy)"
+  }
+]
