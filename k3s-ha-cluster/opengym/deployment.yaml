@@ -45,7 +45,7 @@ spec:
       containers:
         # Passkey auth + per-user data (Node, no framework). Data is plain JSON.
         - name: api
-          image: git.yukselcloud.com/lab/opengym-api:v1.2.11
+          image: git.yukselcloud.com/lab/opengym-api:v1.3.7
           ports:
             - containerPort: 3000
           resources:
@@ -97,7 +97,7 @@ spec:
         # nginx serving the React build; proxies /api -> api on localhost
         # (both containers share the pod network namespace).
         - name: web
-          image: git.yukselcloud.com/lab/opengym-web:v1.2.11
+          image: git.yukselcloud.com/lab/opengym-web:v1.3.7
           ports:
             - containerPort: 80
           resources:
