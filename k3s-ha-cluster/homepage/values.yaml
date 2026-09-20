@@ -57,6 +57,7 @@ config:
           memory: true
           showLabel: true
     - longhorn:
+        url: ${LONGHORN_URI}
         expanded: true
         total: true
         nodes: true
