@@ -1,0 +1,51 @@
+name: Deploy Homepage
+on:
+  push:
+    paths:
+      - "k3s-ha-cluster/homepage/**"
+  workflow_dispatch:
+
+jobs:
+  deploy-homepage:
+    runs-on: self-hosted
+
+    container:
+      image: git.yukselcloud.com/lab/kubectl-node:latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG_DEPLOY }}" > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Ensure Namespace
+        run: |
+          kubectl create namespace homepage --dry-run=client -o yaml \
+            | kubectl apply -f -
+
+      - name: Apply Secrets
+        run: kubectl -n homepage apply -f k3s-ha-cluster/homepage/secret.yaml
+
+      - name: Helm Upgrade
+        run: |
+          helm repo add jameswynn https://jameswynn.github.io/helm-charts
+          helm repo update jameswynn
+          helm upgrade --install homepage jameswynn/homepage \
+            --namespace homepage \
+            --values k3s-ha-cluster/homepage/values.yaml
+
+      - name: Notify
+        if: always()
+        run: |
+          STATUS="${{ job.status }}"
+          PRIORITY=$([[ "$STATUS" == "success" ]] && echo "default" || echo "high")
+          TAGS=$([[ "$STATUS" == "success" ]] && echo "white_check_mark" || echo "warning")
+          curl -sf \
+            -H "Title: homepage deploy: $STATUS" \
+            -H "Priority: $PRIORITY" \
+            -H "Tags: $TAGS" \
+            -d "Homepage helm upgrade — $STATUS" \
+            http://ntfy.ntfy.svc.cluster.local/homelab-deploys
