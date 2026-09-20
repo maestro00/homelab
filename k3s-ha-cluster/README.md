@@ -19,7 +19,7 @@ With this setup, we can host;
 - Media servers (Plex, Jellyfin)
 - Monitoring (Prometheus, Grafana)
 - Web apps (Forgejo, Vaultwarden, etc.)
-- Homelab dashboards, like Homer
+- Homelab dashboards (home.yukselcloud.com)
 
 ## 🛠️ Infrastructure Overview
 
@@ -510,41 +510,6 @@ Access the dashboard at `https://<EXTERNAL-IP>` (see the service details).
 
 - The dashboard is exposed via a LoadBalancer service.
 - Use the generated token for admin login.
-
-## 🏠 Homer Dashboard
-
-Homer is a simple, static dashboard for your homelab services.
-
-### Install via Helm
-
-Add the Homer Helm repo and install:
-
-```bash
-helm repo add djjudas21 https://djjudas21.github.io/charts/
-helm repo update djjudas21
-
-helm upgrade --install homer djjudas21/homer \
-  --create-namespace \
-  -n homer \
-  -f homer/values.yaml
-```
-
-### Configure Homer
-
-Create a ConfigMap referencing your dashboard configuration:
-
-```bash
-kubectl -n homer create configmap homer-config \
-  --from-file=config.yml=homer/config.yaml \
-  -o yaml --dry-run=client | kubectl apply -f -
-```
-
----
-
-**Notes:**
-
-- Homer is exposed via a LoadBalancer service (see `homer/values.yaml`).
-- Update `homer/config.yaml` to customize your dashboard links and appearance.
 
 ## 🛠️ Forgejo: Self-hosted Git Service
 

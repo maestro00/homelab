@@ -1,4 +1,4 @@
-name: Deploy Homer Config
+name: Deploy Caddy Config
 on:
   push:
     paths:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy-homer-config:
+  deploy-caddy-config:
     runs-on: self-hosted
 
     container:

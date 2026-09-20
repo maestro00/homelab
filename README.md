@@ -78,7 +78,8 @@ local actions runners to automatically deploy configuration changes.
 
 ### 🏠 Media & Dashboards
 
-- 📊 **Homer:** A clean, static dashboard for quick access to all homelab services.
+- 🏠 **Homepage:** A dashboard for quick access to all homelab services, at
+  [home.yukselcloud.com](https://home.yukselcloud.com).
 - 🍿 **Media Stack:** The full *Arr* suite paired with Jellyfin for internal
 media management and streaming.
 
