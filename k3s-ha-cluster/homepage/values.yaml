@@ -1,192 +1,186 @@
 image:
   repository: ghcr.io/gethomepage/homepage
-  tag: v1.2.0
+  tag: v2.1.2
 
 enableRbac: true
 
 serviceAccount:
-  create: true
+    create: true
 
 service:
-  main:
-    type: ClusterIP
-    ports:
-      http:
-        port: 3000
+    main:
+        type: ClusterIP
+        ports:
+            http:
+                port: 3000
 
 env:
-  - name: HOMEPAGE_ALLOWED_HOSTS
-    value: "home.yukselcloud.com"
-  - name: LONGHORN_URI
-    value: "http://longhorn-frontend.longhorn-system.svc.cluster.local"
+    - name: HOMEPAGE_ALLOWED_HOSTS
+      value: "home.yukselcloud.com"
 
 envFrom:
-  - secretRef:
-      name: homepage-secrets
+    - secretRef:
+          name: homepage-secrets
 
 resources:
-  requests:
-    memory: 128Mi
-    cpu: 50m
-  limits:
-    memory: 512Mi
-    cpu: 500m
+    requests:
+        memory: 128Mi
+        cpu: 50m
+    limits:
+        memory: 512Mi
+        cpu: 500m
 
 config:
-  settings:
-    title: YukselCloud Homelab
-    theme: dark
-    headerStyle: boxed
-    statusStyle: dot
-    language: en
+    settings:
+        title: YukselCloud Homelab
+        theme: dark
+        headerStyle: boxed
+        statusStyle: dot
+        language: en
 
-  widgets:
-    - greeting:
-        text_size: xl
-        text: YukselCloud Homelab
-    - kubernetes:
-        cluster:
-          show: true
-          cpu: true
-          memory: true
-          showLabel: true
-          label: cluster
-        nodes:
-          show: true
-          cpu: true
-          memory: true
-          showLabel: true
-    - longhorn:
-        url: ${LONGHORN_URI}
-        expanded: true
-        total: true
-        nodes: true
+    widgets:
+        - greeting:
+              text_size: xl
+              text: YukselCloud Homelab
+        - kubernetes:
+              cluster:
+                  show: true
+                  cpu: true
+                  memory: true
+                  showLabel: true
+                  label: cluster
+              nodes:
+                  show: true
+                  cpu: true
+                  memory: true
+                  showLabel: true
+        - longhorn:
+              url: http://longhorn-frontend.longhorn-system.svc.cluster.local
+              expanded: true
+              total: true
+              nodes: true
 
-  services:
-    - Infrastructure:
-        - Longhorn:
-            href: http://192.168.0.203
-            icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/longhorn.png
-            description: Persistent storage UI
-        - Kubernetes Dashboard:
-            href: https://192.168.0.209
-            icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/kubernetes.png
-            description: Cluster management
+    services:
+        - Infrastructure:
+              - Longhorn:
+                    href: http://192.168.0.203
+                    icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/longhorn.png
+                    description: Persistent storage UI
+              - Kubernetes Dashboard:
+                    href: https://192.168.0.209
+                    icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/kubernetes.png
+                    description: Cluster management
 
-    - Git & DevOps:
-        - Forgejo:
-            href: https://git.yukselcloud.com
-            icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/forgejo.png
-            description: Self-hosted git
-        - Termix:
-            href: http://192.168.0.216:8080
-            icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/terminal.png
-            description: Terminal multiplexer
+        - Git & DevOps:
+              - Forgejo:
+                    href: https://git.yukselcloud.com
+                    icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/forgejo.png
+                    description: Self-hosted git
+              - Termix:
+                    href: http://192.168.0.216:8080
+                    icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/terminal.png
+                    description: Terminal multiplexer
 
-    - Identity & Security:
-        - Authelia:
-            href: https://auth.yukselcloud.com
-            icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/authelia.png
-            description: 2FA & SSO
-        - Vaultwarden:
-            href: https://vaultwarden.yukselcloud.com
-            icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/vaultwarden.png
-            description: Password manager
-        - lldap:
-            href: https://ldap.yukselcloud.com
-            icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/lldap.png
-            description: LDAP directory
+        - Identity & Security:
+              - Authelia:
+                    href: https://auth.yukselcloud.com
+                    icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/authelia.png
+                    description: 2FA & SSO
+              - Vaultwarden:
+                    href: https://vaultwarden.yukselcloud.com
+                    icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/vaultwarden.png
+                    description: Password manager
+              - lldap:
+                    href: https://ldap.yukselcloud.com
+                    icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/lldap.png
+                    description: LDAP directory
 
-    - Networking & DNS:
-        - Pi-hole:
-            href: https://pihole.yukselcloud.com
-            icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/pi-hole.png
-            description: DNS & ad-block
-        - Tailscale:
-            href: https://login.tailscale.com/admin
-            icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/tailscale.png
-            description: VPN overlay admin
+        - Networking & DNS:
+              - AdGuard Home:
+                    href: http://192.168.0.1:3000
+                    icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/adguard-home.png
+                    description: DNS & ad-block
+              - Tailscale:
+                    href: https://login.tailscale.com/admin
+                    icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/tailscale.png
+                    description: VPN overlay admin
 
-    - Media:
-        - Sonarr:
-            href: http://192.168.0.212:8989
-            icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/sonarr.png
-            description: TV show management
-        - Radarr:
-            href: http://192.168.0.213:7878
-            icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/radarr.png
-            description: Movie management
-        - Prowlarr:
-            href: http://192.168.0.211:9696
-            icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/prowlarr.png
-            description: Indexer management
-        - Bazarr:
-            href: http://192.168.0.214:6767
-            icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/bazarr.png
-            description: Subtitle management
-        - Flaresolverr:
-            href: http://192.168.0.217:8191
-            icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/flaresolverr.png
-            description: CAPTCHA solver
-        - Jellyfin:
-            href: http://192.168.0.215:8096
-            icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/jellyfin.png
-            description: Media playback
-        - Jellyseerr:
-            href: http://192.168.0.218:5055
-            icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/jellyseerr.png
-            description: Media requests
-        - Profilarr:
-            href: http://192.168.0.219:6868
-            icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/profilarr.png
-            description: Media profiling
-        - Metube:
-            href: http://192.168.0.222:8080
-            icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/metube.png
-            description: YouTube downloader
-        - qBittorrent:
-            href: http://192.168.0.210:8080
-            icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/vuetorrent.png
-            description: Torrent client
+        - Media:
+              - Sonarr:
+                    href: http://192.168.0.212:8989
+                    icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/sonarr.png
+                    description: TV show management
+              - Radarr:
+                    href: http://192.168.0.213:7878
+                    icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/radarr.png
+                    description: Movie management
+              - Prowlarr:
+                    href: http://192.168.0.211:9696
+                    icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/prowlarr.png
+                    description: Indexer management
+              - Bazarr:
+                    href: http://192.168.0.214:6767
+                    icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/bazarr.png
+                    description: Subtitle management
+              - Flaresolverr:
+                    href: http://192.168.0.217:8191
+                    icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/flaresolverr.png
+                    description: CAPTCHA solver
+              - Jellyfin:
+                    href: http://192.168.0.215:8096
+                    icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/jellyfin.png
+                    description: Media playback
+              - Jellyseerr:
+                    href: http://192.168.0.218:5055
+                    icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/jellyseerr.png
+                    description: Media requests
+              - Profilarr:
+                    href: http://192.168.0.219:6868
+                    icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/profilarr.png
+                    description: Media profiling
+              - Metube:
+                    href: http://192.168.0.222:8080
+                    icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/metube.png
+                    description: YouTube downloader
+              - qBittorrent:
+                    href: http://192.168.0.210:8080
+                    icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/vuetorrent.png
+                    description: Torrent client
 
-    - Observability:
-        - Grafana:
-            href: https://grafana.yukselcloud.com
-            icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/grafana.png
-            description: Monitoring dashboards
-        - Speedtest Tracker:
-            href: http://192.168.0.223
-            icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/speedtest-tracker.png
-            description: Bandwidth history
-            widget:
-              type: speedtest
-              url: http://speedtest-tracker.speedtest-tracker.svc.cluster.local
-        - Beszel:
-            href: https://beszel.yukselcloud.com
-            icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/beszel.png
-            description: Server monitoring
-        - Uptime Kuma:
-            href: https://uptime-kuma.yukselcloud.com
-            icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/uptime-kuma.png
-            description: Uptime checks
+        - Observability:
+              - Speedtest Tracker:
+                    href: http://192.168.0.223
+                    icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/speedtest-tracker.png
+                    description: Bandwidth history
+                    widget:
+                        type: speedtest
+                        url: http://speedtest-tracker.speedtest-tracker.svc.cluster.local
+              - Beszel:
+                    href: https://beszel.yukselcloud.com
+                    icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/beszel.png
+                    description: Server monitoring
+              - Uptime Kuma:
+                    href: https://uptime-kuma.yukselcloud.com
+                    icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/uptime-kuma.png
+                    description: Uptime checks
 
-    - Tools:
-        - ntfy:
-            href: https://ntfy.yukselcloud.com
-            icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/ntfy.png
-            description: Push notifications
-            widget:
-              type: ntfy
-              url: http://ntfy.ntfy.svc.cluster.local
-              topic: homelab-deploys
-        - OpenGym:
-            href: https://opengym.yukselcloud.com
-            icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/opengym.png
-            description: Workout tracking
-        - Portfolio:
-            href: https://portfolio.yukselcloud.com
-            icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/homepage.png
-            description: Personal site
+        - Tools:
+              - ntfy:
+                    href: https://ntfy.yukselcloud.com
+                    icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/ntfy.png
+                    description: Push notifications
+                    widget:
+                        type: ntfy
+                        url: http://ntfy.ntfy.svc.cluster.local
+                        topic: homelab-deploys
+              - OpenGym:
+                    href: https://opengym.yukselcloud.com
+                    icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/opengym.png
+                    description: Workout tracking
+              - Portfolio:
+                    href: https://portfolio.yukselcloud.com
+                    icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/homepage.png
+                    description: Personal site
 
-  kubernetes:
-    mode: cluster
+    kubernetes:
+        mode: cluster
