@@ -34,6 +34,7 @@ jobs:
           helm repo add jameswynn https://jameswynn.github.io/helm-charts
           helm repo update jameswynn
           helm upgrade --install homepage jameswynn/homepage \
+            --version 2.1.0 \
             --namespace homepage \
             --values k3s-ha-cluster/homepage/values.yaml
 
