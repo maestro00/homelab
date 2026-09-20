@@ -56,18 +56,20 @@ Ship a working dashboard with no API keys required.
    { "name": "home", "proxied": false }
    ```
 
-5. Create `.forgejo/workflows/deploy-homepage.yml` mirroring the homer
-   workflow pattern. The runner image (`kubectl-node:latest`) has no Helm, so
-   the workflow first installs a pinned Helm binary, then runs:
+5. Add the pinned Helm binary to the runner image
+   (`k3s-ha-cluster/forgejo/runner/image/Dockerfile`) so `kubectl-node:latest`
+   carries both tools. Create `.forgejo/workflows/deploy-homepage.yml`
+   mirroring the homer workflow pattern and run:
 
    ```bash
+   helm repo add jameswynn https://jameswynn.github.io/helm-charts
    helm upgrade --install homepage jameswynn/homepage -n homepage \
        -f k3s-ha-cluster/homepage/values.yaml
    ```
 
-   plus `helm repo add jameswynn` beforehand, and `kubectl apply -f
-   secret.yaml` after. Helm renders the config into ConfigMaps and the chart
-   reloads the pod when the config checksum changes.
+   then `kubectl apply -f secret.yaml` after. Helm renders the config into
+   ConfigMaps and the chart reloads the pod when the config checksum
+   changes.
 
 6. Delete the abandoned `k3s-ha-cluster/homer/` folder and
    `.forgejo/workflows/homer-deploy.yml`.
