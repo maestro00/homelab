@@ -45,6 +45,7 @@ jobs:
           PRIORITY=$([[ "$STATUS" == "success" ]] && echo "default" || echo "high")
           TAGS=$([[ "$STATUS" == "success" ]] && echo "white_check_mark" || echo "warning")
           curl -sf \
+            -H "Authorization: Bearer ${{ secrets.NTFY_TOKEN }}" \
             -H "Title: homepage deploy: $STATUS" \
             -H "Priority: $PRIORITY" \
             -H "Tags: $TAGS" \
