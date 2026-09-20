@@ -1,6 +1,6 @@
 image:
-  repository: ghcr.io/gethomepage/homepage
-  tag: v2.1.2
+    repository: ghcr.io/gethomepage/homepage
+    tag: v2.1.2
 
 enableRbac: true
 
@@ -37,6 +37,9 @@ config:
         headerStyle: boxed
         statusStyle: dot
         language: en
+        providers:
+            longhorn:
+                url: http://longhorn-frontend.longhorn-system.svc.cluster.local
 
     widgets:
         - greeting:
@@ -55,7 +58,6 @@ config:
                   memory: true
                   showLabel: true
         - longhorn:
-              url: http://longhorn-frontend.longhorn-system.svc.cluster.local
               expanded: true
               total: true
               nodes: true
@@ -110,18 +112,34 @@ config:
                     href: http://192.168.0.212:8989
                     icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/sonarr.png
                     description: TV show management
+                    widget:
+                        type: sonarr
+                        url: http://sonarr.media.svc.cluster.local
+                        key: "{{ HOMEPAGE_VAR_SONARR_API_KEY }}"
               - Radarr:
                     href: http://192.168.0.213:7878
                     icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/radarr.png
                     description: Movie management
+                    widget:
+                        type: radarr
+                        url: http://radarr.media.svc.cluster.local
+                        key: "{{ HOMEPAGE_VAR_RADARR_API_KEY }}"
               - Prowlarr:
                     href: http://192.168.0.211:9696
                     icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/prowlarr.png
                     description: Indexer management
+                    widget:
+                        type: prowlarr
+                        url: http://prowlarr.media.svc.cluster.local
+                        key: "{{ HOMEPAGE_VAR_PROWLLARR_API_KEY }}"
               - Bazarr:
                     href: http://192.168.0.214:6767
                     icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/bazarr.png
                     description: Subtitle management
+                    widget:
+                        type: bazarr
+                        url: http://bazarr.media.svc.cluster.local
+                        key: "{{ HOMEPAGE_VAR_BAZARR_API_KEY }}"
               - Flaresolverr:
                     href: http://192.168.0.217:8191
                     icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/flaresolverr.png
@@ -173,6 +191,7 @@ config:
                         type: ntfy
                         url: http://ntfy.ntfy.svc.cluster.local
                         topic: homelab-deploys
+                        key: "{{ HOMEPAGE_VAR_NTFY_TOKEN }}"
               - OpenGym:
                     href: https://opengym.yukselcloud.com
                     icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/opengym.png

@@ -27,7 +27,13 @@ jobs:
             | kubectl apply -f -
 
       - name: Apply Secrets
-        run: kubectl -n homepage apply -f k3s-ha-cluster/homepage/secret.yaml
+        run: |
+          # Create-if-missing only: real values live in the cluster
+          # secret (kubectl patch), never in git. Re-applying this file
+          # would wipe them on every deployment.
+          if ! kubectl -n homepage get secret homepage-secrets -o name >/dev/null 2>&1; then
+            kubectl -n homepage apply -f k3s-ha-cluster/homepage/secret.yaml
+          fi
 
       - name: Helm Upgrade
         run: |
