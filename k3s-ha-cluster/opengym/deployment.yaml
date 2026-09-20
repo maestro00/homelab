@@ -6,6 +6,11 @@ metadata:
   namespace: opengym
 spec:
   replicas: 1
+  # PVC is ReadWriteOnce: a rolling update would try to attach the volume to
+  # the new pod while the old pod still holds it (multi-attach deadlock).
+  # Recreate terminates the old pod first, then the new pod attaches cleanly.
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: opengym
