@@ -61,6 +61,10 @@
                 {
                     "name": "opengym",
                     "proxied": false
+                },
+                {
+                    "name": "home",
+                    "proxied": false
                 }
             ]
         }
