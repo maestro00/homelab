@@ -4,12 +4,8 @@ RUN apk add --no-cache \
     git \
     bash \
     curl \
-    jq
-
-# kaniko — daemon-less image builds for job containers that have no Docker
-# daemon access. Official releases ship no standalone binaries, so the static
-# executor is copied out of the debug image.
-COPY --from=gcr.io/kaniko-project/executor:debug /kaniko/executor /usr/local/bin/kaniko
+    jq \
+    skopeo
 
 RUN curl -LO https://dl.k8s.io/release/$(curl -Ls https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl \
     && install -m 0755 kubectl /usr/local/bin/kubectl \

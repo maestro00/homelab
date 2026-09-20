@@ -3,7 +3,7 @@
 Self-hosted gym and body-weight tracker: plan routines, log workouts, track
 weight and progress. Passkey login, PWA. AGPL-3.0.
 
-Upstream: <https://gitlab.com/DuarteSantos8/opengym>
+Upstream: <https://github.com/DuarteSantos8/openGym>
 
 ## Architecture
 
@@ -15,10 +15,11 @@ Single pod, two containers sharing one Longhorn PVC (`opengym-data`):
 | api       | `git.yukselcloud.com/lab/opengym-api`     | Node backend, passkeys, JSON data in `/data`    |
 | web       | `git.yukselcloud.com/lab/opengym-web`     | nginx serving React build, proxies `/api`       |
 
-Images are built from the upstream source with podman and pushed to the local
-Forgejo registry (pinned to `v1.2.11`) — no dependency on upstream ghcr.
-The `forgejo-registry` pull secret must exist in the namespace (copied from
-`ntfy`).
+Images are upstream's prebuilt `ghcr.io/DuarteSantos8/opengym-{api,web}`
+(zero building), archived into the local Forgejo registry pinned at the
+released version (`vX.Y.Z`) — the cluster always pulls immutable version tags
+from `git.yukselcloud.com`, not a rolling `:latest`. The `forgejo-registry`
+pull secret must exist in the namespace (copied from `ntfy`).
 
 PVC layout via subPaths:
 
@@ -78,24 +79,19 @@ kubectl -n opengym port-forward svc/opengym 8080:80
 Automated via Forgejo workflow `update-opengym.yml` — trigger from the
 Actions tab with an optional version tag (leave empty for latest).
 
-The workflow fetches the upstream release from GitLab, builds both images
-with podman, pushes to the Forgejo registry, updates `deployment.yaml`,
-commits the change, and rolling-restarts the deployment.
+The workflow resolves the latest upstream release from GitHub, copies both
+images from `ghcr.io` (`:latest`) into the Forgejo registry pinned at
+`vX.Y.Z` with skopeo (nothing is built), updates `deployment.yaml`, commits,
+applies the manifests and rolling-restarts the deployment.
 
 Manual upgrade (same thing, local machine):
 
 ```bash
-# clone upstream at the target tag
-git clone --depth 1 --branch vX.Y.Z \
-    https://gitlab.com/DuarteSantos8/opengym.git /tmp/opengym-src
-
-# build and push
-podman build -t git.yukselcloud.com/lab/opengym-api:vX.Y.Z \
-    --build-arg VERSION=vX.Y.Z /tmp/opengym-src/api
-podman build -t git.yukselcloud.com/lab/opengym-web:vX.Y.Z \
-    --build-arg VERSION=vX.Y.Z -f web/Dockerfile /tmp/opengym-src
-podman push git.yukselcloud.com/lab/opengym-api:vX.Y.Z
-podman push git.yukselcloud.com/lab/opengym-web:vX.Y.Z
+# archive upstream's prebuilt image into the Forgejo registry
+skopeo copy docker://ghcr.io/DuarteSantos8/opengym-api:vX.Y.Z \
+    docker://git.yukselcloud.com/lab/opengym-api:vX.Y.Z
+skopeo copy docker://ghcr.io/DuarteSantos8/opengym-web:vX.Y.Z \
+    docker://git.yukselcloud.com/lab/opengym-web:vX.Y.Z
 
 # bump tags in deployment.yaml and apply
 sed -i "s/opengym-api:v[0-9.]*/opengym-api:vX.Y.Z/" k3s-ha-cluster/opengym/deployment.yaml
@@ -104,11 +100,15 @@ kubectl -n opengym apply -f k3s-ha-cluster/opengym/
 kubectl -n opengym rollout restart deploy opengym
 ```
 
+> `ghcr.io/DuarteSantos8/opengym-{api,web}` only carries a rolling `:latest`
+> tag, not `vX.Y.Z` — the workflow copies `:latest` and re-tags it with the
+> released version, so the pin lives only in our registry.
+
 Data is plain JSON in `/data` — back up the `opengym-data` PVC (Longhorn
 snapshot suffices).
 
 ### Runner note
 
-The workflow runs in the `kubectl-node` container. If podman is not
-available in that image, build locally and use the manual steps above, or
-add podman to the runner image.
+The workflow runs in the `kubectl-node` container, which ships `jq` and
+`skopeo` (plus kubectl, git, curl). No Docker daemon or build capability is
+needed — skopeo only reads from ghcr and writes to the Forgejo registry.

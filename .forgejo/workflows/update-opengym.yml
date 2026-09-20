@@ -1,10 +1,14 @@
+# Update openGym. Images come from upstream's public registry (ghcr.io,
+# :latest only) and are archived into the local Forgejo registry pinned at the
+# released version — so the cluster keeps pulling immutable version tags.
+# skopeo does the copy: no daemon, nothing to build, idempotent.
 name: Update openGym
 
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Upstream tag (e.g. v1.2.11). Leave empty for latest."
+        description: "Upstream release tag (e.g. v1.3.7). Leave empty for latest."
         required: false
         type: string
 
@@ -12,7 +16,7 @@ jobs:
   update:
     runs-on: self-hosted
     container:
-      image: git.yukselcloud.com/lab/kubectl-node:latest
+      image: git.yukselcloud.com/lab/kubectl-node:latest  # has jq + skopeo
 
     steps:
       - uses: actions/checkout@v4
@@ -33,7 +37,8 @@ jobs:
           if [ -n "${{ inputs.version }}" ]; then
             LATEST="${{ inputs.version }}"
           else
-            LATEST=$(curl -sf "https://gitlab.com/api/v4/projects/85678327/releases/permalink" \
+            LATEST=$(curl -sf \
+              "https://api.github.com/repos/DuarteSantos8/openGym/releases/latest" \
               | jq -r '.tag_name' | sed 's/^v//')
           fi
           echo "latest=$LATEST" >> "$GITHUB_OUTPUT"
@@ -45,33 +50,25 @@ jobs:
           echo "Already running v${{ steps.version.outputs.current }}, nothing to do."
           exit 0
 
-      - name: Build and push images
+      - name: Archive images
         if: steps.version.outputs.current != steps.version.outputs.latest
         run: |
           TAG="v${{ steps.version.outputs.latest }}"
           REGISTRY="git.yukselcloud.com/lab"
+          CREDS="${{ secrets.FORGEJO_REGISTRY_USER }}:${{ secrets.FORGEJO_REGISTRY_PASSWORD }}"
 
-          # Check if images already exist in registry
-          if skopeo list-tags "docker://${REGISTRY}/opengym-api" 2>/dev/null \
-              | jq -e ".Tags | index(\"$TAG\")" >/dev/null 2>&1; then
-            echo "Images for $TAG already in registry, skipping build."
-          else
-            echo "Cloning upstream at $TAG..."
-            git clone --depth 1 --branch "$TAG" \
-              https://gitlab.com/DuarteSantos8/opengym.git /tmp/upstream
-
-            echo "Building api..."
-            podman build -t "${REGISTRY}/opengym-api:${TAG}" \
-              --build-arg VERSION="$TAG" /tmp/upstream/api
-
-            echo "Building web..."
-            podman build -t "${REGISTRY}/opengym-web:${TAG}" \
-              --build-arg VERSION="$TAG" -f web/Dockerfile /tmp/upstream
-
-            echo "Pushing..."
-            podman push "${REGISTRY}/opengym-api:${TAG}"
-            podman push "${REGISTRY}/opengym-web:${TAG}"
-          fi
+          for IMG in opengym-api opengym-web; do
+            if skopeo list-tags docker://${REGISTRY}/${IMG} --creds="${CREDS}" 2>/dev/null \
+                | grep -q "\"${TAG}\""; then
+              echo "${IMG}:${TAG} already in registry, skipping copy."
+            else
+              echo "Copying ghcr.io/duartesantos8/${IMG}:latest -> ${TAG}..."
+              skopeo copy \
+                docker://ghcr.io/duartesantos8/${IMG}:latest \
+                docker://${REGISTRY}/${IMG}:${TAG} \
+                --dest-creds="${CREDS}"
+            fi
+          done
 
       - name: Update deployment.yaml
         if: steps.version.outputs.current != steps.version.outputs.latest
