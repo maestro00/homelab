@@ -56,7 +56,7 @@ unrelated pushes do not redeploy everything.
 | -------------------- | -------------------------------------- | ----------------------------------- |
 | `caddy-upgrade.yml`  | `k3s-ha-cluster/caddy/configmap.yaml`  | apply ConfigMap + restart Caddy     |
 | `deploy-ddns.yml`    | `k3s-ha-cluster/ddns/**`               | render Secret from Forgejo secret `CLOUDFLARE_DDNS_API_TOKEN`, apply, restart pod |
-| `homer-deploy.yml`   | `k3s-ha-cluster/homer/config.yaml`     | apply Homer config                  |
+| `deploy-homepage.yml` | `k3s-ha-cluster/homepage/**`          | `helm upgrade --install homepage` (chart pinned 2.1.0) |
 | `deploy-beszel.yml`  | `k3s-ha-cluster/monitoring/beszel/**`  | deploy beszel                       |
 | `deploy-portfolio.yaml` | `k3s-ha-cluster/portfolio/**`       | deploy portfolio                    |
 | `test.yml`           | every push                             | smoke test                          |

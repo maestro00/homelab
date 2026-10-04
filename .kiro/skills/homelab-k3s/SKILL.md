@@ -98,9 +98,10 @@ k3s-ha-cluster/
 │   ├── values.yaml             # bouncer key, ENROLL_KEY, MySQL DB config
 │   └── mysql-secret.yaml       # copy of MySQL password for crowdsec namespace
 ├── vaultwarden/values.yaml     # guerzon/vaultwarden chart
-├── homer/
-│   ├── values.yaml             # djjudas21/homer chart
-│   └── config.yaml             # Dashboard links and layout
+├── homepage/                   # Dashboard, home.yukselcloud.com
+│   ├── values.yaml             # settings, service grid, widgets
+│   ├── secret.yaml             # HOMEPAGE_VAR_* placeholders only
+│   └── README.md
 ├── termix/                     # Custom Helm chart (helm install termix ./termix)
 ├── kubernetes-dashboard/
 │   ├── values.yaml
@@ -120,7 +121,7 @@ k3s-ha-cluster/
 | `db` | mysql | 192.168.0.207 | Helm (Bitnami) |
 | `ddns` | cloudflare-ddns | — | Raw manifest |
 | `forgejo` | forgejo, forgejo-pg (CNPG), runner | — | Helm (OCI) |
-| `homer` | homer | 192.168.0.208 | Helm |
+| `homepage` | homepage (dashboard) | ClusterIP via Caddy | Helm |
 | `kubernetes-dashboard` | dashboard | 192.168.0.209 | Helm |
 | `longhorn-system` | longhorn | 192.168.0.203 | Helm |
 | `media` | qbittorrent, prowlarr, radarr, sonarr, bazarr, jellyfin, seerr, flaresolverr, profilarr, metube, scraperr | 192.168.0.210–222 | Custom Helm umbrella |
