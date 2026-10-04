@@ -37,6 +37,9 @@ config:
         headerStyle: boxed
         statusStyle: dot
         language: en
+        search:
+            provider: duckduckgo
+            target: _blank
         providers:
             longhorn:
                 url: http://longhorn-frontend.longhorn-system.svc.cluster.local
