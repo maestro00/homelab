@@ -162,7 +162,8 @@ kubectl rollout restart deployment/cloudflare-ddns -n ddns
 
 ## Authelia Forward-Auth Pattern
 
-For services that don't support OIDC natively (Homer, Longhorn UI, K8s dashboard):
+For services that do not support OIDC natively (homepage, Longhorn UI,
+K8s dashboard):
 
 ```caddyfile
 myservice.yukselcloud.com {
@@ -183,6 +184,72 @@ myservice.yukselcloud.com {
 ```
 
 Note: `forward_auth` comes BEFORE `reverse_proxy` — Caddy evaluates top-down.
+
+### Two things that silently break this
+
+Both were hit for real on `home.yukselcloud.com`. Check them before debugging
+anything else.
+
+**1. The endpoint is opt-in since Authelia v4.39.** If
+`server.endpoints.authz.forward-auth` is missing, `/api/authz/forward-auth`
+returns **404** and Caddy passes that 404 straight through — the site looks
+broken rather than locked.
+
+```yaml
+configMap:
+  server:
+    endpoints:
+      authz:
+        auth-request:
+          implementation: "AuthRequest"
+        forward-auth:
+          implementation: "ForwardAuth"   # <- required
+```
+
+**2. The chart overrides `authelia_url`.** The authelia chart renders
+`session.cookies[].authelia_url` from `subdomain` + `domain` and ignores an
+`authelia_url` key in values. With `domain: yukselcloud.com` and no
+`subdomain`, it renders `https://yukselcloud.com` — and forward-auth
+redirects to the apex, which has **no DNS record** here, so the login is a
+dead end.
+
+```yaml
+configMap:
+  session:
+    cookies:
+      - domain: yukselcloud.com
+        subdomain: auth        # <- yields https://auth.yukselcloud.com
+        secure: true
+```
+
+Do not also set `default_redirection_url` to the same URL — Authelia refuses
+to start (`effectively equal to option 'authelia_url'`).
+
+### Verify before pushing
+
+```bash
+# unauthenticated request must 302 to the portal, never 200 or 404
+curl -sI https://<service>.yukselcloud.com | grep -iE '^HTTP|^location'
+
+# the portal itself must resolve
+curl -s -o /dev/null -w '%{http_code}\n' https://auth.yukselcloud.com
+```
+
+### Authelia is applied by hand, not GitOps
+
+There is no deploy workflow for `auth/authelia`. Apply it manually and pin the
+chart version, otherwise `helm upgrade` picks up a newer chart whose schema
+rejects the current values:
+
+```bash
+helm upgrade authelia authelia/authelia -n auth \
+  --version 0.10.49 \
+  --values k3s-ha-cluster/auth/authelia/values.yaml
+```
+
+> The authelia image is `:latest`, so the app version drifts from the chart's
+> `appVersion` on its own. A `:latest` bump can change API behaviour with no
+> git change — see issue #30.
 
 ---
 
