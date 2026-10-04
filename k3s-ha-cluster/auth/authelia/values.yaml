@@ -59,7 +59,7 @@ configMap:
     same_site: none
     cookies:
       - domain: yukselcloud.com
-        authelia_url: https://auth.yukselcloud.com
+        subdomain: auth
         secure: true
     redis:
       enabled: true
