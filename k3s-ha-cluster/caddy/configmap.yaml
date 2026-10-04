@@ -94,6 +94,10 @@ data:
         home.yukselcloud.com {
             log
             crowdsec
+            forward_auth authelia.auth.svc.cluster.local:9091 {
+                uri /api/authz/forward-auth
+                copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+            }
             reverse_proxy homepage.homepage.svc.cluster.local:3000 {
                 header_up Host {host}
                 header_up X-Forwarded-Proto https
