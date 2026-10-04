@@ -191,21 +191,4 @@ configMap:
           response_types:
             - code
           claims_policy: legacy
-        - client_id: homarr
-          client_name: Homarr
-          client_secret: "$pbkdf2-sha512$310000$suciIlHCbfAyuSK2Ia6Diw$kxzF8HCygIfFCPk1CIfwNzqxIsp.ZiWvoao3b2yryEQnHe1CODQFRisv.UvxqOA1LLBArp/lapu1LyuT45BJ3Q"
-          public: false
-          authorization_policy: one_factor
-          require_pkce: true
-          redirect_uris:
-            - https://homarr.yukselcloud.com/api/auth/callback/oidc
-          scopes:
-            - openid
-            - email
-            - profile
-            - groups
-          grant_types:
-            - authorization_code
-          response_types:
-            - code
-          claims_policy: legacy
+        
