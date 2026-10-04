@@ -48,6 +48,8 @@ configMap:
       authz:
         auth-request:
           implementation: "AuthRequest"
+        forward-auth:
+          implementation: "ForwardAuth"
 
   session:
     name: authelia_session
