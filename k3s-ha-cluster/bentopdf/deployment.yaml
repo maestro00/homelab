@@ -1,0 +1,48 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bentopdf
+  namespace: bentopdf
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bentopdf
+  template:
+    metadata:
+      labels:
+        app: bentopdf
+    spec:
+      containers:
+        # Privacy-first PDF toolkit. All processing is client-side (WASM), so
+        # this container only ever serves the pre-built SPA. No PVC, no DB.
+        # Pinned tag on purpose: the deploy workflow path filter does not
+        # retrigger on image changes, so `:latest` would silently never update.
+        - name: bentopdf
+          image: bentopdfteam/bentopdf-simple:v2.8.8
+          ports:
+            - name: http
+              containerPort: 8080
+          resources:
+            requests:
+              cpu: 10m
+              memory: "64Mi"
+            limits:
+              # Upstream minimum is 512MB (LibreOffice/OCR WASM in the browser).
+              memory: "1Gi"
+              cpu: 1000m
+          # Ships COOP: same-origin / COEP: credentialless, which is what makes
+          # SharedArrayBuffer (Office conversion, OCR) work.
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 20

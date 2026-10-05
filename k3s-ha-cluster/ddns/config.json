@@ -61,6 +61,10 @@
                 {
                     "name": "home",
                     "proxied": false
+                },
+                {
+                    "name": "bentopdf",
+                    "proxied": false
                 }
             ]
         }
