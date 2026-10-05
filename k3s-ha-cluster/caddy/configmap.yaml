@@ -118,3 +118,8 @@ data:
             crowdsec
             reverse_proxy opengym.opengym.svc.cluster.local:80
         }
+        bentopdf.yukselcloud.com {
+            log
+            crowdsec
+            reverse_proxy bentopdf.bentopdf.svc.cluster.local:80
+        }

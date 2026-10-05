@@ -1,0 +1,46 @@
+name: Deploy bentopdf
+on:
+  push:
+    paths:
+      - "k3s-ha-cluster/bentopdf/deployment.yaml"
+      - "k3s-ha-cluster/bentopdf/service.yaml"
+  workflow_dispatch:
+
+jobs:
+  deploy-bentopdf:
+    runs-on: self-hosted
+
+    container:
+      image: git.yukselcloud.com/lab/kubectl-node:latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG_DEPLOY }}" > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Ensure Namespace
+        run: kubectl create namespace bentopdf --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Apply bentopdf
+        run: kubectl apply -f k3s-ha-cluster/bentopdf/
+
+      - name: Wait for rollout
+        run: kubectl -n bentopdf rollout status deploy/bentopdf --timeout=120s
+
+      - name: Notify
+        if: always()
+        run: |
+          STATUS="${{ job.status }}"
+          PRIORITY=$([[ "$STATUS" == "success" ]] && echo "default" || echo "high")
+          TAGS=$([[ "$STATUS" == "success" ]] && echo "white_check_mark" || echo "warning")
+          curl -sf \
+            -H "Title: bentopdf deploy: $STATUS" \
+            -H "Priority: $PRIORITY" \
+            -H "Tags: $TAGS" \
+            -H "Authorization: Bearer ${{ secrets.NTFY_TOKEN }}" \
+            -d "BentoPDF applied and rolled out — $STATUS" \
+            http://ntfy.ntfy.svc.cluster.local/homelab-deploys
