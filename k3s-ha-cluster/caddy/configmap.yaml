@@ -121,5 +121,8 @@ data:
         bentopdf.yukselcloud.com {
             log
             crowdsec
+            # This site ships 1.09MB of JS/CSS bundles; without encode Caddy
+            # sends them uncompressed. gzip/zstd brings that to ~305KB.
+            encode zstd gzip
             reverse_proxy bentopdf.bentopdf.svc.cluster.local:80
         }
