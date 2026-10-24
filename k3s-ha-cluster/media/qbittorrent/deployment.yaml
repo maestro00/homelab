@@ -18,7 +18,7 @@ spec:
         # Gluetun VPN + Proxy
         # ==========================
         - name: gluetun
-          image: qmcgaw/gluetun:v3.41.0
+          image: qmcgaw/gluetun:v3.41.1
           securityContext:
             capabilities:
               add:
@@ -40,6 +40,8 @@ spec:
             - name: WIREGUARD_CONF_FILE
               value: wg0.conf
             - name: FIREWALL
+              value: "on"
+            - name: HTTPPROXY
               value: "on"
           ports:
             - containerPort: 8080

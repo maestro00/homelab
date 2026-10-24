@@ -7,12 +7,12 @@ Grafana/Prometheus (kube-prometheus-stack) deployment.
 ## Components
 
 | File | What it creates |
-|------|-----------------|
-| `deployment.yaml` | Beszel hub (web UI + database), served at `https://beszel.yukselcloud.com` |
+| ------ | ----------------- |
+| `deployment.yaml` | Beszel hub `https://beszel.yukselcloud.com` |
 | `service.yaml` | LoadBalancer `192.168.0.225` → hub port 8090 |
 | `pvc.yaml` | Longhorn PVC `beszel-data` (2Gi, hub database) |
 | `secret.yaml` | `beszel-agent` secret (KEY/TOKEN for agent registration) |
-| `agent-daemonset.yaml` | `beszel-agent` DaemonSet — one agent pod per node (host network, port 45876) |
+| `agent-daemonset.yaml` | Beszel agent per node; host network, port 45876 |
 
 ## Deploying
 
