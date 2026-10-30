@@ -153,7 +153,7 @@ resource "proxmox_virtual_environment_container" "lxc" {
 
   memory {
     dedicated = each.value.memory_mb
-    swap      = 0
+    swap      = try(each.value.swap_mb, 0)
   }
 
   disk {
@@ -167,8 +167,6 @@ resource "proxmox_virtual_environment_container" "lxc" {
     enabled = true
   }
 
-  # tun needed by tailscaled inside the container (/dev/net/tun).
-  # PVE feature list has no `tun` flag on this version -> device passthrough.
   device_passthrough {
     path = "/dev/net/tun"
     mode = "0777"

@@ -1,0 +1,16 @@
+# The ops agent diagnoses; it never changes state. The built-in "view" role
+# is cluster-wide read for workloads, endpoints, events and logs, and it
+# excludes Secrets, Roles and RoleBindings — an agent that can read every
+# namespace's Secrets is one prompt injection away from owning the cluster.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: paperclip-ops-view
+subjects:
+  - kind: ServiceAccount
+    name: ops
+    namespace: paperclip-agent
+roleRef:
+  kind: ClusterRole
+  name: view
+  apiGroup: rbac.authorization.k8s.io

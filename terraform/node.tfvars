@@ -61,11 +61,22 @@ containers = [
     ipv4_address         = "192.168.0.53/24"
     target_node          = "lab-pve2"
     cpu_cores            = 2
-    # 1 GiB was too tight: opencode (Bun) + tailscaled + systemd hit 99% and
-    # the container thrashed (sshd banner timeout, web UI hang)
     memory_mb            = 2048
     disk_size            = 16
     storage_datastore_id = "local-lvm"
     description          = "Always-on opencode server (Tailscale-only, no reverse proxy)"
+  },
+  {
+    name                 = "paperclip"
+    ct_id                = 254
+    hostname             = "paperclip"
+    ipv4_address         = "192.168.0.54/24"
+    target_node          = "lab-pve1"
+    cpu_cores            = 4
+    memory_mb            = 4096
+    swap_mb              = 2048
+    disk_size            = 32
+    storage_datastore_id = "local-lvm"
+    description          = "Paperclip agent orchestrator (Tailscale-only, no reverse proxy)"
   }
 ]

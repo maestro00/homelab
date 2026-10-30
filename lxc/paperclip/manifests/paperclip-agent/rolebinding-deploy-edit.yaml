@@ -1,0 +1,48 @@
+# Write access for the deploy agent, one document per namespace. Only
+# namespaces listed here are writable; nothing is writable cluster-wide.
+# "edit" cannot touch RBAC, but it does grant read on Secrets in the
+# namespace (verified with `auth can-i`) — so only list namespaces whose
+# Secrets you are fine with the agent reading. Start with namespaces that
+# are safe to break (media, monitoring, opengym) and leave auth/, db/,
+# forgejo/, caddy/ and security/ out until the agent has a track record.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: paperclip-deploy-edit
+  namespace: media
+subjects:
+  - kind: ServiceAccount
+    name: deploy
+    namespace: paperclip-agent
+roleRef:
+  kind: ClusterRole
+  name: edit
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: paperclip-deploy-edit
+  namespace: monitoring
+subjects:
+  - kind: ServiceAccount
+    name: deploy
+    namespace: paperclip-agent
+roleRef:
+  kind: ClusterRole
+  name: edit
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: paperclip-deploy-edit
+  namespace: opengym
+subjects:
+  - kind: ServiceAccount
+    name: deploy
+    namespace: paperclip-agent
+roleRef:
+  kind: ClusterRole
+  name: edit
+  apiGroup: rbac.authorization.k8s.io
