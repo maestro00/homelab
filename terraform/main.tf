@@ -38,6 +38,7 @@ variable "containers" {
     target_node          = string
     cpu_cores            = number
     memory_mb            = number
+    swap_mb              = optional(number, 0)
     disk_size            = number
     storage_datastore_id = string
     description          = optional(string, "")
@@ -153,7 +154,7 @@ resource "proxmox_virtual_environment_container" "lxc" {
 
   memory {
     dedicated = each.value.memory_mb
-    swap      = try(each.value.swap_mb, 0)
+    swap      = each.value.swap_mb
   }
 
   disk {

@@ -25,7 +25,11 @@ REMOTE_PROVISION_SCRIPT="$SCRIPT_DIR/remote-provision.sh"
 CT_HOST="${CT_HOST:-root@192.168.0.54}"
 OPENCODE_VERSION="${OPENCODE_VERSION:-1.18.25}"
 
-: "${TS_AUTHKEY:?set TS_AUTHKEY (fresh key from the Tailscale console)}"
+# TS_AUTHKEY is only needed if the container has not joined the tailnet yet,
+# so a re-run against an already-joined container can leave it unset.
+if [ -z "${TS_AUTHKEY:-}" ]; then
+  log "no TS_AUTHKEY — needed only if this container has not joined the tailnet"
+fi
 : "${GIT_TOKEN:?set GIT_TOKEN (Forgejo token — verify it is scoped to lab/homelab only, not account-wide)}"
 : "${OPENCODE_SERVER_USERNAME:?set OPENCODE_SERVER_USERNAME (web basic auth)}"
 : "${OPENCODE_SERVER_PASSWORD:?set OPENCODE_SERVER_PASSWORD (web basic auth)}"
