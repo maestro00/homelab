@@ -19,6 +19,6 @@ Keeps `yukselcloud.com` DNS records pointed at your home IP. Runs
 > The Cloudflare API token is **never** in git — `config.json` only holds the
 > placeholder. `temp/config.json` (gitignored) keeps a local working copy.
 
-See
-[`.kiro/skills/homelab-k3s/references/add-service-to-caddy.md`](../../.kiro/skills/homelab-k3s/references/add-service-to-caddy.md)
+See the
+[homelab K3s skill](../../.opencode/skills/homelab-k3s/SKILL.md)
 for the full "expose a new service" flow (Caddy route + DDNS subdomain).
