@@ -84,7 +84,10 @@ install_opencode() {
 }
 
 install_paperclip() {
-  if [ ! -x "$PC_BIN" ]; then
+  # The launcher in .local/bin outlives a wiped ~/.paperclip, but its payload
+  # (cli/current/node_modules/paperclipai) does not — so -x is not proof the
+  # CLI works. Ask the CLI itself.
+  if ! su - paperclip -c "$PC_BIN --version" >/dev/null 2>&1; then
     log "installing paperclipai (managed store, as $PC_HOME user)"
     su - paperclip -c 'npx --yes paperclipai install --yes' >/dev/null
   fi
@@ -105,8 +108,10 @@ clone_homelab_repo() {
     git clone https://git.yukselcloud.com/lab/homelab.git "$PC_HOME/work/homelab"
   else
     # The agents work from this clone. A stale one means they cannot see the
-    # code they are being asked to reason about.
-    git -C "$PC_HOME/work/homelab" pull --ff-only >/dev/null \
+    # code they are being asked to reason about. The tree is paperclip-owned
+    # from the chown below, so git needs the exception for a root pull.
+    git -c safe.directory="$PC_HOME/work/homelab" \
+      -C "$PC_HOME/work/homelab" pull --ff-only >/dev/null \
       || log "pull failed — workspace is stale"
   fi
   chown -R paperclip:paperclip "$PC_HOME/work"
@@ -172,6 +177,10 @@ allow_lan_hostname() {
     [ -f "$PC_HOME/.paperclip/instances/default/config.json" ] && break
     sleep 2
   done
+  # Without this the next line fails with a confusing MODULE_NOT_FOUND when the
+  # CLI payload is missing or the unit is crash-looping.
+  [ -f "$PC_HOME/.paperclip/instances/default/config.json" ] \
+    || { log "FAILED: no config.json after 60s — check 'systemctl status paperclip'"; exit 1; }
   log "allowing the LAN IP in the hostname allowlist"
   su - paperclip -c "$PC_BIN allowed-hostname 192.168.0.54" >/dev/null
   systemctl restart paperclip
