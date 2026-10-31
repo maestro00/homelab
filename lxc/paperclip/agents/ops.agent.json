@@ -1,0 +1,28 @@
+{
+  "name": "ops",
+  "role": "general",
+  "title": "Read-only cluster observer",
+  "reportsTo": null,
+  "capabilities": "Reports homelab cluster health and config drift. Never changes anything.",
+  "adapterType": "opencode_local",
+  "adapterConfig": {
+    "cwd": "/srv/paperclip/work/homelab",
+    "model": "opencode/big-pickle",
+    "instructionsFilePath": "/srv/paperclip/work/homelab/lxc/paperclip/agents/ops.md",
+    "dangerouslySkipPermissions": true,
+    "timeoutSec": 600,
+    "graceSec": 30,
+    "env": {
+      "KUBECONFIG": "/srv/paperclip/.kube/ops-config",
+      "PAPERCLIP_OPENCODE_SMALL_MODEL": "opencode/big-pickle"
+    }
+  },
+  "runtimeConfig": {
+    "heartbeat": { "enabled": false }
+  },
+  "budgetMonthlyCents": 0,
+  "metadata": {
+    "rbac": "cluster-scoped view (no Secrets, no writes)",
+    "gitops": "lab/homelab @ lxc/paperclip/agents/ops.md"
+  }
+}
