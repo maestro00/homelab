@@ -2,6 +2,10 @@
 # Regenerate the committed ConfigMap manifests from the gitignored source dirs.
 # Source of truth: html/index.html (page) and img/ (photographs). After running,
 # commit the manifests — the Forgejo deploy-portfolio workflow ships them on push.
+#
+# NOTE: portfolio-assets must be applied with `kubectl apply --server-side`:
+# client-side apply embeds the whole object in the last-applied-configuration
+# annotation, which busts the 256 KiB annotation limit for large manifests.
 set -euo pipefail
 cd "$(dirname "$0")"
 kubectl create configmap portfolio-html -n portfolio \
@@ -12,7 +16,7 @@ kubectl create configmap portfolio-assets -n portfolio \
   --dry-run=client -o yaml > assets-configmap.yaml
 for f in configmap.yaml assets-configmap.yaml; do
   b=$(wc -c < "$f")
-  # ConfigMap hard cap is 1 MiB; fail loudly at 95%.
+  # ConfigMap hard cap is 1 MiB; fail loudly at ~95%.
   [ "$b" -lt 1000000 ] || { echo "$f is ${b}B — over the ConfigMap budget"; exit 1; }
 done
 echo "regenerated: $(wc -c < configmap.yaml)B page, $(wc -c < assets-configmap.yaml)B assets"

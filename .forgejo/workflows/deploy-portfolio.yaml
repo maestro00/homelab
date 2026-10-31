@@ -25,7 +25,7 @@ jobs:
       - name: Apply ConfigMap and Deployment
         run: |
           kubectl -n portfolio apply -f k3s-ha-cluster/portfolio/configmap.yaml
-          kubectl -n portfolio apply -f k3s-ha-cluster/portfolio/assets-configmap.yaml
+          kubectl -n portfolio apply --server-side -f k3s-ha-cluster/portfolio/assets-configmap.yaml
           kubectl -n portfolio apply -f k3s-ha-cluster/portfolio/deployment.yaml
           kubectl -n portfolio apply -f k3s-ha-cluster/portfolio/service.yaml
 
