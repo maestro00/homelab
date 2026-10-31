@@ -1,790 +1,640 @@
----
 apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: portfolio-html
-  namespace: portfolio
 data:
   index.html: |
     <!DOCTYPE html>
-    <html lang="en" data-theme="dark">
+    <html lang="en">
     <head>
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>Yusuf Taylan Yuksel — Software Developer &amp; DevOps</title>
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-      <style>
-        /* ── Design Tokens ───────────────────────────────────────── */
-        :root {
-          --bg:           #0a0f1e;
-          --bg-surface:   #111827;
-          --bg-card:      rgba(17,24,39,0.8);
-          --border:       rgba(99,118,160,0.18);
-          --text:         #e2e8f0;
-          --text-muted:   #94a3b8;
-          --accent:       #06b6d4;
-          --accent-glow:  rgba(6,182,212,0.18);
-          --accent2:      #6366f1;
-          --accent2-glow: rgba(99,102,241,0.15);
-          --success:      #10b981;
-          --radius:       12px;
-          --radius-sm:    8px;
-          --transition:   0.25s ease;
-          --font:         'Inter', system-ui, sans-serif;
-          --font-mono:    'JetBrains Mono', monospace;
-          --shadow:       0 4px 24px rgba(0,0,0,0.4);
-          --shadow-card:  0 2px 12px rgba(0,0,0,0.3);
-        }
-    
-        [data-theme="light"] {
-          --bg:           #f1f5f9;
-          --bg-surface:   #ffffff;
-          --bg-card:      rgba(255,255,255,0.9);
-          --border:       rgba(100,116,139,0.2);
-          --text:         #1e293b;
-          --text-muted:   #64748b;
-          --accent:       #0891b2;
-          --accent-glow:  rgba(8,145,178,0.12);
-          --accent2:      #4f46e5;
-          --accent2-glow: rgba(79,70,229,0.1);
-          --shadow:       0 4px 24px rgba(0,0,0,0.08);
-          --shadow-card:  0 2px 12px rgba(0,0,0,0.06);
-        }
-    
-        /* ── Reset ───────────────────────────────────────────────── */
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        html { scroll-behavior: smooth; }
-        body {
-          font-family: var(--font);
-          background: var(--bg);
-          color: var(--text);
-          line-height: 1.6;
-          transition: background var(--transition), color var(--transition);
-          min-height: 100vh;
-        }
-        a { color: var(--accent); text-decoration: none; transition: opacity var(--transition); }
-        a:hover { opacity: 0.8; }
-        ul { list-style: none; }
-    
-        /* ── Background mesh ─────────────────────────────────────── */
-        body::before {
-          content: '';
-          position: fixed;
-          inset: 0;
-          background:
-            radial-gradient(ellipse 80% 50% at 20% 10%, var(--accent-glow), transparent),
-            radial-gradient(ellipse 60% 60% at 80% 80%, var(--accent2-glow), transparent);
-          pointer-events: none;
-          z-index: 0;
-        }
-    
-        /* ── Nav ─────────────────────────────────────────────────── */
-        nav {
-          position: fixed;
-          top: 0; left: 0; right: 0;
-          z-index: 100;
-          background: rgba(10,15,30,0.8);
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
-          border-bottom: 1px solid var(--border);
-          height: 60px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 0 clamp(16px, 5vw, 64px);
-          transition: background var(--transition);
-        }
-        [data-theme="light"] nav { background: rgba(241,245,249,0.85); }
-    
-        .nav-logo {
-          font-family: var(--font-mono);
-          font-size: 14px;
-          color: var(--accent);
-          font-weight: 500;
-          letter-spacing: 0.02em;
-        }
-        .nav-logo span { color: var(--text-muted); }
-    
-        .nav-links {
-          display: flex;
-          gap: 28px;
-          align-items: center;
-        }
-        .nav-links a {
-          font-size: 13px;
-          font-weight: 500;
-          color: var(--text-muted);
-          letter-spacing: 0.03em;
-          text-transform: uppercase;
-        }
-        .nav-links a:hover { color: var(--accent); opacity: 1; }
-    
-        .theme-btn {
-          background: none;
-          border: 1px solid var(--border);
-          color: var(--text-muted);
-          cursor: pointer;
-          padding: 6px 10px;
-          border-radius: var(--radius-sm);
-          font-size: 14px;
-          transition: all var(--transition);
-          display: flex;
-          align-items: center;
-          gap: 6px;
-        }
-        .theme-btn:hover { border-color: var(--accent); color: var(--accent); }
-    
-        /* ── Layout ──────────────────────────────────────────────── */
-        main {
-          position: relative;
-          z-index: 1;
-          max-width: 900px;
-          margin: 0 auto;
-          padding: 80px clamp(16px, 5vw, 32px) 80px;
-        }
-    
-        section { margin-bottom: 80px; }
-    
-        .section-label {
-          font-family: var(--font-mono);
-          font-size: 12px;
-          font-weight: 500;
-          color: var(--accent);
-          letter-spacing: 0.12em;
-          text-transform: uppercase;
-          margin-bottom: 12px;
-        }
-        .section-title {
-          font-size: clamp(22px, 3.5vw, 30px);
-          font-weight: 700;
-          color: var(--text);
-          margin-bottom: 8px;
-        }
-        .section-divider {
-          width: 40px;
-          height: 3px;
-          background: linear-gradient(90deg, var(--accent), var(--accent2));
-          border-radius: 2px;
-          margin-bottom: 32px;
-        }
-    
-        /* ── Card ────────────────────────────────────────────────── */
-        .card {
-          background: var(--bg-card);
-          border: 1px solid var(--border);
-          border-radius: var(--radius);
-          padding: 24px;
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
-          box-shadow: var(--shadow-card);
-          transition: border-color var(--transition), box-shadow var(--transition);
-        }
-        .card:hover {
-          border-color: rgba(6,182,212,0.35);
-          box-shadow: 0 4px 24px rgba(6,182,212,0.08);
-        }
-    
-        /* ── Hero ────────────────────────────────────────────────── */
-        #hero {
-          min-height: calc(100vh - 60px);
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          padding-top: 40px;
-          margin-bottom: 40px;
-        }
-    
-        .hero-tag {
-          font-family: var(--font-mono);
-          font-size: 13px;
-          color: var(--accent);
-          margin-bottom: 20px;
-          opacity: 0;
-          animation: fadeUp 0.6s ease 0.1s forwards;
-        }
-    
-        .hero-name {
-          font-size: clamp(36px, 7vw, 72px);
-          font-weight: 700;
-          line-height: 1.05;
-          letter-spacing: -0.02em;
-          margin-bottom: 16px;
-          opacity: 0;
-          animation: fadeUp 0.6s ease 0.2s forwards;
-        }
-        .hero-name .accent { color: var(--accent); }
-    
-        .hero-role {
-          font-size: clamp(16px, 2.5vw, 22px);
-          color: var(--text-muted);
-          font-weight: 400;
-          margin-bottom: 24px;
-          opacity: 0;
-          animation: fadeUp 0.6s ease 0.3s forwards;
-        }
-        .hero-role strong { color: var(--text); font-weight: 600; }
-    
-        .hero-desc {
-          max-width: 600px;
-          font-size: 16px;
-          color: var(--text-muted);
-          line-height: 1.7;
-          margin-bottom: 40px;
-          opacity: 0;
-          animation: fadeUp 0.6s ease 0.4s forwards;
-        }
-    
-        .hero-actions {
-          display: flex;
-          gap: 16px;
-          flex-wrap: wrap;
-          opacity: 0;
-          animation: fadeUp 0.6s ease 0.5s forwards;
-        }
-    
-        .btn {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          padding: 12px 24px;
-          border-radius: var(--radius-sm);
-          font-size: 14px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all var(--transition);
-          border: none;
-        }
-        .btn-primary {
-          background: var(--accent);
-          color: #0a0f1e;
-        }
-        .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); color: #0a0f1e; }
-        .btn-outline {
-          background: transparent;
-          color: var(--text);
-          border: 1px solid var(--border);
-        }
-        .btn-outline:hover { border-color: var(--accent); color: var(--accent); opacity: 1; transform: translateY(-1px); }
-    
-        .hero-stats {
-          display: flex;
-          gap: 40px;
-          margin-top: 60px;
-          opacity: 0;
-          animation: fadeUp 0.6s ease 0.65s forwards;
-        }
-        .stat-num {
-          font-size: 28px;
-          font-weight: 700;
-          color: var(--accent);
-          font-family: var(--font-mono);
-          line-height: 1;
-        }
-        .stat-label {
-          font-size: 12px;
-          color: var(--text-muted);
-          text-transform: uppercase;
-          letter-spacing: 0.06em;
-          margin-top: 4px;
-        }
-    
-        /* ── Animations ──────────────────────────────────────────── */
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(20px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        .animate-in {
-          opacity: 0;
-          transform: translateY(16px);
-          transition: opacity 0.5s ease, transform 0.5s ease;
-        }
-        .animate-in.visible { opacity: 1; transform: translateY(0); }
-      </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yusuf Taylan Yuksel, DevOps engineer in Helsinki</title>
+    <meta name="description" content="Software developer and DevOps engineer at Ericsson, Helsinki. Home cloud on K3s: this page is served by it.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+    /* ── Tokens (direction sheet 1418059130: The contact sheet: charcoal and sage / Archivo) ── */
+    :root {
+      --bg: #1c1c1c;
+      --surface: #262626;
+      --ink: #f1f1ef;
+      --muted: #a9aaa5;
+      --accent: #8fa68e;
+      --accent-ink: #1c1c1c;
+      --field-1: #c8c5ba;
+      --field-1-ink: #1c1c1c;
+      --step-small: 1rem;
+      --step-body: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
+      --step-lead: clamp(1.25rem, 1.1rem + 0.7vw, 1.625rem);
+      --step-display: clamp(2.5rem, 7vw, 6.5rem);
+      --font: 'Archivo', system-ui, sans-serif;
+      --pad-page: clamp(20px, 4vw, 48px);
+      --gap-strip: 10px;
+      --ease: cubic-bezier(0.2, 0.6, 0.3, 1);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { color-scheme: dark; scrollbar-width: none; }
+    html::-webkit-scrollbar { display: none; }
+    body {
+      font-family: var(--font);
+      font-weight: 400;
+      background: var(--bg);
+      color: var(--ink);
+      font-size: var(--step-body);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--ink); text-decoration: none; }
+    a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    img { display: block; max-width: 100%; height: auto; }
+    h1, h2, h3 { text-wrap: balance; font-weight: 400; }
+    p { text-wrap: pretty; }
+
+    /* ── First screen ── */
+    .first-screen {
+      min-height: 100svh;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: clamp(24px, 4vh, 48px);
+      padding: clamp(20px, 3vh, 40px) var(--pad-page) clamp(28px, 4vh, 44px);
+    }
+    .first-screen > * { min-width: 0; }
+    .name-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 12px 28px; }
+    h1 {
+      font-size: var(--step-display);
+      line-height: 0.95;
+      letter-spacing: -0.02em;
+    }
+    .what {
+      font-size: var(--step-lead);
+      color: var(--muted);
+      line-height: 1.1;
+    }
+    .corner-blocks {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, max-content));
+      gap: 8px clamp(24px, 4vw, 56px);
+      font-size: var(--step-small);
+      margin-top: clamp(12px, 2vh, 20px);
+    }
+    .corner-blocks .label { color: var(--muted); display: block; margin-bottom: 2px; }
+    .corner-blocks a { text-decoration: underline; text-underline-offset: 3px; color: var(--ink); }
+    .corner-blocks nav { display: flex; flex-wrap: wrap; gap: 16px; font-size: var(--step-small); justify-self: end; justify-content: end; }
+
+    /* ── The sheet: lit strip (signature drag row) ── */
+    .strip-wrap { display: flex; flex-direction: column; justify-content: center; gap: 12px; min-height: 0; margin-inline: calc(-1 * var(--pad-page) + 20px); }
+    .strip { padding-left: 20px; }
+    .strip {
+      display: flex;
+      gap: var(--gap-strip);
+      overflow-x: auto;
+      scroll-snap-type: x proximity;
+      height: clamp(220px, 34vh, 360px);
+      scrollbar-width: thin;
+      scrollbar-color: var(--surface) transparent;
+    }
+    .strip figure {
+      flex: 0 0 auto;
+      scroll-snap-align: center;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      filter: brightness(0.85);
+      transition: filter 0.5s var(--ease);
+    }
+    .strip figure.lit, .strip figure:hover, .strip figure:focus-within { filter: brightness(1); }
+    .strip figcaption {
+      height: 30px;
+      font-size: var(--step-body);
+      color: var(--ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .strip figcaption strong { color: var(--ink); font-weight: 600; }
+    .strip figure img { height: calc(100% - 42px); width: auto; object-fit: cover; }
+    .strip figure > .tile { height: calc(100% - 42px); }
+    .tile {
+      aspect-ratio: 3 / 2;
+      background: var(--surface);
+      color: var(--ink);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 16px;
+      font-size: var(--step-body);
+    }
+    .tile > span:first-child { font-weight: 600; }
+    a.tile:hover, a.tile:focus-visible { background: var(--field-1); color: var(--field-1-ink); }
+    .tile .names { display: flex; flex-direction: column; gap: 2px; color: var(--muted); font-size: var(--step-small); }
+    a.tile:hover .names, a.tile:focus-visible .names { color: var(--field-1-ink); }
+
+    .hero-actions { display: flex; align-items: center; gap: clamp(16px, 3vw, 32px); flex-wrap: wrap; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      min-height: 48px;
+      padding: 0 28px;
+      background: var(--accent);
+      color: var(--accent-ink);
+      font: 600 var(--step-body)/1 var(--font);
+      border: 0;
+    }
+    .btn:hover, .btn:focus-visible { background: var(--field-1); }
+    .link-plain { font-size: var(--step-body); text-decoration: underline; text-underline-offset: 4px; }
+
+    /* ── Shared section frame ── */
+    main { padding: 0 var(--pad-page); }
+    section { margin: clamp(96px, 15vh, 160px) 0; }
+    h2 {
+      font-size: var(--step-lead);
+      line-height: 1.1;
+      letter-spacing: -0.015em;
+      margin-bottom: clamp(32px, 5vh, 56px);
+    }
+
+    /* ── About ── */
+    .about-grid { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: clamp(24px, 4vw, 48px); }
+    .facts { display: flex; flex-direction: column; gap: 20px; font-size: var(--step-small); }
+    .facts .label { color: var(--muted); display: block; margin-bottom: 2px; }
+    h2.mini { font-size: var(--step-small); font-weight: 600; color: var(--ink); margin-bottom: 20px; letter-spacing: 0; }
+    .about-lead { font-size: var(--step-lead); line-height: 1.35; max-width: 56ch; }
+
+    /* ── Proof: plain names in columns ── */
+    .proof-grid { display: grid; grid-template-columns: repeat(12, 1fr); column-gap: clamp(24px, 4vw, 48px); }
+    .proof-grid > h2 { grid-column: 1 / 4; }
+    .proof-names { grid-column: 5 / -1; display: grid; grid-template-columns: repeat(4, 1fr); column-gap: 32px; }
+    .proof-kind { break-inside: avoid; margin: 0 0 28px; font-size: var(--step-body); line-height: 1.5; }
+    @media (max-width: 900px) { .proof-names { grid-template-columns: repeat(2, 1fr); } }
+    .proof-kind .label { color: var(--muted); display: block; }
+
+    /* ── Cluster: frame run with one lifted ── */
+    .cluster-grid { display: grid; grid-template-columns: minmax(230px, 25%) 1fr; gap: 48px clamp(20px, 3vw, 48px); align-items: start; }
+    .cluster-grid > h2 { grid-column: 1; margin-bottom: 24px; }
+    .cluster-aside { grid-column: 1; display: flex; flex-direction: column; gap: 20px; font-size: var(--step-small); color: var(--ink); }
+    .cluster-aside a { text-decoration: underline; text-underline-offset: 3px; color: var(--ink); }
+    .frame-run { grid-column: 2; display: grid; grid-template-columns: repeat(12, 1fr); gap: 24px 12px; align-items: end; }
+    .frame-run > figure { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+    .f3 { grid-column: span 3; } .f5 { grid-column: span 5; } .f6 { grid-column: span 6; }
+    .cap { display: flex; justify-content: space-between; gap: 12px; font-size: var(--step-body); color: var(--muted); }
+    .cap strong { color: var(--ink); font-weight: 600; }
+
+    /* interface fragments: their own conventions (inspector data-ui exemption) */
+    [data-ui] { background: var(--surface); color: var(--ink); border: 1px solid rgba(241, 241, 239, 0.09); padding: 12px 0; font-size: var(--step-body); line-height: 1.45; overflow: hidden; height: 100%; }
+    .ui-head { display: flex; justify-content: space-between; gap: 8px; font-weight: 600; margin-bottom: 10px; padding-inline: 12px; }
+    .ui-head .ui-sub { color: var(--muted); font-weight: 400; }
+    table { width: 100%; border-collapse: collapse; font-size: inherit; }
+    th, td { text-align: left; padding: 4px 12px; border-bottom: 1px solid rgba(241, 241, 239, 0.09); font-weight: 400; font-variant-numeric: tabular-nums; }
+    th { color: var(--muted); }
+    .ui-ok { color: var(--accent); }
+    .ui-bar { display: inline-block; height: 6px; background: var(--accent); vertical-align: middle; }
+
+    /* ── Work: book-spine shelf, on the one pale field ── */
+    #work { background: var(--field-1); color: var(--field-1-ink); margin-inline: calc(-1 * var(--pad-page)); padding: clamp(96px, 14vh, 140px) var(--pad-page); }
+    #work .shelf-note { color: var(--field-1-ink); }
+    .work-row { display: flex; gap: clamp(24px, 4vw, 64px); align-items: flex-end; margin-top: 48px; }
+    .shelf { display: flex; gap: 6px; align-items: flex-start; flex: 1; min-width: 0; }
+    .legend { flex: none; width: 300px; display: flex; flex-direction: column; gap: 12px; font-size: var(--step-small); color: var(--field-1-ink); text-align: right; }
+    .legend .disc { font-style: normal; }
+    .shelf-head { display: flex; align-items: baseline; gap: 24px; flex-wrap: wrap; }
+    .shelf-note { font-size: var(--step-small); color: var(--muted); }
+    .spine { writing-mode: vertical-rl; width: 34px; height: 340px; font-size: var(--step-body); color: var(--field-1-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-top: 4px; }
+    .spine .disc { margin-top: 12px; padding: 2px 6px; font-size: var(--step-small); }
+    #work .d-be { background: var(--surface); color: var(--ink); }
+    .d-infra { background: var(--accent); color: var(--accent-ink); }
+    .d-be { background: var(--field-1); color: var(--field-1-ink); }
+    .d-fe { background: var(--ink); color: var(--bg); }
+    .d-re { background: var(--muted); color: var(--bg); }
+    .spine:hover, .spine:focus-visible { text-decoration: underline; text-underline-offset: 4px; }
+
+    /* ── Record: two-ended rows ── */
+    .record-col { max-width: none; margin-left: 0; }
+    .rec { display: grid; grid-template-columns: 38% 1fr max-content; column-gap: clamp(24px, 4vw, 64px); align-items: baseline; margin-bottom: 14px; min-height: 38px; }
+    .rec .rec-what { font-size: var(--step-body); }
+    .rec .when { grid-area: when; }
+    .rec-group { color: var(--muted); margin: 40px 0 10px; font-size: var(--step-body); }
+    .rec-group:first-of-type { margin-top: 0; }
+    .rec .rec-fact { color: var(--muted); font-size: var(--step-small); }
+    .rec .when { color: var(--muted); font-size: var(--step-small); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+    /* ── Contact band ── */
+    .contact-grid { display: grid; grid-template-columns: repeat(12, 1fr); align-items: start; column-gap: clamp(16px, 2vw, 32px); }
+    .contact-stmt { grid-column: 1 / 6; font-size: var(--step-lead); line-height: 1.2; max-width: 24ch; }
+    .contact-photo { grid-column: 7 / 13; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 640px; }
+    .contact-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .contact-photo img:first-child { animation: none; }
+    .contact-links { grid-column: 10 / 13; display: flex; flex-direction: column; gap: 10px; font-size: 1.125rem; }
+    .contact-links a { display: block; text-decoration: underline; text-underline-offset: 4px; }
+    .contact-where { color: var(--muted); font-size: var(--step-small); margin-top: 10px; }
+
+    /* ── Footer ── */
+    .foot-name { display: block; font-size: clamp(2.2rem, 6.5vw, 6rem); line-height: 1; letter-spacing: -0.02em; color: var(--ink); margin-bottom: clamp(40px, 6vh, 72px); }
+    footer { padding: clamp(56px, 9vh, 96px) var(--pad-page) clamp(48px, 7vh, 64px); color: var(--muted); font-size: var(--step-small); }
+    .foot-row { display: flex; justify-content: space-between; gap: clamp(24px, 5vw, 80px); flex-wrap: wrap; }
+    footer a { color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
+
+    @media (min-width: 641px) { #deploy-frame [data-ui] { min-height: 560px; } }
+
+    /* ── Tablet collapse ── */
+    @media (max-width: 900px) {
+      .proof-grid > h2, .proof-names { grid-column: 1 / -1; }
+      .cluster-grid { grid-template-columns: 1fr; }
+      .frame-run { grid-column: 1; }
+      .frame-run .f3 { grid-column: span 6; }
+      .contact-stmt { grid-column: 1 / 8; }
+      .contact-photo { grid-column: 1 / -1; max-width: 560px; margin-top: 24px; }
+      .contact-links { grid-column: 1 / -1; margin-top: 24px; }
+    }
+
+    /* ── Phone ── */
+    @media (max-width: 640px) {
+      .first-screen { padding: 20px var(--pad-page) 24px; }
+      .strip { height: 46vh; }
+      .about-grid { grid-template-columns: 1fr; }
+      .about-lead { font-size: 1.1875rem; }
+      .proof-grid > h2, .proof-names { grid-column: 1 / -1; }
+      .proof-names { grid-template-columns: repeat(2, 1fr); }
+      .cluster-grid { grid-template-columns: 1fr; }
+      .frame-run { grid-column: 1; }
+      .frame-run { grid-template-columns: repeat(6, 1fr); }
+      .f3 { grid-column: span 6; } .f5, .f6 { grid-column: span 6; }
+      .shelf { flex-wrap: wrap; height: auto; gap: 10px 14px; }
+      .spine { writing-mode: horizontal-tb; width: auto; height: auto; white-space: normal; padding-top: 0; display: flex; align-items: baseline; gap: 8px; }
+      .spine .disc { margin-top: 0; }
+      .record-col { margin-left: 0; max-width: none; }
+      .rec { grid-template-columns: 1fr max-content; column-gap: 16px; }
+      .rec .rec-fact { grid-column: 1 / -1; }
+      .legend { width: auto; text-align: left; }
+      .contact-grid { grid-template-columns: 1fr; }
+      .contact-stmt, .contact-photo, .contact-links { grid-column: 1 / -1; }
+      .contact-photo { max-width: 480px; }
+      .contact-photo { max-width: 220px; }
+      section { margin: clamp(72px, 12vh, 120px) 0; }
+    }
+
+    /* motion layer: entrances — transform-only, so no capture (or script failure) can ever hide content */
+    .js .rise { transform: translateY(18px); }
+    .js .rise.in { transform: none; transition: transform 0.55s var(--ease); }
+    .frame-run figure [data-ui] { transition: background 0.3s var(--ease); }
+    .frame-run figure:hover [data-ui], .frame-run figure:focus-within [data-ui] { background: #2b2b2a; }
+    @media (prefers-reduced-motion: no-preference) {
+      .contact-photo img { animation: drift 24s ease-in-out infinite alternate; transform-origin: 60% 40%; }
+    }
+    @keyframes drift { from { transform: scale(1); } to { transform: scale(1.06); } }
+    .photo-box { display: block; overflow: hidden; }
+    @media (prefers-reduced-motion: reduce) {
+      .js .rise { opacity: 1; transform: none; }
+      .strip figure { transition: none; }
+    }
+    </style>
     </head>
     <body>
-    
-    <!-- ── Nav ───────────────────────────────────────────────────── -->
-    <nav>
-      <div class="nav-logo"><span>~/</span>taylan</div>
-      <div class="nav-links">
-        <a href="#about">About</a>
-        <a href="#experience">Experience</a>
-        <a href="#skills">Skills</a>
-        <a href="#education">Education</a>
-        <a href="#contact">Contact</a>
-        <button class="theme-btn" onclick="toggleTheme()" aria-label="Toggle theme">
-          <span id="theme-icon">☀️</span>
-        </button>
+    <script>document.documentElement.classList.add('js');</script>
+
+    <header class="first-screen">
+      <div>
+        <div class="name-row">
+          <h1>Yusuf Taylan Yuksel</h1>
+          <p class="what">Software developer &amp; DevOps engineer in Helsinki.</p>
+        </div>
+        <div class="corner-blocks">
+          <p><span class="label">What</span>Software developer &amp; DevOps engineer</p>
+          <p><span class="label">Where</span>Ericsson, Helsinki. Since October 2022.</p>
+          <p><span class="label">Reach</span><a href="mailto:ytaylanyuksel@gmail.com">ytaylanyuksel@gmail.com</a></p>
+          <nav aria-label="Sections">
+            <a href="#cluster">Cluster</a>
+            <a href="#work">Work</a>
+            <a href="#record">Record</a>
+            <a href="#contact">Contact</a>
+          </nav>
+        </div>
       </div>
-    </nav>
-    
-    <!-- ── Hero ──────────────────────────────────────────────────── -->
-    <main>
-    <section id="hero">
-      <p class="hero-tag">// hello world</p>
-      <h1 class="hero-name">Yusuf Taylan<br><span class="accent">Yuksel</span></h1>
-      <p class="hero-role"><strong>Software Developer</strong> &amp; DevOps Engineer</p>
-      <p class="hero-desc">
-        Building reliable systems at the intersection of software and infrastructure.
-        Passionate about CI/CD automation, Kubernetes, and self-hosted everything.
-        Currently at <strong>Ericsson</strong>, Helsinki.
-      </p>
+
+      <div class="strip-wrap">
+        <div class="strip" id="strip" aria-label="The systems I run, frame by frame">
+          <figure class="lit" data-caption="Helsinki's South Harbour railway quay, 1907">
+            <img src="img/satamarata-1907.jpg" width="760" height="578" alt="Helsinki South Harbour railway quay in 1907, a steam locomotive crossing the causeway in front of the city">
+            <figcaption><strong>Signe Brander, 1907</strong>, the harbour railway quay</figcaption>
+          </figure>
+          <figure>
+            <a class="tile" href="#cluster" aria-label="The cluster section"><span>This page</span><span class="names"><span>push</span><span>apply</span><span>rollout</span><span>serving</span></span></a>
+            <figcaption><strong>This page</strong>, served by the machines below it</figcaption>
+          </figure>
+          <figure data-caption="Nodes: three control planes, two workers">
+            <div class="tile"><span>The cluster</span><span class="names"><span>k3s ×5 nodes</span><span>proxmox</span><span>longhorn</span><span>metallb</span><span>caddy</span></span></div>
+            <figcaption><strong>The cluster</strong>, under every frame on this page</figcaption>
+          </figure>
+          <figure>
+            <div class="tile"><span>Watching it</span><span class="names"><span>beszel</span><span>uptime-kuma</span><span>homepage</span><span>ntfy</span><span>speedtest</span></span></div>
+            <figcaption><strong>Watching it</strong>, so I know the moment something breaks</figcaption>
+          </figure>
+          <figure data-caption="Authelia in front of everything private">
+            <div class="tile"><span>Locked down</span><span class="names"><span>authelia</span><span>lldap</span><span>crowdsec</span><span>tailscale</span><span>vaultwarden</span></span></div>
+            <figcaption><strong>Locked down</strong>, nothing private faces the internet bare</figcaption>
+          </figure>
+          <figure>
+            <img src="img/lab-1910.jpg" width="380" height="274" alt="A hospital laboratory room in Helsinki around 1910: desk, microscope, lamp and glassware">
+            <figcaption><strong>Lab, c. 1910</strong>, the instruments of the era</figcaption>
+          </figure>
+          <figure data-caption="Jellyfin, Sonarr, Radarr behind a wireguard egress">
+            <div class="tile"><span>The media cloud</span><span class="names"><span>jellyfin</span><span>sonarr</span><span>radarr</span><span>qbittorrent</span><span>gluetun</span></span></div>
+            <figcaption><strong>The media cloud</strong>, a library that answers to no subscription</figcaption>
+          </figure>
+          <figure>
+            <img src="img/elaintarha-1900.jpg" width="380" height="264" alt="State railway Elaintarha stop near central Helsinki around 1900: tracks, signal hut, a worker watching a train">
+            <figcaption><strong>Eläintarha stop, c. 1900</strong>, infrastructure in its first century</figcaption>
+          </figure>
+          <figure data-caption="OpenGym, Translator, Telegram agent, shipped end to end">
+            <div class="tile"><span>Apps I shipped</span><span class="names"><span>opengym</span><span>translator</span><span>telegram-agent</span><span>bentopdf</span><span>termix</span></span></div>
+            <figcaption><strong>Apps I shipped</strong>, from repo to a URL on my domain</figcaption>
+          </figure>
+          <figure>
+            <img src="img/west-harbour-2019.jpg" width="380" height="253" alt="Helsinki Western Harbour ferry terminal in 2019, angular glass roof under a grey sky">
+            <figcaption><strong>Western Harbour, 2019</strong>, the city's other side of the water</figcaption>
+          </figure>
+          <figure data-caption="The same quay I stand on today">
+            <img src="img/south-harbour-2019.jpg" width="760" height="468" alt="The South Harbour waterfront today, ferry terminals and the Uspenski Cathedral">
+            <figcaption><strong>South Harbour today</strong>, same water, 112 years apart</figcaption>
+          </figure>
+        </div>
+      </div>
+
       <div class="hero-actions">
-        <a href="#contact" class="btn btn-primary">Get in touch</a>
-        <a href="#experience" class="btn btn-outline">View experience</a>
+        <a class="btn" href="mailto:ytaylanyuksel@gmail.com">Email me</a>
+        <a class="link-plain" href="#cluster">See the cluster</a>
       </div>
-      <div class="hero-stats">
+    </header>
+
+    <main>
+    <section id="about" aria-labelledby="about-t">
+      <div class="about-grid">
         <div>
-          <div class="stat-num">4+</div>
-          <div class="stat-label">Years experience</div>
+          <h2 class="mini" id="about-t">About</h2>
+          <div class="facts">
+            <p><span class="label">Based</span>Helsinki, Finland</p>
+            <p><span class="label">Currently</span>Ericsson, since 2022</p>
+            <p><span class="label">At home</span>One K3s cluster, 28 namespaces</p>
+            <p><span class="label">Degrees</span>Three, in three countries</p>
+          </div>
         </div>
-        <div>
-          <div class="stat-num">5</div>
-          <div class="stat-label">Countries lived in</div>
-        </div>
-        <div>
-          <div class="stat-num">K3s</div>
-          <div class="stat-label">Home cluster</div>
+        <p class="about-lead">I build the systems software runs on. At Ericsson I design CI/CD pipelines and manage Kubernetes clusters. At home I run a K3s cluster that hosts this page, my password manager, my media library and the apps I have shipped myself. Five countries, three degrees, one constant: I learn infrastructure by operating it, then breaking it.</p>
+      </div>
+    </section>
+
+    <section id="stack" aria-labelledby="stack-t">
+      <div class="proof-grid">
+        <h2 id="stack-t">Tech stack</h2>
+        <div class="proof-names">
+          <div class="proof-kind"><span class="label">Infrastructure</span>
+            <p>Kubernetes, K3s, Helm, Docker, Terraform, Ansible, Proxmox, MetalLB, Longhorn, Caddy</p>
+          </div>
+          <div class="proof-kind"><span class="label">Languages</span>
+            <p>Go, C#, Python, Bash, Java, Groovy, JavaScript</p>
+          </div>
+          <div class="proof-kind"><span class="label">Data &amp; storage</span>
+            <p>PostgreSQL, MySQL, MariaDB, MSSQL, SQLite, Redis</p>
+          </div>
+          <div class="proof-kind"><span class="label">Security &amp; GitOps</span>
+            <p>Authelia, OpenLDAP, CrowdSec, Tailscale, Vaultwarden, Forgejo Actions, GitLab CI, GitHub Actions, Jenkins</p>
+          </div>
         </div>
       </div>
     </section>
-    
-    <!-- ── About ─────────────────────────────────────────────────── -->
-    <section id="about" class="animate-in">
-      <p class="section-label">01 / about</p>
-      <h2 class="section-title">Who I Am</h2>
-      <div class="section-divider"></div>
-      <div class="card">
-        <p style="color:var(--text-muted); line-height:1.8; font-size:15px;">
-          I'm a software developer and DevOps engineer based in <strong style="color:var(--text)">Helsinki, Finland</strong>,
-          currently working at <strong style="color:var(--text)">Ericsson</strong> where I design CI/CD pipelines,
-          manage Kubernetes clusters, and automate infrastructure.
-        </p>
-        <p style="color:var(--text-muted); line-height:1.8; font-size:15px; margin-top:14px;">
-          My background spans IoT, blockchain, payment systems, and telecom — across five countries and three degrees.
-          Outside of work I run a self-hosted <strong style="color:var(--accent)">K3s HA cluster</strong> at home
-          with Longhorn storage, MetalLB, Caddy, Authelia, and a full Arr media stack — because the best way
-          to learn infrastructure is to break it at home first.
-        </p>
-        <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:20px;">
-          <a href="https://fi.linkedin.com/in/yusuf-taylan-yuksel" class="btn btn-outline" style="padding:8px 16px; font-size:13px;">LinkedIn ↗</a>
-          <a href="https://github.com/maestro00" class="btn btn-outline" style="padding:8px 16px; font-size:13px;">GitHub ↗</a>
-          <a href="mailto:ytaylanyuksel@gmail.com" class="btn btn-outline" style="padding:8px 16px; font-size:13px;">Email ↗</a>
+
+    <section id="cluster" aria-labelledby="cluster-t">
+      <div class="cluster-grid">
+        <h2 id="cluster-t">The cloud under my desk</h2>
+        <aside class="cluster-aside">
+          <p>Three control planes, two workers, designed for no single weak machine. VMs on Proxmox; Longhorn keeps every volume on three disks; Caddy terminates TLS with CrowdSec watching the door.</p>
+          <a href="#deploy-frame">See the pipeline</a>
+        </aside>
+        <div class="frame-run">
+          <figure class="f3">
+            <div data-ui>
+              <div class="ui-head">Nodes <span class="ui-sub">k3s HA</span></div>
+              <table>
+                <tr><th>Role</th><th>Count</th><th>Status</th></tr>
+                <tr><td>control-plane</td><td>3</td><td class="ui-ok">Ready</td></tr>
+                <tr><td>worker</td><td>2</td><td class="ui-ok">Ready</td></tr>
+                <tr><td>storage</td><td>Longhorn</td><td class="ui-ok">Healthy</td></tr>
+              </table>
+            </div>
+            <figcaption class="cap"><span><strong>Nodes</strong>, roles and counts, never hostnames</span></figcaption>
+          </figure>
+          <figure class="f3">
+            <div data-ui>
+              <div class="ui-head">Load <span class="ui-sub">last hour</span></div>
+              <table>
+                <tr><td>control planes</td><td><span class="ui-bar" style="width: 18%"></span></td><td>cpu 6%</td></tr>
+                <tr><td>workers</td><td><span class="ui-bar" style="width: 36%"></span></td><td>cpu 12%</td></tr>
+                <tr><td>memory</td><td><span class="ui-bar" style="width: 61%"></span></td><td>41%</td></tr>
+                <tr><td>volumes bound</td><td><span class="ui-bar" style="width: 88%"></span></td><td>all</td></tr>
+              </table>
+            </div>
+            <figcaption class="cap"><span><strong>Load</strong>, a Beszel-style read on a calm day</span></figcaption>
+          </figure>
+          <figure class="f3">
+            <div data-ui>
+              <div class="ui-head">Volumes <span class="ui-sub">Longhorn</span></div>
+              <table>
+                <tr><th>Volume</th><th>Repl.</th></tr>
+                <tr><td>forgejo-postgres</td><td>3</td></tr>
+                <tr><td>authelia-config</td><td>3</td></tr>
+                <tr><td>beszel-data</td><td>3</td></tr>
+                <tr><td>opengym-data</td><td>3</td></tr>
+                <tr><td>media (6 vols)</td><td>3</td></tr>
+              </table>
+            </div>
+            <figcaption class="cap"><span><strong>Volumes</strong>, three copies each</span></figcaption>
+          </figure>
+          <figure class="f3">
+            <div data-ui>
+              <div class="ui-head">Access <span class="ui-sub">edge policy</span></div>
+              <table>
+                <tr><td>This page</td><td class="ui-ok">open</td></tr>
+                <tr><td>Everything private</td><td>Authelia SSO</td></tr>
+                <tr><td>Admin paths</td><td>Tailscale only</td></tr>
+                <tr><td>Abuse</td><td>CrowdSec</td></tr>
+              </table>
+            </div>
+            <figcaption class="cap"><span><strong>Access</strong>, one door open on purpose</span></figcaption>
+          </figure>
+          <figure class="f3">
+            <div data-ui>
+              <div class="ui-head">Machines <span class="ui-sub">Proxmox</span></div>
+              <table>
+                <tr><th>VMs by role</th><th>On</th></tr>
+                <tr><td>control-plane ×3</td><td>2 hosts</td></tr>
+                <tr><td>worker ×2</td><td>1 host</td></tr>
+                <tr><td>lab containers</td><td>1 host</td></tr>
+              </table>
+            </div>
+            <figcaption class="cap"><span><strong>Machines</strong>, spread on purpose</span></figcaption>
+          </figure>
+          <figure class="f3">
+            <div data-ui>
+              <div class="ui-head">Snapshots <span class="ui-sub">Longhorn</span></div>
+              <table>
+                <tr><td>forgejo-postgres</td><td>nightly</td></tr>
+                <tr><td>authelia-config</td><td>nightly</td></tr>
+                <tr><td>opengym-data</td><td>nightly</td></tr>
+              </table>
+            </div>
+            <figcaption class="cap"><span><strong>Snapshots</strong>, every volume, nightly</span></figcaption>
+          </figure>
+          <figure class="f3">
+            <div data-ui>
+              <div class="ui-head">Alerts <span class="ui-sub">ntfy</span></div>
+              <table>
+                <tr><td>disk thresholds</td><td>watched</td></tr>
+                <tr><td>cert expiry</td><td>watched</td></tr>
+                <tr><td>rollouts</td><td>quiet</td></tr>
+              </table>
+            </div>
+            <figcaption class="cap"><span><strong>Alerts</strong>, push to my phone</span></figcaption>
+          </figure>
+          <figure class="f6">
+            <div data-ui>
+              <div class="ui-head">Routes <span class="ui-sub">Caddy</span></div>
+              <table>
+                <tr><td>git.yukselcloud.com</td><td>Forgejo</td></tr>
+                <tr><td>beszel.yukselcloud.com</td><td>Monitoring</td></tr>
+                <tr><td>uptime-kuma.yukselcloud.com</td><td>Status</td></tr>
+                <tr><td>ntfy.yukselcloud.com</td><td>Push alerts</td></tr>
+                <tr><td>opengym.yukselcloud.com</td><td>My workout app</td></tr>
+                <tr><td>auth.yukselcloud.com</td><td>Authelia</td></tr>
+                <tr><td>ldap.yukselcloud.com</td><td>lldap</td></tr>
+                <tr><td>vaultwarden.yukselcloud.com</td><td>Passwords</td></tr>
+                <tr><td>jellyfin.yukselcloud.com</td><td>Media</td></tr>
+                <tr><td>bentopdf.yukselcloud.com</td><td>PDF tools</td></tr>
+                <tr><td>home.yukselcloud.com</td><td>Dashboard</td></tr>
+                <tr><td>portfolio.yukselcloud.com</td><td>You are here</td></tr>
+              </table>
+            </div>
+            <figcaption class="cap"><span><strong>Routes</strong>, every public door</span><span>all of them on my own domain</span></figcaption>
+          </figure>
+          <figure class="f6" id="deploy-frame">
+            <div data-ui>
+              <div class="ui-head">deploy-portfolio <span class="ui-sub">Forgejo Actions</span></div>          <table>
+                <tr><td>Setup Kubeconfig</td><td class="ui-ok">done</td></tr>
+                <tr><td>Delete old Pod</td><td class="ui-ok">done</td></tr>
+                <tr><td>Apply ConfigMap and Deployment</td><td class="ui-ok">done</td></tr>
+                <tr><td>Rollout restart</td><td class="ui-ok">done</td></tr>
+                <tr><td>Wait for rollout (90s)</td><td class="ui-ok">done</td></tr>
+              </table>
+            </div>
+            <figcaption class="cap"><span><strong>Run passed</strong></span><span>shipped by the cluster serving it</span></figcaption>
+          </figure>
         </div>
       </div>
     </section>
-    
-    <!-- ── Experience ─────────────────────────────────────────────── -->
-    <section id="experience" class="animate-in">
-      <p class="section-label">02 / experience</p>
-      <h2 class="section-title">Work History</h2>
-      <div class="section-divider"></div>
-      <div class="timeline">
-    
-        <div class="tl-item animate-in">
-          <div class="tl-dot"></div>
-          <div class="tl-content card">
-            <div class="tl-header">
-              <div>
-                <h3 class="tl-role">Software Developer</h3>
-                <p class="tl-company">Ericsson <span class="tl-location">· Helsinki, Finland</span></p>
-              </div>
-              <span class="tl-date">Oct 2022 — Present</span>
-            </div>
-            <ul class="tl-bullets">
-              <li>Designed and managed CI/CD pipelines using Jenkins, Groovy, and Helm</li>
-              <li>Owned full lab infrastructure lifecycle: planning, equipment, and setup</li>
-              <li>Managed Kubernetes clusters and automated infrastructure as code</li>
-              <li>Collaborated on secure, high-performance development environments</li>
-            </ul>
-            <div class="tl-tags">
-              <span class="tag">Jenkins</span><span class="tag">Kubernetes</span><span class="tag">Helm</span><span class="tag">Groovy</span><span class="tag">IaC</span>
-            </div>
-          </div>
+
+    <section id="work" aria-labelledby="work-t">
+      <div class="shelf-head">
+        <h2 id="work-t">Work &amp; projects</h2>
+        <p class="shelf-note">Every job and everything shipped, one shelf. The label tells the discipline.</p>
+      </div>
+      <div class="work-row">
+        <div class="shelf">
+        <a class="spine" href="#record">Ericsson<span class="disc d-infra">infra</span></a>
+        <a class="spine" href="#cluster">K3s home cloud<span class="disc d-infra">infra</span></a>
+        <a class="spine" href="#deploy-frame">Forgejo GitOps<span class="disc d-infra">infra</span></a>
+        <a class="spine" href="#record">Templari IoT bridge<span class="disc d-be">backend</span></a>
+        <a class="spine" href="#record">Mobilitypay EMV<span class="disc d-be">backend</span></a>
+        <a class="spine" href="#record">Tradenet Go API<span class="disc d-be">backend</span></a>
+        <a class="spine" href="#cluster">OpenGym<span class="disc d-be">backend</span></a>
+        <a class="spine" href="#cluster">Translator<span class="disc d-fe">frontend</span></a>
+        <a class="spine" href="#cluster">Telegram agent<span class="disc d-infra">infra</span></a>
+        <a class="spine" href="#cluster">BentoPDF &amp; Termix<span class="disc d-fe">frontend</span></a>
+        <a class="spine" href="#stack">OpenWRT + VLANs<span class="disc d-infra">infra</span></a>
+        <a class="spine" href="#record">CUDA research<span class="disc d-re">research</span></a>
         </div>
-    
-        <div class="tl-item animate-in">
-          <div class="tl-dot"></div>
-          <div class="tl-content card">
-            <div class="tl-header">
-              <div>
-                <h3 class="tl-role">Software Developer</h3>
-                <p class="tl-company">Templari SRL <span class="tl-location">· Italy</span></p>
-              </div>
-              <span class="tl-date">Feb 2021 — Sep 2022</span>
-            </div>
-            <ul class="tl-bullets">
-              <li>Maintained IoT Bridge applications and MQTT-based services</li>
-              <li>Built .NET Core MVC web interfaces to visualize client sensor data</li>
-              <li>Handled large datasets generated by on-premise IoT devices</li>
-            </ul>
-            <div class="tl-tags">
-              <span class="tag">.NET Core</span><span class="tag">MQTT</span><span class="tag">IoT</span><span class="tag">C#</span>
-            </div>
-          </div>
-        </div>
-    
-        <div class="tl-item animate-in">
-          <div class="tl-dot"></div>
-          <div class="tl-content card">
-            <div class="tl-header">
-              <div>
-                <h3 class="tl-role">Backend Developer Intern</h3>
-                <p class="tl-company">Tradenet Services <span class="tl-location">· Italy</span></p>
-              </div>
-              <span class="tl-date">Sep 2021 — Jul 2022</span>
-            </div>
-            <ul class="tl-bullets">
-              <li>Developed Go-based backend interacting with the Commercio blockchain</li>
-              <li>Created REST APIs and integrated comprehensive test suites</li>
-            </ul>
-            <div class="tl-tags">
-              <span class="tag">Go</span><span class="tag">REST API</span><span class="tag">Blockchain</span>
-            </div>
-          </div>
-        </div>
-    
-        <div class="tl-item animate-in">
-          <div class="tl-dot"></div>
-          <div class="tl-content card">
-            <div class="tl-header">
-              <div>
-                <h3 class="tl-role">Computer Engineer</h3>
-                <p class="tl-company">Mobilitypay <span class="tl-location">· Turkey</span></p>
-              </div>
-              <span class="tl-date">Jun 2019 — Jan 2021</span>
-            </div>
-            <ul class="tl-bullets">
-              <li>Developed smart card and payment solutions (EMV standard, C#, WCF)</li>
-              <li>Maintained Windows services and ASP.NET systems</li>
-              <li>Worked with secure personalization tools and RSA encryption</li>
-            </ul>
-            <div class="tl-tags">
-              <span class="tag">C#</span><span class="tag">ASP.NET</span><span class="tag">EMV</span><span class="tag">RSA</span>
-            </div>
-          </div>
-        </div>
-    
-        <div class="tl-item animate-in">
-          <div class="tl-dot" style="background:var(--text-muted);"></div>
-          <div class="tl-content card">
-            <div class="tl-header">
-              <div>
-                <h3 class="tl-role">Engineer Trainee</h3>
-                <p class="tl-company">Częstochowa Univ. of Technology <span class="tl-location">· Poland</span></p>
-              </div>
-              <span class="tl-date">Jul — Aug 2017</span>
-            </div>
-            <ul class="tl-bullets">
-              <li>Researched CUDA GPU performance with image processing algorithms in MATLAB</li>
-            </ul>
-            <div class="tl-tags">
-              <span class="tag">CUDA</span><span class="tag">MATLAB</span><span class="tag">GPU</span>
-            </div>
-          </div>
-        </div>
-    
+        <aside class="legend" aria-label="Discipline key">
+          <p><span class="disc d-infra">infra</span> infrastructure &amp; GitOps</p>
+          <p><span class="disc d-be">backend</span> services &amp; APIs</p>
+          <p><span class="disc d-fe">frontend</span> interfaces</p>
+          <p><span class="disc d-re">research</span> GPU &amp; CUDA</p>
+        </aside>
       </div>
     </section>
-    
-    <!-- ── Skills ─────────────────────────────────────────────────── -->
-    <section id="skills" class="animate-in">
-      <p class="section-label">03 / skills</p>
-      <h2 class="section-title">Tech Stack</h2>
-      <div class="section-divider"></div>
-      <div class="skills-grid">
-    
-        <div class="card animate-in">
-          <div class="skill-icon">⚙️</div>
-          <h4 class="skill-cat">DevOps &amp; Infrastructure</h4>
-          <div class="skill-tags">
-            <span class="tag tag-accent">Kubernetes</span>
-            <span class="tag tag-accent">K3s</span>
-            <span class="tag">Helm</span>
-            <span class="tag">Docker</span>
-            <span class="tag">Terraform</span>
-            <span class="tag">Ansible</span>
-            <span class="tag">Jenkins</span>
-            <span class="tag">MetalLB</span>
-            <span class="tag">Longhorn</span>
-          </div>
-        </div>
-    
-        <div class="card animate-in">
-          <div class="skill-icon">💻</div>
-          <h4 class="skill-cat">Languages</h4>
-          <div class="skill-tags">
-            <span class="tag tag-accent">Go</span>
-            <span class="tag tag-accent">C#</span>
-            <span class="tag">Python</span>
-            <span class="tag">Bash</span>
-            <span class="tag">JavaScript</span>
-            <span class="tag">Java</span>
-            <span class="tag">Groovy</span>
-          </div>
-        </div>
-    
-        <div class="card animate-in">
-          <div class="skill-icon">🗄️</div>
-          <h4 class="skill-cat">Databases</h4>
-          <div class="skill-tags">
-            <span class="tag tag-accent">PostgreSQL</span>
-            <span class="tag">MySQL</span>
-            <span class="tag">MSSQL</span>
-            <span class="tag">SQLite</span>
-            <span class="tag">MariaDB</span>
-            <span class="tag">Redis</span>
-          </div>
-        </div>
-    
-        <div class="card animate-in">
-          <div class="skill-icon">🐧</div>
-          <h4 class="skill-cat">Systems &amp; Networking</h4>
-          <div class="skill-tags">
-            <span class="tag tag-accent">Linux</span>
-            <span class="tag">Ubuntu</span>
-            <span class="tag">Debian</span>
-            <span class="tag">SUSE</span>
-            <span class="tag">Caddy</span>
-            <span class="tag">Nginx</span>
-            <span class="tag">Proxmox</span>
-            <span class="tag">OpenWRT</span>
-          </div>
-        </div>
-    
-        <div class="card animate-in">
-          <div class="skill-icon">🔒</div>
-          <h4 class="skill-cat">Security &amp; Auth</h4>
-          <div class="skill-tags">
-            <span class="tag">Authelia</span>
-            <span class="tag">CrowdSec</span>
-            <span class="tag">Vaultwarden</span>
-            <span class="tag">LDAP</span>
-            <span class="tag">Tailscale</span>
-            <span class="tag">RSA / TLS</span>
-          </div>
-        </div>
-    
-        <div class="card animate-in">
-          <div class="skill-icon">🔄</div>
-          <h4 class="skill-cat">GitOps &amp; CI/CD</h4>
-          <div class="skill-tags">
-            <span class="tag tag-accent">Forgejo</span>
-            <span class="tag tag-accent">GitLab</span>
-            <span class="tag">GitHub Actions</span>
-            <span class="tag">Jenkins</span>
-            <span class="tag">GitOps</span>
-            <span class="tag">Pipelines</span>
-          </div>
-        </div>
-    
+
+    <section id="record" aria-labelledby="record-t">
+      <h2 id="record-t">Career record</h2>
+      <div class="record-col">
+        <p class="rec-group">Employment</p>
+        <div class="rec"><span class="rec-what">Software Developer · Ericsson, Helsinki</span><span class="rec-fact">Jenkins and Helm pipelines, Kubernetes clusters, infrastructure as code.</span><span class="when">Oct 2022 – present</span></div>
+        <div class="rec"><span class="rec-what">Software Developer · Templari SRL, Italy</span><span class="rec-fact">IoT Bridge services on MQTT, .NET dashboards for sensor data.</span><span class="when">Feb 2021 – Sep 2022</span></div>
+        <div class="rec"><span class="rec-what">Backend Developer Intern · Tradenet Services, Italy</span><span class="rec-fact">Go backend against the Commercio blockchain, REST APIs with test suites.</span><span class="when">Sep 2021 – Jul 2022</span></div>
+        <div class="rec"><span class="rec-what">Computer Engineer · Mobilitypay, Turkey</span><span class="rec-fact">EMV smart-card and payment services in C# and WCF.</span><span class="when">Jun 2019 – Jan 2021</span></div>
+        <div class="rec"><span class="rec-what">Engineer Trainee · Częstochowa Univ. of Technology</span><span class="rec-fact">CUDA GPU performance research with MATLAB image processing.</span><span class="when">Jul – Aug 2017</span></div>
+        <p class="rec-group">Education</p>
+        <div class="rec"><span>MSc, ICT for Internet and Multimedia · University of Padova</span><span class="when">2020 – 2022</span></div>
+        <div class="rec"><span>BSc, Computer Engineering · Fırat University</span><span class="when">2013 – 2019</span></div>
+        <div class="rec"><span>Erasmus, Computer Science · Białystok Univ. of Technology</span><span class="when">2016 – 2018</span></div>
       </div>
     </section>
-    
-    <!-- ── Education ──────────────────────────────────────────────── -->
-    <section id="education" class="animate-in">
-      <p class="section-label">04 / education</p>
-      <h2 class="section-title">Academic Background</h2>
-      <div class="section-divider"></div>
-      <div class="edu-grid">
-    
-        <div class="card edu-card animate-in">
-          <div class="edu-degree">MSc — ICT for Internet and Multimedia</div>
-          <div class="edu-school">University of Padova</div>
-          <div class="edu-meta">Italy &nbsp;·&nbsp; 2020 – 2022</div>
-        </div>
-    
-        <div class="card edu-card animate-in">
-          <div class="edu-degree">Bachelor — Computer Engineering</div>
-          <div class="edu-school">Fırat University</div>
-          <div class="edu-meta">Turkey &nbsp;·&nbsp; 2013 – 2019</div>
-        </div>
-    
-        <div class="card edu-card animate-in">
-          <div class="edu-degree">Erasmus — Computer Science</div>
-          <div class="edu-school">Białystok University of Technology</div>
-          <div class="edu-meta">Poland &nbsp;·&nbsp; 2016 – 2018</div>
-        </div>
-    
-      </div>
-    </section>
-    
-    <!-- ── Contact ───────────────────────────────────────────────── -->
-    <section id="contact" class="animate-in">
-      <p class="section-label">05 / contact</p>
-      <h2 class="section-title">Get In Touch</h2>
-      <div class="section-divider"></div>
-      <div class="card" style="text-align:center; padding:48px 32px;">
-        <p style="color:var(--text-muted); font-size:16px; max-width:500px; margin:0 auto 32px; line-height:1.7;">
-          Open to interesting problems in infrastructure, distributed systems, and backend engineering.
-          Feel free to reach out.
-        </p>
-        <a href="mailto:ytaylanyuksel@gmail.com" class="btn btn-primary" style="font-size:15px; padding:14px 32px;">
-          ytaylanyuksel@gmail.com
-        </a>
-        <div style="display:flex; justify-content:center; gap:24px; margin-top:32px;">
-          <a href="https://fi.linkedin.com/in/yusuf-taylan-yuksel" style="color:var(--text-muted); font-size:13px; font-weight:500; text-transform:uppercase; letter-spacing:0.06em;">LinkedIn ↗</a>
-          <a href="https://github.com/maestro00" style="color:var(--text-muted); font-size:13px; font-weight:500; text-transform:uppercase; letter-spacing:0.06em;">GitHub ↗</a>
+
+    <section id="contact" aria-label="Contact">
+      <div class="contact-grid">
+        <p class="contact-stmt">Open to problems in infrastructure, distributed systems and backend engineering.</p>
+        <span class="contact-photo photo-box"><img src="img/satamarata-1907.jpg" width="380" height="380" loading="lazy" alt="Helsinki South Harbour railway quay in 1907, a steam locomotive crossing the causeway">
+        <img src="img/south-harbour-2019.jpg" width="380" height="380" loading="lazy" alt="The same South Harbour waterfront today, ferry terminals and the Uspenski Cathedral"></span>
+        <div class="contact-links">
+          <a href="mailto:ytaylanyuksel@gmail.com">ytaylanyuksel@gmail.com</a>
+          <a href="https://fi.linkedin.com/in/yusuf-taylan-yuksel">fi.linkedin.com/in/yusuf-taylan-yuksel</a>
+          <p class="contact-where">Based in Helsinki. I answer within a day. GitHub: <a href="https://github.com/maestro00">maestro00</a></p>
         </div>
       </div>
     </section>
-    
     </main>
-    
-    <!-- ── Footer ────────────────────────────────────────────────── -->
+
     <footer>
-      <p>
-        <span style="color:var(--accent); font-family:var(--font-mono)">Yusuf Taylan Yuksel</span>
-        &nbsp;·&nbsp; Helsinki, Finland
-        &nbsp;·&nbsp;
-        <span style="color:var(--text-muted)">Self-hosted on K3s @ yukselcloud.com</span>
-      </p>
+      <span class="foot-name">Yusuf Taylan Yuksel</span>
+      <div class="foot-row">
+        <p>Served by my own K3s cluster. The run above is how this page ships.</p>
+        <p>Archive photographs: Signe Brander and unknown authors, and modern harbour photos by Ввласенко and WanderingTrad, via Wikimedia Commons (CC BY / CC BY-SA).</p>
+      </div>
     </footer>
-    
-    <style>
-      /* ── Timeline ────────────────────────────────────────────────── */
-      .timeline { position: relative; padding-left: 24px; }
-      .timeline::before {
-        content: '';
-        position: absolute;
-        left: 7px; top: 8px; bottom: 8px;
-        width: 2px;
-        background: linear-gradient(to bottom, var(--accent), var(--accent2), transparent);
-        opacity: 0.3;
-      }
-      .tl-item { position: relative; margin-bottom: 24px; }
-      .tl-dot {
-        position: absolute;
-        left: -20px; top: 24px;
-        width: 14px; height: 14px;
-        border-radius: 50%;
-        background: var(--accent);
-        border: 2px solid var(--bg);
-        box-shadow: 0 0 0 3px var(--accent-glow);
-      }
-      .tl-content { margin-left: 8px; }
-      .tl-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 12px;
-        margin-bottom: 12px;
-        flex-wrap: wrap;
-      }
-      .tl-role { font-size: 16px; font-weight: 600; color: var(--text); }
-      .tl-company { font-size: 14px; color: var(--accent); margin-top: 2px; }
-      .tl-location { color: var(--text-muted); }
-      .tl-date {
-        font-family: var(--font-mono);
-        font-size: 12px;
-        color: var(--text-muted);
-        white-space: nowrap;
-        background: var(--bg-surface);
-        padding: 4px 10px;
-        border-radius: 20px;
-        border: 1px solid var(--border);
-        flex-shrink: 0;
-      }
-      .tl-bullets {
-        color: var(--text-muted);
-        font-size: 14px;
-        line-height: 1.7;
-        padding-left: 16px;
-        list-style: disc;
-        margin-bottom: 14px;
-      }
-      .tl-bullets li { margin-bottom: 4px; }
-    
-      /* ── Tags ────────────────────────────────────────────────────── */
-      .tl-tags, .skill-tags { display: flex; flex-wrap: wrap; gap: 6px; }
-      .tag {
-        font-family: var(--font-mono);
-        font-size: 11px;
-        padding: 3px 10px;
-        border-radius: 20px;
-        background: var(--bg-surface);
-        border: 1px solid var(--border);
-        color: var(--text-muted);
-        font-weight: 500;
-        letter-spacing: 0.02em;
-      }
-      .tag-accent {
-        border-color: rgba(6,182,212,0.4);
-        color: var(--accent);
-        background: var(--accent-glow);
-      }
-    
-      /* ── Skills grid ─────────────────────────────────────────────── */
-      .skills-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-        gap: 16px;
-      }
-      .skill-icon { font-size: 24px; margin-bottom: 10px; }
-      .skill-cat {
-        font-size: 14px;
-        font-weight: 600;
-        color: var(--text);
-        margin-bottom: 12px;
-      }
-    
-      /* ── Education ───────────────────────────────────────────────── */
-      .edu-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-        gap: 16px;
-      }
-      .edu-card { border-left: 3px solid var(--accent); border-radius: 0 var(--radius) var(--radius) 0; }
-      .edu-degree { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
-      .edu-school { font-size: 15px; font-weight: 700; color: var(--accent); margin-bottom: 6px; }
-      .edu-meta { font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); }
-    
-      /* ── Footer ──────────────────────────────────────────────────── */
-      footer {
-        position: relative;
-        z-index: 1;
-        text-align: center;
-        padding: 32px clamp(16px,5vw,64px);
-        border-top: 1px solid var(--border);
-        font-size: 13px;
-        color: var(--text-muted);
-      }
-    
-      /* ── Responsive ──────────────────────────────────────────────── */
-      @media (max-width: 640px) {
-        .nav-links a:not(:last-child) { display: none; }
-        .hero-stats { gap: 24px; }
-        .tl-header { flex-direction: column; }
-        .tl-date { align-self: flex-start; }
-      }
-    </style>
-    
     <script>
-      // Theme toggle
-      function toggleTheme() {
-        const html = document.documentElement;
-        const isDark = html.getAttribute('data-theme') === 'dark';
-        html.setAttribute('data-theme', isDark ? 'light' : 'dark');
-        document.getElementById('theme-icon').textContent = isDark ? '🌙' : '☀️';
-      }
-    
-      // Intersection Observer for scroll animations
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(e => {
-          if (e.isIntersecting) {
-            e.target.classList.add('visible');
-            observer.unobserve(e.target);
-          }
+    (function () {
+      var rm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      document.querySelectorAll('main section, .first-screen, footer').forEach(function (parent) {
+        Array.prototype.forEach.call(parent.children, function (el, i) {
+          el.classList.add('rise');
+          el.style.transitionDelay = Math.min(i * 70, 280) + 'ms';
         });
-      }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-    
-      document.querySelectorAll('.animate-in').forEach(el => observer.observe(el));
-    
-      // Stagger children within animated parents
-      document.querySelectorAll('.skills-grid .animate-in, .edu-grid .animate-in, .tl-item.animate-in')
-        .forEach((el, i) => { el.style.transitionDelay = `${i * 80}ms`; });
+      });
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+        });
+      }, { threshold: 0.12 });
+      document.querySelectorAll('.rise').forEach(function (el) { rm ? el.classList.add('in') : io.observe(el); });
+
+      var strip = document.getElementById('strip');
+      function light() {
+        var rect = strip.getBoundingClientRect();
+        var mid = rect.left + rect.width / 2, best = null, bd = 1e9;
+        strip.querySelectorAll('figure').forEach(function (f) {
+          var r = f.getBoundingClientRect(), d = Math.abs(r.left + r.width / 2 - mid);
+          if (d < bd) { bd = d; best = f; }
+        });
+        strip.querySelectorAll('.lit').forEach(function (f) { f.classList.remove('lit'); });
+        if (best) best.classList.add('lit');
+      }
+      strip.addEventListener('scroll', light, { passive: true });
+      strip.addEventListener('wheel', function (e) {
+        var max = strip.scrollWidth - strip.clientWidth;
+        var canGo = e.deltaY > 0 ? strip.scrollLeft < max - 1 : strip.scrollLeft > 1;
+        if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && canGo) { e.preventDefault(); strip.scrollLeft += e.deltaY * 0.9; }
+      }, { passive: false });
+      light();
+    })();
     </script>
-    
     </body>
     </html>
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: portfolio-html
+  namespace: portfolio
