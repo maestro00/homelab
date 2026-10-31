@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 # Runs ON ct254 (paperclip), piped in over SSH stdin by
-# bootstrap-paperclip-lxc.sh. Expects TS_AUTHKEY, GIT_TOKEN,
-# OPENCODE_SERVER_USERNAME, OPENCODE_SERVER_PASSWORD, OPENCODE_VERSION already
-# exported by the caller.
+# bootstrap-paperclip-lxc.sh. Expects TS_AUTHKEY, GIT_TOKEN and
+# OPENCODE_VERSION already exported by the caller.
 set -euo pipefail
 
 log() { echo "[provision] $*"; }
@@ -229,9 +228,11 @@ HOST=0.0.0.0
 PAPERCLIP_DEPLOYMENT_MODE=authenticated
 PAPERCLIP_DEPLOYMENT_EXPOSURE=private
 PAPERCLIP_AUTH_BASE_URL_MODE=auto
-OPENCODE_SERVER_USERNAME=${OPENCODE_SERVER_USERNAME}
-OPENCODE_SERVER_PASSWORD=${OPENCODE_SERVER_PASSWORD}
 ENVFILE
+  # No OPENCODE_SERVER_USERNAME/PASSWORD here on purpose: those guard ct253's
+  # `opencode serve` on :4096. ct254 runs no opencode server, and anything in
+  # this file lands in the agent child's environment, the board database and
+  # its hourly SQL dumps.
   chmod 0600 /etc/paperclip/paperclip.env
 
   systemctl daemon-reload
