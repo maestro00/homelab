@@ -42,6 +42,32 @@ VM provisioning:
 
         Network config
 
+### 🧩 Proxmox Containers (LXC)
+
+Lightweight services that live outside the cluster, provisioned by the same
+Terraform `containers` list and bootstrapped by scripts in [`/lxc/`](/lxc/):
+
+- 💻 **opencode (ct253):** always-on interactive coding agent on `lab-pve2`,
+  reached over Tailscale only. No reverse proxy, no Authelia.
+- 📎 **paperclip (ct254):** agent orchestrator on `lab-pve1`. It is not a web
+  service but a board that spawns `opencode run` subprocesses, so a human does
+  not drive a terminal. Runs the Node server with an embedded PostgreSQL on
+  `192.168.0.54:3100`, reachable from the LAN and the tailnet, never proxied.
+
+**Paperclip specifics:**
+
+- Needs Node 24 (the Ubuntu 22.04 template ships none) and the `opencode` CLI
+  pinned to `1.18.25`, matching ct253.
+- Two agents with deliberately different powers, one ServiceAccount each:
+  `ops` holds a cluster-wide read-only `view`, `deploy` holds `edit` in
+  `media`, `monitoring` and `opengym` only. Scoped kubeconfigs are generated
+  into gitignored `temp/` files, never committed.
+- Agent instructions live in [`lxc/paperclip/agents/`](/lxc/paperclip/agents/)
+  and are read from the repo clone the container keeps at
+  `/srv/paperclip/work/homelab`.
+- Nothing is merged automatically: an agent opens a PR, another agent or a
+  human reviews it, and the existing Forgejo workflows do the deploy.
+
 **Directory:** [terraform](/terraform/)
 
 ## ☸️ High-Availability K3s Cluster
