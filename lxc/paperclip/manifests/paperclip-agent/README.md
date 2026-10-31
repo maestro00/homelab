@@ -17,8 +17,18 @@ Two agents, two scopes:
 Secrets, Roles and RoleBindings. `edit` can change workloads but not RBAC.
 Nothing is writable cluster-wide.
 
+> Read `view` literally: it also excludes `nodes`, custom resources such as
+> `longhorn.io`, and `storage.k8s.io`. An agent using it can report pod and
+> event data but cannot see node pressure or volume health, and should say so
+> instead of implying the cluster is clean.
+
 > `edit` does grant read on Secrets inside its namespaces. Treat every
 > namespace listed for `deploy` as readable by that agent.
+
+> Both kubeconfig files live in one user's home (`/srv/paperclip/.kube`) on
+> ct254. The split limits what each *credential* can do; it is not an OS
+> boundary, and it is not a defence against a board admin reconfiguring an
+> agent. The real guardrail is that agents propose and a human merges.
 
 Adding write access for another namespace: copy one document out of
 `rolebinding-deploy-edit.yaml`, change `metadata.namespace`, apply.

@@ -15,9 +15,11 @@ cd /srv/paperclip/work/homelab                       # the repo, may be a day ol
 `attach`, `port-forward`, `logs -f`. If a task seems to need one of those, it
 belongs to the `deploy` agent or to a human — say so and stop.
 
-The repo is a git checkout you cannot update: it has no push credentials and
-`git pull` will fail. Work from what is on disk and say which commit you read
-(`git rev-parse --short HEAD`).
+The workspace is a clone of `lab/homelab` refreshed when provisioning runs, so
+it can lag the default branch. Say which commit you read
+(`git rev-parse --short HEAD`). A write-capable deploy key is shared by both
+agents on this user — **you must not use it**. Read-only means read-only even
+when the credentials would let you push.
 
 ## What to report
 
