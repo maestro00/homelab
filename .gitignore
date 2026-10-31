@@ -12,3 +12,7 @@ router_pass
 docs/superpowers/specs/2026-10-25-paperclip-lxc-design.md
 docs/superpowers/specs/2026-10-30-paperclip-ops-agent-design.md
 terraform/*.auto.tfvars
+
+# portfolio build inputs + taste-skill work dirs
+k3s-ha-cluster/portfolio/img/
+.taste-skill/

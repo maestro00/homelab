@@ -37,6 +37,9 @@ spec:
             - name: html
               mountPath: /usr/share/nginx/html
               readOnly: true
+            - name: assets
+              mountPath: /usr/share/nginx/html/img
+              readOnly: true
           livenessProbe:
             httpGet:
               path: /
@@ -53,3 +56,6 @@ spec:
         - name: html
           configMap:
             name: portfolio-html
+        - name: assets
+          configMap:
+            name: portfolio-assets
