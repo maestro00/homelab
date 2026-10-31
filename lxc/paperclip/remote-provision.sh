@@ -241,26 +241,33 @@ ENVFILE
 }
 
 verify() {
-  sleep 8
+  local code=""
+  # A fresh instance needs ~30s to create its embedded database before it
+  # binds; a fixed sleep either races the startup or wastes a minute.
+  for _ in $(seq 1 12); do
+    code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 \
+      http://192.168.0.54:3100/api/health || true)"
+    [ "$code" = "200" ] && break
+    sleep 5
+  done
   log "service: $(systemctl is-active paperclip)"
   log "tailscale: $(tailscale ip -4 | head -1)"
-  local code
-  code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 \
-    http://192.168.0.54:3100/api/health || echo 000)"
-  log "http probe (LAN 192.168.0.54:3100): $code"
+  log "http probe (LAN 192.168.0.54:3100): ${code:-000}"
   # A 403 here means an orphaned detached server owns :3100 and the unit fell
   # back to :3101. That passed silently for five days; fail the run instead.
-  if [ "$code" != "200" ]; then
-    log "FAILED: :3100 answered $code, expected 200"
+  if [ "${code:-000}" != "200" ]; then
+    log "FAILED: :3100 answered ${code:-000}, expected 200"
     log "runners: $(pgrep -af 'index.js' | tr '\n' ' ')"
     exit 1
   fi
-  local claim
-  claim="$(journalctl -u paperclip --no-pager 2>/dev/null | grep -o '/board-claim/[^ "]*' | tail -1 || true)"
-  if [ -n "$claim" ]; then
-    log "board claim URL: http://192.168.0.54:3100$claim"
+  # The bootstrap invite is an admin credential, so it is never echoed here —
+  # it is already in the journal, and printing it again only spreads the copy.
+  if journalctl -u paperclip --no-pager 2>/dev/null | \
+      grep -qE '/invite/pcp_bootstrap_|/board-claim/'; then
+    log "board is UNCLAIMED. Read the invite URL from the container journal:"
+    log "  journalctl -u paperclip | grep -m1 'Invite URL'"
   else
-    log "no board claim URL in the journal — the instance is already claimed"
+    log "no bootstrap invite in the journal — board already claimed"
   fi
 }
 

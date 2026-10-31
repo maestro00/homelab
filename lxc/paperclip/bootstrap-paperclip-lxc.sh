@@ -92,4 +92,5 @@ provision_remote
 TS_IP="$("${SSH[@]}" "$CT_HOST" 'tailscale ip -4' | head -1)"
 echo "[done] Paperclip bootstrapped. Reach it at http://${TS_IP}:3100 via Tailscale"
 echo "       or http://192.168.0.54:3100 on the LAN."
-echo "[next] open the /board-claim/<token> URL printed by 'journalctl -u paperclip'"
+echo "[next] if the board is unclaimed, read its admin invite URL from ct254:"
+echo "       ssh root@192.168.0.54 \"journalctl -u paperclip | grep -m1 'Invite URL'\""
