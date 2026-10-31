@@ -165,25 +165,32 @@ enable_persistent_logging() {
   systemd-tmpfiles --create --prefix /var/log/journal >/dev/null 2>&1 || true
 }
 
-allow_lan_hostname() {
-  # 'paperclipai run' self-onboards (onboard + doctor) on a fresh instance, so
-  # there is no separate onboard step any more. The old one ran under
-  # `timeout`, which reaped only the `su` wrapper: the server Paperclip
-  # detached kept holding :3100 and pushed the systemd unit to :3101 for five
-  # days. The allowlist can only be written once the instance has created its
-  # config.json, so this runs after the unit is up.
-  log "waiting for the instance to self-onboard"
-  for _ in $(seq 1 30); do
-    [ -f "$PC_HOME/.paperclip/instances/default/config.json" ] && break
+onboard() {
+  # Required: `paperclipai run` self-onboards only when it has a TTY, and under
+  # systemd it exits with "No config found and terminal is non-interactive".
+  # The trap is that --yes also starts a server and detaches it (PPID 1), which
+  # `timeout` cannot reap — that orphan held :3100 for five days while the unit
+  # silently fell back to :3101. Reap by user, then hand the port to systemd.
+  log "onboarding (non-interactive quickstart)"
+  timeout 90 su - paperclip -c \
+    "$PC_BIN onboard --yes --bind lan --no-install-service" >/dev/null 2>&1 || true
+  pkill -u paperclip 2>/dev/null || true
+  sleep 3
+  pkill -9 -u paperclip 2>/dev/null || true
+  local cfg="$PC_HOME/.paperclip/instances/default/config.json"
+  for _ in $(seq 1 15); do
+    [ -f "$cfg" ] && break
     sleep 2
   done
-  # Without this the next line fails with a confusing MODULE_NOT_FOUND when the
-  # CLI payload is missing or the unit is crash-looping.
-  [ -f "$PC_HOME/.paperclip/instances/default/config.json" ] \
-    || { log "FAILED: no config.json after 60s — check 'systemctl status paperclip'"; exit 1; }
+  [ -f "$cfg" ] || { log "FAILED: onboard wrote no config.json"; exit 1; }
+  log "instance configured"
+}
+
+allow_lan_hostname() {
+  # Needs config.json, so it runs after onboard. The unit starts after this and
+  # reads the allowlist on its first boot; no restart dance.
   log "allowing the LAN IP in the hostname allowlist"
   su - paperclip -c "$PC_BIN allowed-hostname 192.168.0.54" >/dev/null
-  systemctl restart paperclip
 }
 
 write_systemd_unit() {
@@ -208,7 +215,7 @@ EnvironmentFile=/etc/paperclip/paperclip.env
 # The SQL dumps in .paperclip/instances/default/data/backups contain every
 # agent output and secret ref value; default umask made them world-readable.
 UMask=0077
-ExecStart=$PC_BIN run --bind lan
+ExecStart=$PC_BIN run
 Restart=always
 RestartSec=5
 
@@ -268,6 +275,7 @@ clone_homelab_repo
 install_kubectl
 restrict_port
 enable_persistent_logging
-write_systemd_unit
+onboard
 allow_lan_hostname
+write_systemd_unit
 verify
