@@ -195,6 +195,10 @@ config:
                         url: http://ntfy.ntfy.svc.cluster.local
                         topic: homelab-deploys
                         key: "{{ HOMEPAGE_VAR_NTFY_TOKEN }}"
+              - changedetection.io:
+                    href: https://changedetection.yukselcloud.com
+                    icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/changedetection.png
+                    description: Website & price change monitoring
               - OpenGym:
                     href: https://opengym.yukselcloud.com
                     icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/opengym.png

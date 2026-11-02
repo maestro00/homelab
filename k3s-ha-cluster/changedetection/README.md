@@ -105,3 +105,23 @@ For a clean price-only watch, use the Visual Selector in the UI (works because
 Playwright is enabled) to pick the price element, or add a CSS
 `include_filters` entry. Amazon.de does not always expose price in JSON-LD, so
 a CSS selector on the buybox is more reliable than the restock processor.
+
+### Track only the price (include_filters)
+
+`include_filters` is a list of CSS selectors; only matching elements are kept
+in the snapshot, so the change diff shows just those values. Verified on
+Amazon.de — `.a-price .a-offscreen` collapses a 666 KB page to a 119-byte list
+of prices:
+
+```json
+{
+  "include_filters": [".a-price .a-offscreen"]
+}
+```
+
+For the single buybox price, prefer the Visual Selector, or a tighter selector
+such as `#corePriceDisplay_desktop_feature_div .a-offscreen`.
+
+> Amazon.de caveat: if the item doesn't ship to your delivery country, the
+> buybox shows "similar items" instead of a direct price, so a single clean
+> price may not be present in the page at all.
