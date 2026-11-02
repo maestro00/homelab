@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: changedetection
+  namespace: changedetection
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: changedetection
+  template:
+    metadata:
+      labels:
+        app: changedetection
+    spec:
+      containers:
+        - name: changedetection
+          image: ghcr.io/dgtlmoon/changedetection.io:0.60.10
+          ports:
+            - containerPort: 5000
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+          env:
+            - name: PLAYWRIGHT_DRIVER_URL
+              value: "ws://sockpuppetbrowser.changedetection.svc.cluster.local:3000/?stealth=1&--disable-web-security=true"
+            - name: BASE_URL
+              value: https://changedetection.yukselcloud.com
+            - name: TZ
+              value: Europe/Helsinki
+            - name: HIDE_REFERER
+              value: "true"
+            - name: SALTED_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: changedetection-secret
+                  key: salted-pass
+          volumeMounts:
+            - name: datastore
+              mountPath: /datastore
+      volumes:
+        - name: datastore
+          persistentVolumeClaim:
+            claimName: changedetection-datastore
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sockpuppetbrowser
+  namespace: changedetection
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sockpuppetbrowser
+  template:
+    metadata:
+      labels:
+        app: sockpuppetbrowser
+    spec:
+      containers:
+        - name: sockpuppetbrowser
+          image: dgtlmoon/sockpuppetbrowser:0.0.3
+          ports:
+            - containerPort: 3000
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 2Gi
+          env:
+            - name: SCREEN_WIDTH
+              value: "1920"
+            - name: SCREEN_HEIGHT
+              value: "1024"
+            - name: SCREEN_DEPTH
+              value: "16"
+            - name: MAX_CONCURRENT_CHROME_PROCESSES
+              value: "5"
+          securityContext:
+            capabilities:
+              add: ["SYS_ADMIN"]
+          volumeMounts:
+            - name: dshm
+              mountPath: /dev/shm
+      volumes:
+        - name: dshm
+          emptyDir:
+            medium: Memory
