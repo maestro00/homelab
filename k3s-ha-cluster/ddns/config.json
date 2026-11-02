@@ -65,6 +65,10 @@
                 {
                     "name": "bentopdf",
                     "proxied": false
+                },
+                {
+                    "name": "changedetection",
+                    "proxied": false
                 }
             ]
         }
