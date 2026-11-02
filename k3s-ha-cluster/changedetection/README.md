@@ -79,3 +79,29 @@ See issue #74 for the full strategy. Summary:
 - Neither FlareSolverr nor Playwright stealth solves an interactive Turnstile
   (the click/human-verify captcha); for those use Browser Steps or a
   residential proxy.
+
+## Verified end-to-end (2026-11-02)
+
+Tested against `https://www.amazon.de/dp/B0DSR14511` (Crucial Pro DDR5 64GB
+6400MHz). The Playwright stealth fetcher retrieved the real product page
+(title, 1.5MB screenshot, price in the DOM) with no Cloudflare captcha, and a
+forced change produced an ntfy alert on `homelab-changedetection`.
+
+## Adding a price watch
+
+Via the REST API (API key in the datastore, see `changedetection.json`):
+
+```bash
+curl -X POST https://changedetection.yukselcloud.com/api/v1/watch \
+  -H "x-api-key: <API_KEY>" -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://www.amazon.de/dp/ASIN",
+    "fetch_backend": "html_webdriver",
+    "notification_urls": ["ntfys://tk_<TOKEN>@ntfy.yukselcloud.com/homelab-changedetection?auth=token"]
+  }'
+```
+
+For a clean price-only watch, use the Visual Selector in the UI (works because
+Playwright is enabled) to pick the price element, or add a CSS
+`include_filters` entry. Amazon.de does not always expose price in JSON-LD, so
+a CSS selector on the buybox is more reliable than the restock processor.

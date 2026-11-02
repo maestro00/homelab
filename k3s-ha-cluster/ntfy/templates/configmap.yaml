@@ -14,3 +14,8 @@ data:
     enable-login: {{ .Values.config.enableLogin }}
     require-login: true
     upstream-base-url: {{ .Values.config.upstreamBaseURL }}
+    # Attachments (e.g. changedetection.io diff .txt) need an explicit cache dir.
+    attachment-cache-dir: /var/cache/ntfy/attachments
+    attachment-total-size-limit: 512M
+    attachment-file-size-limit: 10M
+    attachment-expiry-duration: 6h
