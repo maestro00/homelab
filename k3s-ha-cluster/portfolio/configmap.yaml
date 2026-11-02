@@ -32,8 +32,10 @@ data:
       --ease: cubic-bezier(0.2, 0.6, 0.3, 1);
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { color-scheme: dark; scrollbar-width: none; }
-    html::-webkit-scrollbar { display: none; }
+    html { color-scheme: dark; scrollbar-width: thin; scrollbar-color: #3a3a38 var(--bg); }
+    html::-webkit-scrollbar { width: 10px; }
+    html::-webkit-scrollbar-thumb { background: #3a3a38; }
+    html::-webkit-scrollbar-track { background: var(--bg); }
     body {
       font-family: var(--font);
       font-weight: 400;
@@ -54,8 +56,8 @@ data:
       min-height: 100svh;
       display: grid;
       grid-template-rows: auto 1fr auto;
-      gap: clamp(24px, 4vh, 48px);
-      padding: clamp(20px, 3vh, 40px) var(--pad-page) clamp(28px, 4vh, 44px);
+      gap: clamp(14px, 2vh, 26px);
+      padding: clamp(16px, 2.4vh, 32px) var(--pad-page) clamp(20px, 2.6vh, 34px);
     }
     .first-screen > * { min-width: 0; }
     .name-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 12px 28px; }
@@ -88,7 +90,7 @@ data:
       gap: var(--gap-strip);
       overflow-x: auto;
       scroll-snap-type: x proximity;
-      height: clamp(220px, 34vh, 360px);
+      height: clamp(250px, 40vh, 430px);
       scrollbar-width: thin;
       scrollbar-color: var(--surface) transparent;
     }
@@ -623,11 +625,6 @@ data:
         if (best) best.classList.add('lit');
       }
       strip.addEventListener('scroll', light, { passive: true });
-      strip.addEventListener('wheel', function (e) {
-        var max = strip.scrollWidth - strip.clientWidth;
-        var canGo = e.deltaY > 0 ? strip.scrollLeft < max - 1 : strip.scrollLeft > 1;
-        if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && canGo) { e.preventDefault(); strip.scrollLeft += e.deltaY * 0.9; }
-      }, { passive: false });
       light();
     })();
     </script>
