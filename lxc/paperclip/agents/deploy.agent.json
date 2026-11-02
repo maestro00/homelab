@@ -23,6 +23,6 @@
   "budgetMonthlyCents": 0,
   "metadata": {
     "rbac": "edit in media/monitoring/opengym, read Secrets there",
-    "git": "one-repo ssh deploy key; push branches only; human opens and merges"
+    "git": "one-repo bot user over HTTPS; push branches; human merges"
   }
 }

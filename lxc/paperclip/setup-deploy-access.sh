@@ -4,114 +4,127 @@
 # Run from the workstation, after the board is claimed and the repo pushed:
 #   FORGEJO_TOKEN=... ./lxc/paperclip/setup-deploy-access.sh
 #
-# Why a deploy key and not a Forgejo token: tokens are restricted by *scope*,
-# not by repository, and the `lab` account owns the org. A token handed to an
-# agent would let it write every repo `lab` can reach, and a push to master
-# triggers Forgejo Actions that apply manifests to the cluster with the
-# runner's kubectl — a leaked token would be a cluster-level compromise.
-# A deploy key is bound to one repository, and `read_write` is granted only
-# here. It lives as a 0600 file on ct254: never in git, never in the Paperclip
-# database or its hourly SQL dumps, never in a process argument list.
+# Forgejo here is reached over HTTPS only — `forgejo-ssh` is a ClusterIP with
+# no LoadBalancer, and port 22 at the public IP is the router's dropbear, not
+# Forgejo. So a deploy key cannot work, and a token for the `lab` account would
+# reach all three of its repos (homelab, telegram-agent, homelab-event-collector),
+# including ones whose pushes trigger deploy workflows. Instead this creates a
+# dedicated bot user that is a collaborator on lab/homelab and nothing else, so
+# its token is limited by membership, which is the only real per-repo scoping
+# Forgejo offers.
 #
-# The key can push branches and nothing else. PRs are opened and merged by a
-# human; deploy only proposes.
+# The token value never appears on stdout or in git. It is captured from the
+# API response straight into a 0600 file on ct254 and deleted from the
+# workstation. It reaches the board database only if an agent chooses to paste
+# it, which deploy.md forbids and the dump audit checks.
 #
-# Idempotent: re-running reuses the existing key and remote.
+# The bot can push branches and open PRs (issue scope). Merging is not a
+# permission it holds: merges stay human.
+#
+# Idempotent-ish: the user and collaborator steps are idempotent; each run
+# mints a fresh token and overwrites the credential file, so old tokens pile up
+# until revoked.
 
 set -euo pipefail
 
 CT_HOST="${CT_HOST:-root@192.168.0.54}"
 FORGEJO_URL="${FORGEJO_URL:-https://git.yukselcloud.com}"
-FORGEJO_HOST="${FORGEJO_URL#https://}"
+API="$FORGEJO_URL/api/v1"
 REPO="${REPO:-lab/homelab}"
-KEY_TITLE="${KEY_TITLE:-paperclip-ct254}"
+BOT="${BOT:-paperclip-deploy}"
+BOT_EMAIL="${BOT_EMAIL:-paperclip@yukselcloud.com}"
 WS="/srv/paperclip/work/homelab"
 
-: "${FORGEJO_TOKEN:?set FORGEJO_TOKEN (the lab account token, gitignored)}"
+: "${FORGEJO_TOKEN:?set FORGEJO_TOKEN (the lab account admin token, gitignored)}"
 
 SSH=(ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new)
+AUTH=(-H "Authorization: token $FORGEJO_TOKEN")
 
 log() { echo "[deploy-access] $*"; }
 die() { echo "[deploy-access] FAILED: $*" >&2; exit 1; }
 
-# 1. Key pair on the container, owned by the agent's own user.
-log "ensuring a deploy keypair exists on ct254"
-"${SSH[@]}" "$CT_HOST" "su - paperclip -c '
-  install -d -m 0700 ~/.ssh
-  [ -f ~/.ssh/id_ed25519 ] || ssh-keygen -q -t ed25519 -N \"\" \
-    -C paperclip-ct254 -f ~/.ssh/id_ed25519
-  chmod 0600 ~/.ssh/id_ed25519
-'"
-
-PUBKEY="$("${SSH[@]}" "$CT_HOST" "su - paperclip -c 'cat ~/.ssh/id_ed25519.pub'")"
-[ -n "$PUBKEY" ] || die "no public key came back from ct254"
-log "public key: $(cut -d' ' -f1-2 <<<"$PUBKEY")"
-
-# Host key trust: pin the real fingerprint rather than disabling checking.
-log "caching the Forgejo host key"
-"${SSH[@]}" "$CT_HOST" "su - paperclip -c '
-  grep -q \"^${FORGEJO_HOST} \" ~/.ssh/known_hosts 2>/dev/null || \
-    ssh-keyscan -t ed25519 ${FORGEJO_HOST} >> ~/.ssh/known_hosts
-'"
-
-# 2. Register the key on the repo, only if it is not already there.
-KEY_EXISTS=$(curl -sS -m 20 "$FORGEJO_URL/api/v1/repos/$REPO/keys" \
-  -H "Authorization: token $FORGEJO_TOKEN" \
-  | python3 -c '
-import json,sys
-want=sys.argv[1].split(" ",2)[:2]
-for k in json.load(sys.stdin):
-    if k.get("key","").split(" ",2)[:2] == want:
-        print("yes"); break
-' "$PUBKEY")
-
-if [ "$KEY_EXISTS" = "yes" ]; then
-  log "deploy key already registered on $REPO — skipping"
+# 1. Bot user, if it does not exist.
+if curl -sS -m 20 "$API/users/$BOT" "${AUTH[@]}" -o /dev/null -w '%{http_code}' | grep -q 200; then
+  log "bot user $BOT already exists"
 else
-  log "registering the deploy key on $REPO (read_write)"
-  curl -sS -m 20 -X POST "$FORGEJO_URL/api/v1/repos/$REPO/keys" \
-    -H "Authorization: token $FORGEJO_TOKEN" \
+  log "creating bot user $BOT"
+  curl -sS -m 20 -X POST "$API/admin/users" "${AUTH[@]}" \
     -H "Content-Type: application/json" \
     -d "$(python3 -c '
-import json,sys
-print(json.dumps({"title":sys.argv[1],"key":sys.argv[2],"read_write":True}))
-' "$KEY_TITLE" "$PUBKEY")" >/dev/null
-  log "deploy key registered"
+import json,sys,secrets
+print(json.dumps({
+  "username": sys.argv[1], "email": sys.argv[2],
+  "password": secrets.token_urlsafe(24), "must_change_password": False,
+  "login_name": sys.argv[1], "send_notify": False,
+}))' "$BOT" "$BOT_EMAIL")" -o /dev/null || die "user creation failed"
+  log "bot user created"
 fi
 
-# 3. A separate `deploy` remote. origin stays HTTPS so the root-side refresh
-#    in remote-provision.sh keeps working untouched.
-log "adding the ssh deploy remote to the workspace clone"
-"${SSH[@]}" "$CT_HOST" "su - paperclip -c '
-  cd $WS
-  git config --global --add safe.directory $WS
+# 2. Collaborator on lab/homelab with write, if not already.
+if curl -sS -m 20 "$API/repos/$REPO/collaborators/$BOT" "${AUTH[@]}" -o /dev/null -w '%{http_code}' | grep -q 204; then
+  log "bot is already a collaborator on $REPO"
+else
+  log "adding bot as write collaborator on $REPO"
+  curl -sS -m 20 -X PUT "$API/repos/$REPO/collaborators/$BOT" "${AUTH[@]}" \
+    -H "Content-Type: application/json" -d '{"permission":"write"}' -o /dev/null \
+    || die "collaborator add failed"
+fi
+
+# 3. Token for the bot. The value is captured to a 0600 file, never printed.
+TMP=$(mktemp)
+chmod 600 "$TMP"
+trap 'rm -f "$TMP"' EXIT
+log "minting a token for $BOT (scopes: repository + issue, no admin)"
+curl -sS -m 20 -X POST "$API/users/$BOT/tokens" "${AUTH[@]}" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"paperclip-ct254","scopes":["write:repository","write:issue"]}' \
+  | python3 -c '
+import json,sys
+d=json.load(sys.stdin)
+tok=d.get("token")
+if not tok:
+    print("no token in response: %s" % json.dumps(d), file=sys.stderr); sys.exit(1)
+open(sys.argv[1],"w").write(tok)
+' "$TMP" || die "token minting failed"
+
+# 4. Deliver the token to the container without it touching stdout or argv.
+log "writing the bot credential to ct254 (~paperclip/.git-credentials, 0600)"
+"${SCP_CMD:-scp}" -q -o BatchMode=yes -o StrictHostKeyChecking=accept-new \
+  "$TMP" "$CT_HOST:/root/deploy-token"
+"${SSH[@]}" "$CT_HOST" "bash -s" <<'INNER'
+set -euo pipefail
+BOT="${BOT:-paperclip-deploy}"
+TOK=$(cat /root/deploy-token)
+rm -f /root/deploy-token
+install -d -o paperclip -g paperclip -m 0750 /srv/paperclip/.config
+printf 'https://%s:%s@git.yukselcloud.com\n' "$BOT" "$TOK" \
+  > /srv/paperclip/.config/git-credentials
+chown paperclip:paperclip /srv/paperclip/.config/git-credentials
+chmod 0600 /srv/paperclip/.config/git-credentials
+su - paperclip -c '
+  git config --global credential.helper "store --file $HOME/.config/git-credentials"
+  cd /srv/paperclip/work/homelab
   git remote remove deploy 2>/dev/null || true
-  git remote add deploy git@${FORGEJO_HOST}:$REPO.git
-  git config user.name  \"paperclip-deploy\"
-  git config user.email \"paperclip@yukselcloud.com\"
-'"
+  git remote add deploy https://git.yukselcloud.com/lab/homelab.git
+  git config user.name  paperclip-deploy
+  git config user.email paperclip@yukselcloud.com
+'
+INNER
 
-log "verifying the key can reach the repo"
+# 5. Prove the bot can read the repo (a cheap, non-mutating check).
+log "verifying the bot credential works"
 "${SSH[@]}" "$CT_HOST" "su - paperclip -c \
-  \"cd $WS && git fetch --quiet deploy && git rev-parse --short deploy/master\"" \
-  || die "fetch over the deploy key failed — check the key was accepted"
-
-# 4. Refresh origin so the agents read current code.
-log "refreshing origin as root (HTTPS credentials stay root-only)"
-"${SSH[@]}" "$CT_HOST" "git -c safe.directory=$WS -C $WS pull --ff-only -q origin master \
-  && chown -R paperclip:paperclip $WS" \
-  || log "origin pull failed — provisioning refresh will catch it up"
-
-log "workspace now at:"
-"${SSH[@]}" "$CT_HOST" "su - paperclip -c 'cd $WS && git log --oneline -1'"
+  'cd $WS && git fetch --quiet deploy && git rev-parse --short deploy/master'" \
+  || die "fetch with the bot token failed"
 
 cat <<DONE
 
-[done] deploy has a one-repo push path.
+[done] deploy has a single-repo write path.
 
-  remote   deploy -> git@${FORGEJO_HOST}:$REPO.git (ssh deploy key, read_write)
-  key      ct254:~paperclip/.ssh/id_ed25519 (0600, never left the container)
-  origin   HTTPS, refreshed by root during provisioning
+  user     $BOT (write collaborator on $REPO only)
+  token    scopes write:repository + write:issue, stored 0600 on ct254
+  remote   deploy -> https://git.yukselcloud.com/lab/homelab.git
+  merge    not granted; PRs open, humans merge
 
   Next: hire the agent from lxc/paperclip/agents/deploy.agent.json
 DONE

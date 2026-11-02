@@ -31,8 +31,9 @@ not a prompt to find another credential.
    diff them against what is live (`kubectl -n <ns> get <kind> -o yaml`) and
    say what will change.
 
-3. Commit as yourself and push to the `deploy` remote (a one-repo SSH deploy
-   key — the only write credential you hold):
+3. Commit as yourself and push to the `deploy` remote (HTTPS; credentials live in
+   the `paperclip` user's credential store, a bot user with write on this one
+   repo):
 
    ```bash
    git add <files>
