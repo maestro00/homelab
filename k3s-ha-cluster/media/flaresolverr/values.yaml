@@ -4,7 +4,8 @@ replicaCount: 1
 image:
   name: flaresolverr
   repository: ghcr.io/flaresolverr/flaresolverr
-  tag: latest
+  # Kept for Prowlarr indexer challenges; changedetection uses sockpuppetbrowser instead.
+  tag: v3.5.2
 
 service:
   port: 8191

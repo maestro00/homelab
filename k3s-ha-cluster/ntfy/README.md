@@ -79,12 +79,13 @@ manifest from `homelab-node` to any topic you prefer.
 ## Integrations
 
 <!-- markdownlint-disable MD013 -->
-| Source          | Topic             | How                                                           |
-| --------------- | ----------------- | ------------------------------------------------------------- |
-| Forgejo Actions | `homelab-deploys` | `NTFY_TOKEN` repo secret + `curl` in workflow                 |
-| Alertmanager    | `homelab-alerts`  | `ntfy-alertmanager` bridge in `monitoring/` namespace         |
-| Radarr / Sonarr | `homelab-media`   | Settings → Connect → Webhook, `Authorization: Bearer` header  |
-| Jellyfin        | `homelab-media`   | Dashboard → Plugins → Webhook                                 |
+| Source             | Topic                     | How                                                          |
+| ------------------ | ------------------------- | ------------------------------------------------------------ |
+| Forgejo Actions    | `homelab-deploys`         | `NTFY_TOKEN` repo secret + `curl` in workflow                |
+| Alertmanager       | `homelab-alerts`          | `ntfy-alertmanager` bridge in `monitoring/` namespace        |
+| Radarr / Sonarr    | `homelab-media`           | Settings → Connect → Webhook, `Authorization: Bearer` header |
+| Jellyfin           | `homelab-media`           | Dashboard → Plugins → Webhook                                |
+| changedetection.io | `homelab-changedetection` | apprise URL in watch settings                                |
 <!-- markdownlint-enable MD013 -->
 
 ## Links

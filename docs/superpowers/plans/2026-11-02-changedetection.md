@@ -169,11 +169,11 @@ git commit -m "docs(changedetection): document ntfy notification"
 
 - [ ] **Step 1: Document the reality**
 
-README section: FlareSolverr is unmaintained and does not solve Cloudflare Turnstile. changedetection's fetcher chain is: default non-JS fetcher → Playwright stealth (sockpuppetbrowser) for JS pages → BrowserSteps for login/interaction → residential proxy for hard-Turnstile sites. Record which of amazon.de / vatanbilgisayar.com / gigantti.fi need which.
+README section: FlareSolverr (v3.5.x, still maintained) is an HTTP API for the arr stack, not a changedetection fetcher. changedetection's fetcher chain is: default non-JS fetcher → Playwright stealth (sockpuppetbrowser) for JS pages → BrowserSteps for login/interaction → residential proxy for hard-Turnstile sites. Record which of amazon.de / vatanbilgisayar.com / gigantti.fi need which.
 
-- [ ] **Step 2: Pin FlareSolverr tag + deprecation note**
+- [ ] **Step 2: Pin FlareSolverr tag + note**
 
-In `media/flaresolverr/values.yaml`, pin `tag: v3.3.21` (last known release) and add a comment that it is only kept for Prowlarr indexers, not used by changedetection.
+In `media/flaresolverr/values.yaml`, pin `tag: v3.5.2` (latest release) and add a comment that it is kept for Prowlarr indexers, not used by changedetection.
 
 - [ ] **Step 3: Commit**
 

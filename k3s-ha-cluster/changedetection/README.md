@@ -72,9 +72,10 @@ Forgejo secret value, never committed.
 
 See issue #74 for the full strategy. Summary:
 
-- FlareSolverr (media ns) is unmaintained and cannot solve Cloudflare
-  Turnstile; it stays only for Prowlarr indexer pings.
+- FlareSolverr (media ns, v3.5.x) is an HTTP API for the arr stack indexers,
+  not a changedetection fetcher; it stays wired to Prowlarr only.
 - Use the Playwright fetcher (`sockpuppetbrowser`) for JS-heavy or lightly
   protected pages.
-- Interactive Turnstile CAPTCHAs are not auto-solvable by any free tool; use
-  Browser Steps or a residential proxy for those.
+- Neither FlareSolverr nor Playwright stealth solves an interactive Turnstile
+  (the click/human-verify captcha); for those use Browser Steps or a
+  residential proxy.
