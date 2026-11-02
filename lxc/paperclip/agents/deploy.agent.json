@@ -1,0 +1,28 @@
+{
+  "name": "deploy",
+  "role": "engineer",
+  "title": "Scoped cluster operator",
+  "reportsTo": null,
+  "capabilities": "Changes media, monitoring and opengym workloads through reviewed branches. Never merges, never opens PRs.",
+  "adapterType": "opencode_local",
+  "adapterConfig": {
+    "cwd": "/srv/paperclip/work/homelab",
+    "model": "opencode/big-pickle",
+    "instructionsFilePath": "/srv/paperclip/work/homelab/lxc/paperclip/agents/deploy.md",
+    "dangerouslySkipPermissions": true,
+    "timeoutSec": 900,
+    "graceSec": 30,
+    "env": {
+      "KUBECONFIG": "/srv/paperclip/.kube/deploy-config",
+      "PAPERCLIP_OPENCODE_SMALL_MODEL": "opencode/big-pickle"
+    }
+  },
+  "runtimeConfig": {
+    "heartbeat": { "enabled": false }
+  },
+  "budgetMonthlyCents": 0,
+  "metadata": {
+    "rbac": "edit in media/monitoring/opengym, read Secrets there",
+    "git": "one-repo ssh deploy key; push branches only; human opens and merges"
+  }
+}
