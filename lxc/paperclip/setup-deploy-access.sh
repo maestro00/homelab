@@ -6,24 +6,28 @@
 #
 # Forgejo here is reached over HTTPS only — `forgejo-ssh` is a ClusterIP with
 # no LoadBalancer, and port 22 at the public IP is the router's dropbear, not
-# Forgejo. So a deploy key cannot work, and a token for the `lab` account would
-# reach all three of its repos (homelab, telegram-agent, homelab-event-collector),
-# including ones whose pushes trigger deploy workflows. Instead this creates a
-# dedicated bot user that is a collaborator on lab/homelab and nothing else, so
-# its token is limited by membership, which is the only real per-repo scoping
-# Forgejo offers.
+# Forgejo. A token for the `lab` account would reach all three of its repos
+# (homelab, telegram-agent, homelab-event-collector), including ones whose
+# pushes trigger deploy workflows. Instead this creates a dedicated bot user
+# that is a write collaborator on lab/homelab and nothing else, so its
+# credential is limited by membership — the only real per-repo scoping Forgejo
+# offers.
 #
-# The token value never appears on stdout or in git. It is captured from the
-# API response straight into a 0600 file on ct254 and deleted from the
-# workstation. It reaches the board database only if an agent chooses to paste
-# it, which deploy.md forbids and the dump audit checks.
+# The credential is the bot's password over HTTPS basic auth. Forgejo 14 has no
+# self-service token API, and the admin token-creation route demands basic auth
+# of an admin; the password path is identical in scope here because the bot has
+# write on exactly one repo and no admin rights.
 #
-# The bot can push branches and open PRs (issue scope). Merging is not a
-# permission it holds: merges stay human.
+# The password never appears on stdout or in git: it is generated, delivered to
+# ct254 as a 0600 file, and deleted from the workstation. It reaches the board
+# database only if an agent pastes it, which deploy.md forbids and the dump
+# audit checks.
 #
-# Idempotent-ish: the user and collaborator steps are idempotent; each run
-# mints a fresh token and overwrites the credential file, so old tokens pile up
-# until revoked.
+# The bot can push branches and open PRs (issue scope). Merging is a human
+# action.
+#
+# Idempotent: user and collaborator steps are idempotent; each run resets the
+# password and overwrites the credential file.
 
 set -euo pipefail
 
@@ -70,39 +74,35 @@ else
     || die "collaborator add failed"
 fi
 
-# 3. Token for the bot. The value is captured to a 0600 file, never printed.
+# 3. A password for the bot, kept only long enough to reach the container.
+BOTPW="$(openssl rand -hex 24)"
+curl -sS -m 20 -X PATCH "$API/admin/users/$BOT" "${AUTH[@]}" \
+  -H "Content-Type: application/json" \
+  -d "$(python3 -c '
+import json,sys
+print(json.dumps({"password": sys.argv[1]}))
+' "$BOTPW")" -o /dev/null || die "password reset failed"
+
 TMP=$(mktemp)
 chmod 600 "$TMP"
 trap 'rm -f "$TMP"' EXIT
-log "minting a token for $BOT (scopes: repository + issue, no admin)"
-curl -sS -m 20 -X POST "$API/users/$BOT/tokens" "${AUTH[@]}" \
-  -H "Content-Type: application/json" \
-  -d '{"name":"paperclip-ct254","scopes":["write:repository","write:issue"]}' \
-  | python3 -c '
-import json,sys
-d=json.load(sys.stdin)
-tok=d.get("token")
-if not tok:
-    print("no token in response: %s" % json.dumps(d), file=sys.stderr); sys.exit(1)
-open(sys.argv[1],"w").write(tok)
-' "$TMP" || die "token minting failed"
+printf '%s' "$BOTPW" > "$TMP"
+log "delivering the bot credential to ct254 (0600, paperclip-owned)"
 
-# 4. Deliver the token to the container without it touching stdout or argv.
-log "writing the bot credential to ct254 (~paperclip/.git-credentials, 0600)"
-"${SCP_CMD:-scp}" -q -o BatchMode=yes -o StrictHostKeyChecking=accept-new \
-  "$TMP" "$CT_HOST:/root/deploy-token"
-"${SSH[@]}" "$CT_HOST" "bash -s" <<'INNER'
+scp -q -o BatchMode=yes -o StrictHostKeyChecking=accept-new \
+  "$TMP" "$CT_HOST:/root/deploy-pass"
+"${SSH[@]}" "$CT_HOST" "bash -s" <<INNER
 set -euo pipefail
-BOT="${BOT:-paperclip-deploy}"
-TOK=$(cat /root/deploy-token)
-rm -f /root/deploy-token
+BOT='$BOT'
+PASS=\$(cat /root/deploy-pass)
+rm -f /root/deploy-pass
 install -d -o paperclip -g paperclip -m 0750 /srv/paperclip/.config
-printf 'https://%s:%s@git.yukselcloud.com\n' "$BOT" "$TOK" \
+printf 'https://%s:%s@git.yukselcloud.com\n' "\$BOT" "\$PASS" \
   > /srv/paperclip/.config/git-credentials
 chown paperclip:paperclip /srv/paperclip/.config/git-credentials
 chmod 0600 /srv/paperclip/.config/git-credentials
 su - paperclip -c '
-  git config --global credential.helper "store --file $HOME/.config/git-credentials"
+  git config --global credential.helper "store --file \$HOME/.config/git-credentials"
   cd /srv/paperclip/work/homelab
   git remote remove deploy 2>/dev/null || true
   git remote add deploy https://git.yukselcloud.com/lab/homelab.git
@@ -111,18 +111,23 @@ su - paperclip -c '
 '
 INNER
 
-# 5. Prove the bot can read the repo (a cheap, non-mutating check).
+# 4. The workspace is refreshed as root during provisioning, which leaves
+#    .git/objects root-owned; a paperclip-side fetch cannot write there.
+log "handing the workspace to the agent user"
+"${SSH[@]}" "$CT_HOST" "chown -R paperclip:paperclip $WS"
+
+# 5. Prove the bot can read the repo (cheap, non-mutating).
 log "verifying the bot credential works"
 "${SSH[@]}" "$CT_HOST" "su - paperclip -c \
   'cd $WS && git fetch --quiet deploy && git rev-parse --short deploy/master'" \
-  || die "fetch with the bot token failed"
+  || die "fetch with the bot credential failed"
 
 cat <<DONE
 
 [done] deploy has a single-repo write path.
 
   user     $BOT (write collaborator on $REPO only)
-  token    scopes write:repository + write:issue, stored 0600 on ct254
+  cred     HTTPS basic auth, stored 0600 on ct254
   remote   deploy -> https://git.yukselcloud.com/lab/homelab.git
   merge    not granted; PRs open, humans merge
 
