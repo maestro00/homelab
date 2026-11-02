@@ -161,3 +161,13 @@ self-hosted line — which becomes the page's thesis instead of a caption.
    state is transient and never publishable content; the page shows the topology
    **as designed (3 CP + 2 workers)**, nothing about live health or node counts
    beyond what is permanent.
+
+## Outcome (2026-11-02)
+
+Shipped, then rejected by the owner on first read: "I really didn't like the ui at all.
+I would rather have something simple, like the previous one and have readable content…
+so wide page and not user friendly. simpler page is better."
+
+The previous page was restored from git (`7c7f3cc^`) and redeployed. The contact-sheet
+build remains in history at commit `7c7f3cc` if it is ever revisited; the lesson recorded
+here is the scope one: an art-directed full rebuild was more than this page wanted.
