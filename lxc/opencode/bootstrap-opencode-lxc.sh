@@ -42,8 +42,8 @@ log() { echo "[bootstrap] $*"; }
 
 push_kubeconfig() {
   if [ -f "$KUBECONFIG_SRC" ]; then
-    ssh -o BatchMode=yes "$CT_HOST" 'mkdir -p /root/.kube'
-    scp -q -o BatchMode=yes "$KUBECONFIG_SRC" "$CT_HOST:/root/.kube/config"
+    ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new "$CT_HOST" 'mkdir -p /root/.kube'
+    scp -q -o BatchMode=yes -o StrictHostKeyChecking=accept-new "$KUBECONFIG_SRC" "$CT_HOST:/root/.kube/config"
     log "kubeconfig copied ($KUBECONFIG_SRC)"
   else
     log "no kubeconfig at $KUBECONFIG_SRC — skipping cluster management setup"
@@ -52,8 +52,8 @@ push_kubeconfig() {
 
 push_opencode_auth() {
   if [ -f "$AUTH_SRC" ]; then
-    ssh -o BatchMode=yes "$CT_HOST" 'install -d /root/.local/share/opencode'
-    scp -q -o BatchMode=yes "$AUTH_SRC" "$CT_HOST:/root/.local/share/opencode/auth.json"
+    ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new "$CT_HOST" 'install -d /root/.local/share/opencode'
+    scp -q -o BatchMode=yes -o StrictHostKeyChecking=accept-new "$AUTH_SRC" "$CT_HOST:/root/.local/share/opencode/auth.json"
     log "opencode gateway auth staged for the service user"
   else
     log "no auth.json at $AUTH_SRC — run 'opencode auth login' on the workstation first"
@@ -72,12 +72,12 @@ provision_remote() {
     printf 'export OPENCODE_SERVER_USERNAME=%q\n' "$OPENCODE_SERVER_USERNAME"
     printf 'export OPENCODE_SERVER_PASSWORD=%q\n' "$OPENCODE_SERVER_PASSWORD"
     cat "$REMOTE_PROVISION_SCRIPT"
-  } | ssh -o BatchMode=yes "$CT_HOST" bash -s
+  } | ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new "$CT_HOST" bash -s
 }
 
 push_kubeconfig
 push_opencode_auth
 provision_remote
 
-TS_IP="$(ssh -o BatchMode=yes "$CT_HOST" 'tailscale ip -4' | head -1)"
+TS_IP="$(ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new "$CT_HOST" 'tailscale ip -4' | head -1)"
 echo "[done] opencode LXC bootstrapped. Reach it at http://${TS_IP}:4096 via Tailscale."
