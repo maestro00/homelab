@@ -86,6 +86,14 @@ kubectl create secret docker-registry forgejo-registry \
 - Name the secret exactly: **KUBECONFIG_DEPLOY**
 - Paste the contents of `kubeconfig-ci.yaml` into the value field and save it.
 
+The deploy kubeconfig authenticates as this ServiceAccount, so it needs
+cluster-wide access to install charts that create CRDs or NetworkPolicies.
+Apply the extra binding once:
+
+```sh
+kubectl apply -f k3s-ha-cluster/forgejo/runner-clusteradmin.yaml
+```
+
 ## Configuration
 
 Edit `values.yaml`:
