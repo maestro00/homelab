@@ -31,7 +31,7 @@ dedicated `gitops-store` ServiceAccount with read-only Secret access plus
 Add the value to the `gitops-secrets` source Secret, then declare:
 
 ```yaml
-apiVersion: external-secrets.io/v1beta1
+apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
   name: my-secret

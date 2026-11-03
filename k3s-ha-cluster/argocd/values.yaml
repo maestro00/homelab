@@ -44,10 +44,8 @@ redis:
       cpu: 250m
       memory: 256Mi
 
-# Not used yet: no external OIDC, no notifications, no ApplicationSet
+# Not used yet: no external OIDC, no notifications
 dex:
   enabled: false
 notifications:
-  enabled: false
-applicationSet:
   enabled: false
