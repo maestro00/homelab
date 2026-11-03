@@ -72,7 +72,7 @@ config:
                     icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/longhorn.png
                     description: Persistent storage UI
               - Kubernetes Dashboard:
-                    href: https://192.168.0.209
+                    href: https://dashboard.yukselcloud.com
                     icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/kubernetes.png
                     description: Cluster management
 
