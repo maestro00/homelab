@@ -85,6 +85,10 @@ config:
                     href: http://192.168.0.216:8080
                     icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/terminal.png
                     description: Terminal multiplexer
+              - Argo CD:
+                    href: https://argocd.yukselcloud.com
+                    icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/argocd.png
+                    description: GitOps controller
 
         - Identity & Security:
               - Authelia:
@@ -180,10 +184,27 @@ config:
                     href: https://beszel.yukselcloud.com
                     icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/beszel.png
                     description: Server monitoring
+              - Grafana:
+                    href: https://grafana.yukselcloud.com
+                    icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/grafana.png
+                    description: Logs (Loki)
               - Uptime Kuma:
                     href: https://uptime-kuma.yukselcloud.com
                     icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/uptime-kuma.png
                     description: Uptime checks
+                    widget:
+                        type: uptimekuma
+                        url: http://uptime-kuma.monitoring.svc.cluster.local:3001
+                        slug: homelab
+              - Alerts:
+                    href: https://ntfy.yukselcloud.com/homelab-alerts
+                    icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/ntfy.png
+                    description: Service alerts
+                    widget:
+                        type: ntfy
+                        url: http://ntfy.ntfy.svc.cluster.local
+                        topic: homelab-alerts
+                        key: "{{ HOMEPAGE_VAR_NTFY_TOKEN }}"
 
         - Tools:
               - ntfy:
