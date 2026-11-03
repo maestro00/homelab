@@ -1,0 +1,24 @@
+---
+# Root app-of-apps: Argo CD reconciles the Kustomize tree at
+# `k3s-ha-cluster/argocd/apps/` and applies every child Application there.
+# Applied once by deploy-argocd.yml; Argo CD then owns everything under apps/.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: apps
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://git.yukselcloud.com/lab/homelab.git
+    targetRevision: master
+    path: k3s-ha-cluster/argocd/apps
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

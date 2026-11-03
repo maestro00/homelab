@@ -35,6 +35,10 @@
                     "proxied": false
                 },
                 {
+                    "name": "argocd",
+                    "proxied": false
+                },
+                {
                     "name": "jellyfin",
                     "proxied": false
                 },

@@ -1,0 +1,53 @@
+# Argo CD (argo-cd chart 10.11.6, app v3.5.6)
+global:
+  image:
+    tag: v3.5.6
+
+server:
+  # Serve plain HTTP; Caddy terminates TLS in front (same as forgejo/homepage)
+  extraArgs:
+    - --insecure
+  service:
+    type: ClusterIP
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+controller:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+repoServer:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+redis:
+  resources:
+    requests:
+      cpu: 25m
+      memory: 64Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+
+# Not used yet: no external OIDC, no notifications, no ApplicationSet
+dex:
+  enabled: false
+notifications:
+  enabled: false
+applicationSet:
+  enabled: false

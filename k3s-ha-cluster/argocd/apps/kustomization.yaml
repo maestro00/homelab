@@ -1,0 +1,11 @@
+---
+# App-of-apps: Argo CD reconciles this directory and applies every child
+# Application listed in `resources`. Add one entry per service you migrate to
+# GitOps, e.g.:
+#
+#   resources:
+#     - homepage.yaml
+#
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources: []

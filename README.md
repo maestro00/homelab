@@ -96,6 +96,10 @@ zero-trust remote network access.
 
 - 🐙 **Forgejo Git Server:** Self-hosted Git repository complete with
 local actions runners to automatically deploy configuration changes.
+- 🚀 **Argo CD:** Pull-based GitOps controller that reconciles the cluster
+against this repo (app-of-apps).
+- 🔐 **External Secrets Operator:** Kubernetes-native secret store keeping
+secret values out of Git.
 - 💻 **Termix:** Provides a web-based terminal for easy remote access to nodes
 (accessible securely via Tailscale).
 
@@ -107,6 +111,9 @@ local actions runners to automatically deploy configuration changes.
 media management and streaming.
 
 **Directory:** [`/k3s-ha-cluster/`](/k3s-ha-cluster/)
+
+For who owns what across Terraform, Ansible, Forgejo Actions, and Argo CD, see
+the [GitOps operating model](docs/gitops-operating-model.md).
 
 ---
 
