@@ -1,0 +1,14 @@
+# External Secrets Operator (external-secrets chart 2.14.0, app v2.14.0)
+image:
+  repository: ghcr.io/external-secrets/external-secrets
+  tag: v2.14.0
+
+installCRDs: true
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
