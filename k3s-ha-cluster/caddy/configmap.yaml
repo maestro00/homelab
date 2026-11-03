@@ -169,7 +169,7 @@ data:
                 uri /api/authz/forward-auth
                 copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
             }
-            reverse_proxy grafana.monitoring.svc.cluster.local:3000 {
+            reverse_proxy grafana.monitoring.svc.cluster.local:80 {
                 header_up Host {host}
                 header_up X-Forwarded-Proto https
                 header_up X-Forwarded-Host {host}
