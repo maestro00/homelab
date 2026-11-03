@@ -109,6 +109,11 @@ config:
                     href: http://192.168.0.1:3000
                     icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/adguard-home.png
                     description: DNS & ad-block
+                    widget:
+                        type: adguard
+                        url: http://192.168.0.1:3000
+                        username: "{{ HOMEPAGE_VAR_ADGUARD_USERNAME }}"
+                        password: "{{ HOMEPAGE_VAR_ADGUARD_PASSWORD }}"
               - Tailscale:
                     href: https://login.tailscale.com/admin
                     icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/tailscale.png
@@ -155,10 +160,19 @@ config:
                     href: http://192.168.0.215:8096
                     icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/jellyfin.png
                     description: Media playback
+                    widget:
+                        type: jellyfin
+                        url: http://jellyfin.media.svc.cluster.local:8096
+                        key: "{{ HOMEPAGE_VAR_JELLYFIN_API_KEY }}"
+                        version: 2
               - Jellyseerr:
                     href: http://192.168.0.218:5055
                     icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/jellyseerr.png
                     description: Media requests
+                    widget:
+                        type: seerr
+                        url: http://seerr.media.svc.cluster.local:5055
+                        key: "{{ HOMEPAGE_VAR_SEERR_API_KEY }}"
               - Profilarr:
                     href: http://192.168.0.219:6868
                     icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/profilarr.png
@@ -171,6 +185,15 @@ config:
                     href: http://192.168.0.210:8080
                     icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/vuetorrent.png
                     description: Torrent client
+                    widget:
+                        type: qbittorrent
+                        url: http://qbittorrent.media.svc.cluster.local:8080
+                        username: lab
+                        password: "{{ HOMEPAGE_VAR_QBITTORRENT_PASSWORD }}"
+              - Scraperr:
+                    href: http://192.168.0.221:8000
+                    icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/scraperr.png
+                    description: Metadata scraper
 
         - Observability:
               - Speedtest Tracker:
@@ -220,6 +243,10 @@ config:
                     href: https://changedetection.yukselcloud.com
                     icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/changedetection.png
                     description: Website & price change monitoring
+              - BentoPDF:
+                    href: https://bentopdf.yukselcloud.com
+                    icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/bentopdf.png
+                    description: PDF toolkit
               - OpenGym:
                     href: https://opengym.yukselcloud.com
                     icon: https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/opengym.png

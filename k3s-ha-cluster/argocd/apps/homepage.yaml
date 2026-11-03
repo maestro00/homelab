@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: homepage
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://git.yukselcloud.com/lab/homelab.git
+    targetRevision: master
+    path: k3s-ha-cluster/homepage
+    helm:
+      chart: homepage
+      repo: https://jameswynn.github.io/helm-charts
+      version: "2.1.0"
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: homepage
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

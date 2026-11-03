@@ -26,29 +26,63 @@ design, to avoid cross-namespace reads), so `store-rbac.yaml` creates a
 dedicated `gitops-store` ServiceAccount with read-only Secret access plus
 `selfsubjectrulesreviews`.
 
-## Adding a secret
+## Adding a secret (worked flow)
 
-Add the value to the `gitops-secrets` source Secret, then declare:
+Three pieces: the value (cluster only), the `ExternalSecret` declaration
+(Git), and no placeholder `secret.yaml`.
 
-```yaml
-apiVersion: external-secrets.io/v1
-kind: ExternalSecret
-metadata:
-  name: my-secret
-  namespace: my-app
-spec:
-  secretStoreRef:
-    name: gitops
-    kind: ClusterSecretStore
-  target:
-    name: my-secret
-  data:
-    - secretKey: token
-      remoteRef:
-        key: gitops-secrets
-        property: my-token
-```
+1. Recover the current value from the live Secret (it lives in the cluster,
+   never Git):
 
-The first real consumer is the Argo CD repo credential
-(`argocd-repo-credential.yaml`), which produces the `repository`-labelled
-Secret Argo CD uses to clone this repo.
+   ```bash
+   kubectl -n <app> get secret <name> -o jsonpath='{.data.<key>}' | base64 -d
+   ```
+
+2. Seed it into the source store:
+
+   ```bash
+   kubectl -n external-secrets patch secret gitops-secrets --type merge \
+     --patch '{"stringData":{"<app>-<key>":"<value>"}}'
+   ```
+
+3. Declare the `ExternalSecret` (references the value by key name only):
+
+   ```yaml
+   apiVersion: external-secrets.io/v1
+   kind: ExternalSecret
+   metadata:
+     name: <name>
+     namespace: <app>
+   spec:
+     refreshInterval: 1h
+     secretStoreRef:
+       name: gitops
+       kind: ClusterSecretStore
+     target:
+       name: <name>
+     data:
+       - secretKey: <KEY>
+         remoteRef:
+           key: gitops-secrets
+           property: <app>-<key>
+   ```
+
+4. Delete the old placeholder `secret.yaml` from the app folder so nothing
+   overwrites the real value again.
+
+5. Apply it. Where the file lives depends on how the app is deployed:
+
+   - Raw-manifest app (Argo CD `directory` source): co-locate
+     `externalsecret.yaml` in the app folder — Argo CD applies it. See
+     `speedtest-tracker/externalsecret.yaml`.
+   - Helm app (Argo CD `helm` source): the chart ignores extra YAML in the
+     folder, so keep the `ExternalSecret` in this folder and list it in
+     `deploy-external-secrets.yml`. See `homepage-secrets.yaml`.
+
+## Existing consumers
+
+- `argocd-repo-credential.yaml` — the `repository`-labelled Secret Argo CD uses
+  to clone this repo.
+- `homepage-secrets.yaml` — homepage widget API keys (`HOMEPAGE_VAR_*`).
+- `speedtest-tracker/externalsecret.yaml` — `speedtest-db-secret` (`app-key`,
+  `password`), co-located because speedtest is a raw-manifest app.
