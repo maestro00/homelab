@@ -1,0 +1,11 @@
+# Promtail (grafana/promtail 6.17.1, app 3.5.1) — DaemonSet log shipper.
+# Tails /var/log/pods on every node (incl. control-plane, via default tolerations)
+# and pushes to Loki. The chart's built-in scrape config already labels each line
+# with namespace/pod/container.
+#
+# shortcut: Promtail is deprecated upstream in favour of Grafana Alloy. Migrate to
+# grafana/alloy when Promtail stops receiving security patches.
+
+config:
+  clients:
+    - url: http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push

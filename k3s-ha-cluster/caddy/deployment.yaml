@@ -26,6 +26,11 @@ spec:
                 secretKeyRef:
                   name: crowdsec-bouncer-secret
                   key: CROWDSEC_API_KEY
+            - name: DASHBOARD_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: dashboard-token-secret
+                  key: DASHBOARD_TOKEN
           resources:
             requests:
               cpu: 10m

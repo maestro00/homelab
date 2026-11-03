@@ -141,3 +141,38 @@ data:
                 header_up X-Forwarded-For {remote_host}
             }
         }
+        dashboard.yukselcloud.com {
+            log
+            crowdsec
+            forward_auth authelia.auth.svc.cluster.local:9091 {
+                uri /api/authz/forward-auth
+                copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+            }
+            reverse_proxy https://kubernetes-dashboard-kong-proxy.kubernetes-dashboard.svc.cluster.local:443 {
+                header_up Host {host}
+                header_up X-Forwarded-Proto https
+                header_up X-Forwarded-Host {host}
+                header_up X-Forwarded-For {remote_host}
+                header_up Authorization "Bearer {env.DASHBOARD_TOKEN}"
+                transport http {
+                    tls_insecure_skip_verify
+                    read_timeout 30s
+                    write_timeout 30s
+                    dial_timeout 10s
+                }
+            }
+        }
+        grafana.yukselcloud.com {
+            log
+            crowdsec
+            forward_auth authelia.auth.svc.cluster.local:9091 {
+                uri /api/authz/forward-auth
+                copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+            }
+            reverse_proxy grafana.monitoring.svc.cluster.local:3000 {
+                header_up Host {host}
+                header_up X-Forwarded-Proto https
+                header_up X-Forwarded-Host {host}
+                header_up X-Forwarded-For {remote_host}
+            }
+        }

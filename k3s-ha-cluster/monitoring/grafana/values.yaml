@@ -1,0 +1,55 @@
+# Grafana (grafana/grafana 10.5.15, app 12.3.1) — the Loki query UI.
+# Auth happens at the Caddy edge (forward_auth → Authelia); Grafana trusts the
+# Remote-User header it receives and auto-provisions that user as Admin. No
+# separate Grafana login form.
+image:
+  tag: "12.3.1"
+
+replicas: 1
+
+service:
+  type: ClusterIP
+
+persistence:
+  enabled: true
+  type: pvc
+  storageClassName: longhorn
+  size: 5Gi
+  accessModes:
+    - ReadWriteOnce
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi
+
+grafana.ini:
+  server:
+    domain: grafana.yukselcloud.com
+    root_url: https://grafana.yukselcloud.com
+  users:
+    auto_assign_org_role: Admin
+    default_theme: dark
+  auth:
+    disable_login_form: true
+  auth.proxy:
+    enabled: true
+    header_name: Remote-User
+    header_property: username
+    auto_sign_up: true
+    sync_ttl: 60
+    enable_login_token: false
+
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Loki
+        type: loki
+        access: proxy
+        url: http://loki.monitoring.svc.cluster.local:3100
+        isDefault: true
+        editable: false

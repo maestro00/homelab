@@ -469,11 +469,24 @@ Restart deployment or recreate pods to apply the change immediately.
 
 ## 📊 Kubernetes Dashboard
 
-Kubernetes Dashboard provides a web-based UI for managing and monitoring your cluster.
+Kubernetes Dashboard provides a web-based UI for managing and monitoring the
+cluster. It is served at `https://dashboard.yukselcloud.com` behind Caddy +
+CrowdSec + Authelia `forward_auth` — you log in once with your Authelia/lldap
+account, no bearer-token paste.
+
+### How the auth works
+
+The kong-based v7 dashboard only accepts a bearer token (its skip-login and
+OIDC modes were removed upstream; the project is archived as of Jan 2026). So
+auth is split in two:
+
+1. **Authelia `forward_auth`** (in the Caddy route) is the real gate — only
+   members of `group:infra` get past it.
+2. **Caddy injects** a long-lived `admin-user` ServiceAccount token as
+   `Authorization: Bearer` on every upstream request, so the dashboard sees an
+   already-authenticated user and never shows its own login screen.
 
 ### 1️⃣ Install via Helm
-
-Add the Helm repo and install the dashboard:
 
 ```bash
 helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
@@ -487,29 +500,35 @@ helm upgrade --install kubernetes-dashboard \
 
 ### 2️⃣ Configure Access
 
-Apply the pre-created ServiceAccount and RBAC configuration for admin access:
+Apply the ServiceAccount + RBAC for admin access:
 
 ```bash
 kubectl apply -f kubernetes-dashboard/service-account.yaml
 kubectl apply -f kubernetes-dashboard/rbac.yaml
 ```
 
-### 3️⃣ Get Login Token
-
-Retrieve the login token for the dashboard:
+### 3️⃣ Create the injected token secret
 
 ```bash
-kubectl -n kubernetes-dashboard create token admin-user
+kubectl -n caddy create secret generic dashboard-token-secret \
+  --from-literal=DASHBOARD_TOKEN="$(
+    kubectl -n kubernetes-dashboard create token admin-user --duration=8760h
+  )" \
+  --dry-run=client -o yaml | kubectl apply -f -
+kubectl rollout restart deployment/caddy -n caddy
 ```
 
-Access the dashboard at `https://<EXTERNAL-IP>` (see the service details).
+The token expires after 1 year (`--duration=8760h`); re-run the command above
+to rotate. A placeholder lives at `caddy/dashboard-token-secret.yaml` — the real
+token is never committed.
 
 ---
 
 **Notes:**
 
-- The dashboard is exposed via a LoadBalancer service.
-- Use the generated token for admin login.
+- The old raw `LoadBalancer` (`192.168.0.209`) is gone — the dashboard is only
+  reachable through Caddy now.
+- `dashboard.yukselcloud.com` must be listed in `ddns/config.json` (it is).
 
 ## 🛠️ Forgejo: Self-hosted Git Service
 

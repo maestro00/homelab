@@ -73,6 +73,10 @@
                 {
                     "name": "changedetection",
                     "proxied": false
+                },
+                {
+                    "name": "dashboard",
+                    "proxied": false
                 }
             ]
         }

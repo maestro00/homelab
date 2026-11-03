@@ -1,0 +1,51 @@
+# Loki (grafana/loki 7.5.0, app 3.6.16) — lightweight log store.
+# Single-binary, filesystem storage on Longhorn. Grafana is the query UI,
+# Promtail ships pod logs here. No external exposure; only reachable in-cluster.
+
+deploymentMode: SingleBinary
+
+loki:
+  auth_enabled: false
+  commonConfig:
+    replication_factor: 1
+  storage:
+    type: filesystem
+  schemaConfig:
+    configs:
+      - from: 2024-04-01
+        store: tsdb
+        object_store: filesystem
+        schema: v13
+        index:
+          prefix: loki_index_
+          period: 24h
+
+# Zero the SimpleScalable targets so validation passes in SingleBinary mode.
+read:
+  replicas: 0
+write:
+  replicas: 0
+backend:
+  replicas: 0
+
+# Single-binary doesn't need the scale-out memcached caches (one was Pending and
+# won't schedule). Gateway + canary stay: canary is required for `helm test` and
+# usefully verifies the ingest path.
+chunksCache:
+  enabled: false
+resultsCache:
+  enabled: false
+
+singleBinary:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+  persistence:
+    enabled: true
+    storageClass: longhorn
+    size: 10Gi
