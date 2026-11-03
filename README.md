@@ -2,10 +2,8 @@
 
 ## 🏡 High-Availability K3s Cluster for Homelab
 
-This is a bookkeeping for setup of my infrastucture and services.
-It features kube-vip for HA control-plane, MetalLB for LoadBalancer services,
-Pi-hole for DNS/ad-blocking along with unbound, and Caddy for reverse proxy
-and etc.
+This is a bookkeeping for setup of my infrastucture and services for learning
+purposes.
 
 ## 🖥️ Physical Lab Inventory
 
@@ -60,8 +58,7 @@ Terraform `containers` list and bootstrapped by scripts in [`/lxc/`](/lxc/):
   pinned to `1.18.25`, matching ct253.
 - Two agents with deliberately different powers, one ServiceAccount each:
   `ops` holds a cluster-wide read-only `view`, `deploy` holds `edit` in
-  `media`, `monitoring` and `opengym` only. Scoped kubeconfigs are generated
-  into gitignored `temp/` files, never committed.
+  `media`, `monitoring` and `opengym` only.
 - Agent instructions live in [`lxc/paperclip/agents/`](/lxc/paperclip/agents/)
   and are read from the repo clone the container keeps at
   `/srv/paperclip/work/homelab`.
