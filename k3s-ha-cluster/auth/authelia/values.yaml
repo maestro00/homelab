@@ -1,7 +1,7 @@
 # https://github.com/authelia/chartrepo/blob/master/charts/authelia/values.yaml
 image:
   repository: authelia/authelia
-  tag: latest
+  tag: 4.39.15
 
 service:
   type: ClusterIP
