@@ -235,21 +235,15 @@ curl -sI https://<service>.yukselcloud.com | grep -iE '^HTTP|^location'
 curl -s -o /dev/null -w '%{http_code}\n' https://auth.yukselcloud.com
 ```
 
-### Authelia is applied by hand, not GitOps
+### Authelia is managed by Argo CD
 
-There is no deploy workflow for `auth/authelia`. Apply it manually and pin the
-chart version, otherwise `helm upgrade` picks up a newer chart whose schema
-rejects the current values:
+The `authelia` Application renders chart `0.10.49` with
+`k3s-ha-cluster/auth/authelia/values.yaml`; the image is pinned to `4.39.15`.
+Do not run `helm upgrade` or `helm uninstall`.
 
-```bash
-helm upgrade authelia authelia/authelia -n auth \
-  --version 0.10.49 \
-  --values k3s-ha-cluster/auth/authelia/values.yaml
-```
-
-> The authelia image is `:latest`, so the app version drifts from the chart's
-> `appVersion` on its own. A `:latest` bump can change API behaviour with no
-> git change — see issue #30.
+OIDC client hashes live in the `oidc-clients` Secret and are referenced as
+`client_secret.path` files. Rotate them through Forgejo and the ESO workflow,
+then restart the DaemonSet.
 
 ---
 
@@ -260,9 +254,8 @@ Add new OIDC client to `auth/authelia/values.yaml` under `identity_providers.oid
 ```yaml
 - client_id: my-service
   client_name: My Service
-  client_secret: '$argon2id$...'
-  # generate: docker run authelia/authelia:latest authelia crypto hash generate
-  # pbkdf2 --password 'mysecret'
+  client_secret:
+    path: /secrets/oidc-clients/my-service
   public: false
   authorization_policy: one_factor
   redirect_uris:
@@ -276,11 +269,13 @@ Add new OIDC client to `auth/authelia/values.yaml` under `identity_providers.oid
     - authorization_code
 ```
 
-After editing values.yaml:
+The hash file is materialized by the `oidc-clients` ExternalSecret. Add the
+hash to `gitops-secrets`, add the key to that ExternalSecret, and add the
+`client_secret.path` entry. Never put the hash in `values.yaml`.
 
-```bash
-helm upgrade authelia authelia/authelia -n auth --values auth/authelia/values.yaml
-```
+After editing values.yaml, commit the change and let Argo CD render it. To
+rotate a hash, update the Forgejo secret, run `Deploy External Secrets`, force
+the ExternalSecret refresh, and restart the DaemonSet.
 
 ---
 
@@ -340,8 +335,10 @@ kubectl logs -n auth deployment/lldap --tail=50
 # Redis
 kubectl logs -n auth deployment/redis --tail=30
 
-# Restart after values.yaml change
-helm upgrade authelia authelia/authelia -n auth --values auth/authelia/values.yaml
+# After an ESO secret change
+kubectl -n auth annotate externalsecret authelia-secrets \
+  force-sync="$(date +%s)" --overwrite
+kubectl -n auth rollout restart daemonset/authelia
 
 # Common issues:
 # Login loop          → CORS or session cookie domain mismatch in Authelia config

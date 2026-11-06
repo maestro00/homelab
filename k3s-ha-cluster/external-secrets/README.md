@@ -112,5 +112,6 @@ Three pieces: the value (cluster only), the `ExternalSecret` declaration
 - `argocd-repo-credential.yaml` — the `repository`-labelled Secret Argo CD uses
   to clone this repo.
 - `homepage-secrets.yaml` — homepage widget API keys (`HOMEPAGE_VAR_*`).
+- `auth-secrets.yaml` — Authelia, lldap, and Redis secrets for the auth stack.
 - `speedtest-tracker/externalsecret.yaml` — `speedtest-db-secret` (`app-key`,
   `password`), co-located because speedtest is a raw-manifest app.

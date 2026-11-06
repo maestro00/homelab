@@ -638,69 +638,20 @@ git merge feature/XX-description
 
 ### Auth
 
-Architecture
+Authelia, lldap, and Redis are managed by Argo CD from
+`k3s-ha-cluster/argocd/apps/`.
 
-```txt
-Browser
- └─ Caddy (192.168.0.201)
-     └─ forward_auth → Authelia
-         └─ LDAP → lldap
-     └─ App (Radarr, Sonarr, etc.)
-```
+- Authelia: `authelia/authelia` `0.10.49`, image `4.39.15`
+- lldap: in-repo chart `k3s-ha-cluster/auth/lldap`
+- Redis: raw manifests in `k3s-ha-cluster/auth/redis`
 
-```bash
-helm repo add authelia https://charts.authelia.com
-helm repo update
-```
+Secret values are materialized by External Secrets from `gitops-secrets`
+into `authelia-secrets`, `oidc-clients`, `jwk-rsa`, `lldap-credentials`, and
+`redis-secret`. Forgejo repository secrets seed the store.
 
-Create secrets for authelia by following and paste them in the
-[secret.yaml](/k3s-ha-cluster/auth/authelia/secret.yaml).
-
-```sh
-echo "OIDC_HMAC_KEY: $(openssl rand -base64 48)"
-echo "RESET_ENCRYPTION_KEY: $(openssl rand -base64 48)"
-echo "SESSION_ENCRYPTION_KEY: $(openssl rand -base64 32 | head -c 32)"
-echo "STORAGE_ENCRYPTION_KEY: $(openssl rand -base64 32 | head -c 32)"
-
-kubectl apply -f auth/authelia/secret.yaml
-```
-
-Create clients in [values.yaml](/k3s-ha-cluster/auth/authelia/values.yaml) clients
-section and configure their secrets.
-Use following to create hash of your super secret by authelia image.
-
-```sh
-docker run --rm docker.io/authelia/authelia:latest authelia \
-  crypto hash generate pbkdf2 --password 'mysupersecretpassword'
-```
-
-Lastly, run helm install command to deploy authelia helm chart.
-
-```sh
-helm upgrade \
-  --install authelia authelia/authelia \
-  -n auth \
-  --values auth/authelia/values.yaml
-```
-
-In the client side, example in forgejo, configure ssh authentication source for
-Authelia. Provide at least following parameters:
-
-- Client ID,
-- Client Secret (In plain format what pasted in `values.yaml`),
-- OpenID Connect Auto Discovery URL (e.g. <https://auth.yukselcloud.com/.well-known/openid-configuration>)
-- Skip Local 2FA (checked),
-- Additional scopes: `groups`
-
-#### LLDAP
-
-TBD:
-
-```sh
-kubectl create namespace auth
-helm install lldap ./auth/lldap -n auth
-
-```
+Do not run `helm upgrade` or `helm uninstall` for these releases. Change the
+values in Git, then let Argo CD sync. The OIDC client hashes are files in the
+`oidc-clients` Secret, not values in Git.
 
 ## 📺 Media Server Stack (Sonarr, Radarr, Prowlarr, Bazarr, Jellyfin, Flaresolverr)
 

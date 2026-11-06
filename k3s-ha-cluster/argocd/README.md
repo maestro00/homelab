@@ -40,6 +40,15 @@ The root `Application` (`app-of-apps.yaml`) points at `apps/`, a Kustomize
 directory. To migrate a service, drop a child `Application` YAML into `apps/`
 and list it in `apps/kustomization.yaml`.
 
+## Managed applications
+
+- `authelia` — chart `authelia/authelia` `0.10.49`, adopted from the manual
+  Helm release.
+- `lldap` — in-repo chart, adopted from the manual Helm release.
+- `redis` — raw manifests, adopted from the manual manifests.
+- `speedtest-tracker` — raw manifests.
+- `vaultwarden` — chart `vaultwarden/vaultwarden`.
+
 ## Access
 
 Served by Caddy without Authelia `forward_auth` (Argo CD has its own RBAC),
