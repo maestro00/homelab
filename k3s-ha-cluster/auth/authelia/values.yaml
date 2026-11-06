@@ -21,6 +21,14 @@ secret:
       items:
         - key: private.pem
           path: private.pem
+    oidc-clients:
+      items:
+        - key: forgejo
+          path: forgejo
+        - key: jellyfin
+          path: jellyfin
+        - key: vaultwarden
+          path: vaultwarden
 
 configMap:
   theme: dark
@@ -135,7 +143,8 @@ configMap:
       clients:
         - client_id: forgejo
           client_name: Forgejo
-          client_secret: "$pbkdf2-sha512$310000$xcIipZZRUvCxyF2PQZTfCg$aM96WaO2Gt1Ut7RS.eVnpBJIpihWk9M8eY5kYK5DG6F7ICuF1Z0ijgo5DyEDbOQ1cP9fbY3ovnrv1eo9kPgL8g"
+          client_secret:
+            path: /secrets/oidc-clients/forgejo
           public: false
           authorization_policy: one_factor
           require_pkce: true
@@ -155,7 +164,8 @@ configMap:
           claims_policy: legacy
         - client_id: jellyfin
           client_name: Jellyfin
-          client_secret: "$pbkdf2-sha512$310000$bqQbNCRnBPgBqRg8b20Sxg$3ZFPwbQ6RHN8WTx41M1cBnn2Jh5TCtj.buEhuNKjGxRnkzFMX.UT2cLNWsmwnChbBWeXw10wau94O6nY/sPuhw"
+          client_secret:
+            path: /secrets/oidc-clients/jellyfin
           public: false
           authorization_policy: one_factor
           require_pkce: true
@@ -175,7 +185,8 @@ configMap:
           claims_policy: legacy
         - client_id: vaultwarden
           client_name: Vaultwarden
-          client_secret: "$pbkdf2-sha512$310000$9AvueUGsjk8Vci4an7xkGA$y5wWLHD584foiLNOh7lFW54RKMdltRjK8Z5d8WfVoV8MH7jIKj9dEjJytyqt/3tKUHOlK1acH3J4ucDwGvKT1w"
+          client_secret:
+            path: /secrets/oidc-clients/vaultwarden
           public: false
           authorization_policy: one_factor
           require_pkce: true
