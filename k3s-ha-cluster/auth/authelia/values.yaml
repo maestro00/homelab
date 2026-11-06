@@ -175,7 +175,7 @@ configMap:
           claims_policy: legacy
         - client_id: vaultwarden
           client_name: Vaultwarden
-          client_secret: "$pbkdf2-sha512$310000$MKrIzzm0jrx1h4I4yOytDw$E8OZvW06fTrfond3syIa3CjF.7YiNoSVUJb36BosQnKl27eZ9rbh6kLJdCeEaU/k1Ms9dhZhQE0GB29yofbBIA"
+          client_secret: "$pbkdf2-sha512$310000$9AvueUGsjk8Vci4an7xkGA$y5wWLHD584foiLNOh7lFW54RKMdltRjK8Z5d8WfVoV8MH7jIKj9dEjJytyqt/3tKUHOlK1acH3J4ucDwGvKT1w"
           public: false
           authorization_policy: one_factor
           require_pkce: true
