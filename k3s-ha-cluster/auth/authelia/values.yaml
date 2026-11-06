@@ -1,7 +1,7 @@
 # https://github.com/authelia/chartrepo/blob/master/charts/authelia/values.yaml
 image:
   repository: authelia/authelia
-  tag: latest
+  tag: 4.39.15
 
 service:
   type: ClusterIP
@@ -175,12 +175,12 @@ configMap:
           claims_policy: legacy
         - client_id: vaultwarden
           client_name: Vaultwarden
-          client_secret: "$pbkdf2-sha512$310000$DLxf0AmuupjG96/k.DAWTA$jGxbYD/nHX/kk/Nj2XXMSCJyO/.a1V6nSaDbylbcbFd.Zh.6ECUfRVYHsSa55YL6GuNu7echBtsUG83aMXfLtg"
+          client_secret: "$pbkdf2-sha512$310000$9AvueUGsjk8Vci4an7xkGA$y5wWLHD584foiLNOh7lFW54RKMdltRjK8Z5d8WfVoV8MH7jIKj9dEjJytyqt/3tKUHOlK1acH3J4ucDwGvKT1w"
           public: false
           authorization_policy: one_factor
           require_pkce: true
           redirect_uris:
-            - https://vaultwarden.yukselcloud.com/identity/connect/oidc/signin
+            - https://vaultwarden.yukselcloud.com/identity/connect/oidc-signin
           scopes:
             - openid
             - email

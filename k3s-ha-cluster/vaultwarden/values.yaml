@@ -1,20 +1,21 @@
 image:
   repository: vaultwarden/server
-  tag: latest
+  tag: 1.37.0-alpine
   pullPolicy: IfNotPresent
+  extraVars:
+    - key: PASSWORD_HINTS_ALLOWED
+      value: "false"
 
 domain: "https://vaultwarden.yukselcloud.com"
 
 adminToken:
-  value: "" # Set this to your admin token
+  existingSecret: vaultwarden-secrets
+  existingSecretKey: ADMIN_TOKEN
 
 service:
-  enabled: true
   type: LoadBalancer
-  loadBalancerIP: 192.168.0.204
-  ports:
-    http:
-      port: 80
+  annotations:
+    metallb.universe.tf/loadBalancerIPs: "192.168.0.204"
 
 storage:
   data:
@@ -35,3 +36,51 @@ resources:
 
 ingress:
   enabled: false
+
+signupsAllowed: false
+invitationsAllowed: false
+showPassHint: "false"
+
+sso:
+  enabled: true
+  existingSecret: vaultwarden-secrets
+  onlySSO: false
+  signupsMatchEmail: true
+  ignoreEmailVerification: false
+  authority: "https://auth.yukselcloud.com"
+  scopes: "openid email profile offline_access"
+  pkce: true
+  masterPasswordPolicy: ""
+  clientId:
+    existingSecretKey: SSO_CLIENT_ID
+  clientSecret:
+    existingSecretKey: SSO_CLIENT_SECRET
+
+extraObjects:
+  - apiVersion: external-secrets.io/v1
+    kind: ExternalSecret
+    metadata:
+      name: vaultwarden-secrets
+      namespace: vaultwarden
+      annotations:
+        argocd.argoproj.io/sync-wave: "-1"
+    spec:
+      refreshInterval: 1h
+      secretStoreRef:
+        name: gitops
+        kind: ClusterSecretStore
+      target:
+        name: vaultwarden-secrets
+      data:
+        - secretKey: ADMIN_TOKEN
+          remoteRef:
+            key: gitops-secrets
+            property: vaultwarden-admin-token
+        - secretKey: SSO_CLIENT_ID
+          remoteRef:
+            key: gitops-secrets
+            property: vaultwarden-sso-client-id
+        - secretKey: SSO_CLIENT_SECRET
+          remoteRef:
+            key: gitops-secrets
+            property: vaultwarden-sso-client-secret

@@ -15,9 +15,17 @@ values out of Git while Argo CD reconciles everything else.
 ## Source of truth
 
 A single `gitops-secrets` Secret in the `external-secrets` namespace holds all
-values. `deploy-external-secrets.yml` seeds it from the Forgejo repo secret
-`FORGEJO_READ_TOKEN` (the same push-driven pattern as DDNS). Extend the seed
-step to add more keys.
+values. `deploy-external-secrets.yml` seeds these keys from Forgejo repo
+secrets (the same push-driven pattern as DDNS):
+
+| Key                             | Source                          |
+| ------------------------------- | ------------------------------- |
+| `forgejo-read-token`            | `FORGEJO_READ_TOKEN`            |
+| `vaultwarden-admin-token`       | `VAULTWARDEN_ADMIN_TOKEN`       |
+| `vaultwarden-sso-client-id`     | literal `vaultwarden`           |
+| `vaultwarden-sso-client-secret` | `VAULTWARDEN_SSO_CLIENT_SECRET` |
+
+The `speedtest-*` keys are seeded separately and must survive the merge patch.
 
 ## RBAC
 
