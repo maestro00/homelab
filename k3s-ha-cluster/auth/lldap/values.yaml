@@ -1,13 +1,10 @@
 namespace: auth
 
 ##### secret creation
+# The Secret is materialized by External Secrets as `lldap-credentials`.
 secret:
-  create: true
+  create: false
   name: lldap-credentials
-  lldapJwtSecret: "placeholder"
-  lldapUserName: "placeholderuser"
-  lldapUserPass: "placeholderpassword"
-  lldapBaseDn: "dc=example,dc=com"
 
 ##### pvc
 persistence:
