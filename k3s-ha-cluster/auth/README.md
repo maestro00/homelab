@@ -63,23 +63,48 @@ The declarations are in
 
 ## Rotation
 
-1. Update the matching Forgejo repository secret (`AUTHELIA_*`, `LLDAP_*`, or
-   `REDIS_PASSWORD`).
-2. Run the `Deploy External Secrets` workflow.
-3. Force the ExternalSecret refresh:
+The Forgejo repository secrets seed `gitops-secrets`. After changing one, run
+the `Deploy External Secrets` workflow, force the matching ExternalSecret,
+and restart its consumer.
 
-   ```bash
-   kubectl -n auth annotate externalsecret authelia-secrets \
-     force-sync="$(date +%s)" --overwrite
-   ```
+- `AUTHELIA_OIDC_<CLIENT>_CLIENT_SECRET_HASH` → `oidc-clients`; restart
+  `daemonset/authelia`. The hash is a file, so the pod must restart.
+- `AUTHELIA_OIDC_HMAC_KEY` → `authelia-secrets`; restart Authelia. Existing
+  OIDC tokens are invalidated.
+- `AUTHELIA_JWK_RSA_PRIVATE_KEY` → `jwk-rsa`; restart Authelia. Tokens signed
+  with the old key may fail until they refresh.
+- `LLDAP_JWT_SECRET` → `lldap-credentials`; restart `deployment/lldap`.
+  Existing lldap UI sessions are invalidated.
+- `REDIS_PASSWORD` → `redis-secret` and `authelia-secrets`; restart Redis,
+  then Authelia. One source key feeds both targets.
+- `AUTHELIA_LDAP_PASSWORD` → `authelia-secrets`; restart Authelia.
+- `LLDAP_ADMIN_PASSWORD` → `lldap-credentials`; restart lldap.
 
-4. Restart the consumer:
+Two credentials need extra care:
 
-   ```bash
-   kubectl -n auth rollout restart daemonset/authelia
-   ```
+- `AUTHELIA_LDAP_PASSWORD` and `LLDAP_ADMIN_PASSWORD` are the same
+  credential. Change both Forgejo secrets together. lldap applies its admin
+  password only when it first creates the admin user; use
+  `extraEnv: LLDAP_FORCE_LDAP_USER_PASS_RESET=true` for one rollout and then
+  remove it, or reset the admin password in the lldap UI.
+- `AUTHELIA_STORAGE_ENCRYPTION_KEY` and `AUTHELIA_SESSION_ENCRYPTION_KEY` are
+  not routine rotations. The first makes existing Authelia data unreadable;
+  the second signs out every user. Plan a migration.
 
-   Use `deployment/lldap` or `deployment/redis` for their secrets.
+Force the affected ExternalSecret and restart its consumer:
+
+```bash
+kubectl -n auth annotate externalsecret oidc-clients \
+  force-sync="$(date +%s)" --overwrite
+kubectl -n auth rollout restart daemonset/authelia
+```
+
+## Rollback
+
+`git revert` the values or manifest change and let Argo CD sync. Argo CD does
+not revert External Secrets; re-seed the affected values from Forgejo and
+force the refresh. Keep `/tmp/opencode/authelia-gitops-backup/` until the
+stack has run for a week; it is not durable storage.
 
 ## Auth flow
 

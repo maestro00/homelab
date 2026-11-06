@@ -269,9 +269,24 @@ Add new OIDC client to `auth/authelia/values.yaml` under `identity_providers.oid
     - authorization_code
 ```
 
+Generate the hash with the pinned image:
+
+```bash
+docker run --rm ghcr.io/authelia/authelia:4.39.15 \
+  authelia crypto hash generate pbkdf2 --variant sha512 \
+  --password 'the-client-secret'
+```
+
 The hash file is materialized by the `oidc-clients` ExternalSecret. Add the
-hash to `gitops-secrets`, add the key to that ExternalSecret, and add the
-`client_secret.path` entry. Never put the hash in `values.yaml`.
+hash to `gitops-secrets`, add the key to `auth-secrets.yaml`, add the
+`AUTHELIA_OIDC_<CLIENT>_CLIENT_SECRET_HASH` env var and patch entry to
+`deploy-external-secrets.yml`, and add the `client_secret.path` entry. Never
+put the hash in `values.yaml`.
+
+Client settings: discovery URL
+`https://auth.yukselcloud.com/.well-known/openid-configuration`, scopes
+`openid profile email groups`, PKCE enabled, and skip local 2FA for the
+client.
 
 After editing values.yaml, commit the change and let Argo CD render it. To
 rotate a hash, update the Forgejo secret, run `Deploy External Secrets`, force

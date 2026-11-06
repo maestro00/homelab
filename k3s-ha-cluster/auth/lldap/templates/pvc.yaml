@@ -4,6 +4,8 @@ kind: PersistentVolumeClaim
 metadata:
   name: lldap-data
   namespace: {{ .Values.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false
   labels:
     app: lldap
 spec:

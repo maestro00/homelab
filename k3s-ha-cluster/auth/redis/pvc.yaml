@@ -4,6 +4,8 @@ kind: PersistentVolumeClaim
 metadata:
   name: redis-pvc
   namespace: auth
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false
 spec:
   accessModes:
     - ReadWriteOnce
