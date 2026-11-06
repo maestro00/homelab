@@ -27,6 +27,26 @@ secrets (the same push-driven pattern as DDNS):
 
 The `speedtest-*` keys are seeded separately and must survive the merge patch.
 
+## Auth stack
+
+`auth-secrets.yaml` declares five ExternalSecrets in namespace `auth` and is
+applied by `deploy-external-secrets.yml` because Authelia and lldap are
+Helm-source Applications.
+
+- `authelia-secrets` ← `authelia-reset-password-jwt-hmac-key`,
+  `authelia-session-encryption-key`, `authelia-storage-encryption-key`,
+  `redis-password`, `authelia-ldap-password`, `authelia-oidc-hmac-key`
+- `oidc-clients` ← `authelia-oidc-forgejo-client-secret-hash`,
+  `authelia-oidc-jellyfin-client-secret-hash`,
+  `authelia-oidc-vaultwarden-client-secret-hash`
+- `jwk-rsa` ← `authelia-jwk-rsa-private-key`
+- `lldap-credentials` ← `lldap-jwt-secret`, `lldap-admin-username`,
+  `lldap-admin-password`, `lldap-base-dn`
+- `redis-secret` ← `redis-password`
+
+The Forgejo repository secret names are the upper-snake-case form shown in
+the workflow: `AUTHELIA_*`, `LLDAP_*`, and `REDIS_PASSWORD`.
+
 ## RBAC
 
 The Kubernetes provider cannot use the operator's own ServiceAccount (by
