@@ -57,6 +57,10 @@ The OIDC client hashes are files in `oidc-clients`. The chart mounts them at
 The declarations are in
 `k3s-ha-cluster/external-secrets/auth-secrets.yaml`.
 
+The `lldap-credentials` Secret carries `helm.sh/resource-policy: keep`, so a
+stray `helm uninstall lldap` does not delete it. A manual Longhorn snapshot of
+`lldap-data` exists, but no recurring snapshot job is configured.
+
 > Never change `storage.encryption.key` or `session.encryption.key` without a
 > migration plan. The storage key encrypts existing Authelia data; the session
 > key signs every active session.
