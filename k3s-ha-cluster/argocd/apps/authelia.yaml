@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: authelia
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://charts.authelia.com
+      chart: authelia
+      targetRevision: "0.10.49"
+      helm:
+        releaseName: authelia
+        valueFiles:
+          - $values/k3s-ha-cluster/auth/authelia/values.yaml
+    - repoURL: https://git.yukselcloud.com/lab/homelab.git
+      targetRevision: master
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: auth
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
